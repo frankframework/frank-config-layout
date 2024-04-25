@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Drawing, Line, Rectangle, getEmptyDrawing } from '../frank-flowchart/frank-flowchart.component';
+import { Drawing, Line, Rectangle } from '../../graphics/svg-generator';
 import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';

@@ -15,4 +15,19 @@ svg {
   width: 100%;
   height: 100%;
 }
-  
+
+g {
+  pointer-events: all;
+  cursor: pointer;
+
+  &:hover {
+
+    > .rect-hover-padding {
+      opacity: 0.5;
+    }
+
+    > .line-hover-padding {
+      stroke-opacity: 0.5;
+    }
+  }
+}
