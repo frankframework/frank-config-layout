@@ -1,27 +1,20 @@
-# FlowChartEditor
+# frank-config-layout
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.5.
+Layout algorithm for Frank configs / flows. WeAreFrank! wishes to use a custom layout algorithm that should look better than images produced by Mermaid. This project assumes that the Frank!Framework can convert Frank configurations or adapters (XML code) to Mermaid commands. See [Mermaid example](src/assets/mermaid.txt) for the syntax of Mermaid files. This project reads Mermaid text and displays it using a custom algorithm.
 
-## Development server
+The algorithm has not been finished yet. In its current state, the produced drawing does not look like intended. There is a user interface that allows humans to improve the layout. This way, the developers can investigate how to improve the algorithm. A future release of this project should eliminate the need for human intervention. A future release will also provide an artifact published on https://www.npmjs.com/ that can be used by the Frank!Framework as a replacement of Mermaid.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+# Development environment and usage
 
-## Code scaffolding
+To use this project, please do the following:
+* Clone this project with `git clone`.
+* Install package manager yarn. Presently we use version 1.22.21.
+* Execute `yarn install --immutable`.
+* Run the Karma tests with `yarn ng test`.
+* Run the project with `yarn ng serve`.
+* Open a webbrowser and go to `http://localhost:4200/`.
+* In the top-left corner enter some Mermaid text. Here is a [simple example](src/assets/simpleMermaid.txt).
+* Press "Load with longest path algorithm". See figure below.
+* Try the controls to change the drawing.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+![Load Mermaid](./readme-pictures/loadMermaid.jpg)
