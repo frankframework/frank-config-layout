@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 @Component({
   selector: 'app-frank-flowchart',
   templateUrl: './frank-flowchart.component.html',
+  styleUrl: './frank-flowchart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FrankFlowchartComponent {
