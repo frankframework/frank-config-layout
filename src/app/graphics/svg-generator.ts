@@ -38,22 +38,6 @@ export function getEmptyDrawing(): Drawing {
 }
 
 export class SvgGenerator {
-  private constructor(
-    private rectEventHandler: (r: Rectangle) => string,
-    private lineEventHandler: (l: Line) => string
-  ) {}
-
-  static createStatic() {
-    return new SvgGenerator(
-      r => '',
-      l => ''
-    )
-  }
-
-  static createDynamic(rectEventHandler: (r: Rectangle) => string, lineEventHandler: (l: Line) => string) {
-    return new SvgGenerator(rectEventHandler, lineEventHandler)
-  }
-
   generateSvg(d: Drawing) {
     return this.openSvg(d.width, d.height)
       + this.renderDefs()
@@ -128,7 +112,7 @@ export class SvgGenerator {
   }
 
   private renderNode(rectangle: Rectangle): string {
-    return `    <g ${this.rectEventHandler(rectangle)}>
+    return `    <g class="${this.getNodeGroupClass(rectangle.id)}">
     <rect class="rectangle"
       x="${rectangle.x}"
       y="${rectangle.y}"
@@ -155,6 +139,10 @@ export class SvgGenerator {
 `
   }
 
+  getNodeGroupClass(id: string) {
+    return id
+  }
+
   private classOfHoverRectangle(rectangle: Rectangle): string {
     if (rectangle.selected) {
       return 'class="rect-hover-padding selected"'
@@ -168,7 +156,7 @@ export class SvgGenerator {
   }
 
   private renderEdge(line: Line): string {
-    return `    <g ${this.lineEventHandler(line)}>
+    return `    <g class="${this.getEdgeGroupClass(line.id)}">
     <polyline ${this.classOfLine(line)}
       points="${line.x1},${line.y1} ${line.x2},${line.y2}"
       ${this.getMarkerEnd(line)}
@@ -177,6 +165,10 @@ export class SvgGenerator {
       points="${line.x1},${line.y1} ${line.x2},${line.y2}"/>
   </g>
 `
+  }
+
+  getEdgeGroupClass(id: string) {
+    return id
   }
 
   private getMarkerEnd(line: Line): string {

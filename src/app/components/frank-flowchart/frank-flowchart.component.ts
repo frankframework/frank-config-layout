@@ -1,5 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
-import { Rectangle, Line, Drawing, SvgGenerator } from '../../graphics/svg-generator';
+import { Drawing, SvgGenerator } from '../../graphics/svg-generator';
+import $ from 'jquery'
 
 @Component({
   selector: 'app-frank-flowchart',
@@ -9,16 +10,7 @@ import { Rectangle, Line, Drawing, SvgGenerator } from '../../graphics/svg-gener
   encapsulation: ViewEncapsulation.None
 })
 export class FrankFlowchartComponent implements AfterViewInit {
-  constructor(
-    private renderer: Renderer2
-  ) {}
-
-  private svgGenerator = SvgGenerator.createDynamic(
-    (rectangle: Rectangle) => `(click)="handleShapeClicked('${rectangle.id}')"`,
-    (line: Line) => `(click)="handleShapeClicked('${line.id}')"`
-  )
-
-  @ViewChild('container') private svgContainerElement: ElementRef|null = null
+  private svgGenerator = new SvgGenerator()
 
   private _drawing: Drawing|null = null
   @Input() set drawing(drawing: Drawing|null) {
@@ -31,9 +23,25 @@ export class FrankFlowchartComponent implements AfterViewInit {
   }
 
   updateSvg() {
-    if ( (this._drawing !== null) && (this.svgContainerElement !== null) && (this.renderer !== null) ) {
-      this.renderer.setProperty(this.svgContainerElement.nativeElement, 'innerHTML', this.svgGenerator.generateSvg(this._drawing))
+    if (this._drawing === null) {
+      console.log('updateSvg without drawing, no action')
+      return
     }
+    console.log('updateSvg with drawing, going to set SVG')
+    $(document).ready(() => {
+      if ($('#container').length === 0) {
+        console.log('#container not found')
+      }
+      $('#container').html(this.svgGenerator.generateSvg(this._drawing!))
+      this._drawing!.rectangles.forEach(rectangle => {
+        const rectClass = this.svgGenerator.getNodeGroupClass(rectangle.id)
+        $(`.${rectClass}`).trigger('click', () => this.handleShapeClicked(rectangle.id))
+      })
+      this._drawing!.lines.forEach(line => {
+        const lineClass = this.svgGenerator.getEdgeGroupClass(line.id)
+        $(`.${lineClass}`).trigger('click', () => this.handleShapeClicked(line.id))
+      })
+    })
   }
 
   @Output() onShapeClicked: EventEmitter<string> = new EventEmitter()
