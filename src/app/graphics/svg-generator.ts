@@ -140,7 +140,7 @@ export class SvgGenerator {
   }
 
   getNodeGroupClass(id: string) {
-    return id
+    return "frank-flowchart-node-" + id
   }
 
   private classOfHoverRectangle(rectangle: Rectangle): string {
@@ -168,7 +168,7 @@ export class SvgGenerator {
   }
 
   getEdgeGroupClass(id: string) {
-    return id
+    return "frank-flowchart-edge-" + id
   }
 
   private getMarkerEnd(line: Line): string {
