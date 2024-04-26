@@ -71,23 +71,23 @@ export class SvgGenerator {
       }
 
       .line-hover-padding {
-        stroke: #eee;
+        stroke: #ccc;
         stroke-opacity: 0;
         stroke-width: 13;
       
         &.selected {
-          stroke: #bbf;
+          stroke: #44f;
           stroke-opacity: 0.3;
         }
       }
       
       .rect-hover-padding {
-        fill: #eee;
+        fill: #ccc;
         opacity: 0;
         stroke: none;
       
         &.selected {
-          fill: #bbf;
+          fill: #44f;
           opacity: 0.3;
         }
       }

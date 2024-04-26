@@ -22,27 +22,27 @@ thead th {
 }
 
 .odd {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .doubleOdd {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .selected {
-  background-color: rgba(0, 0, 128, 0)
+  background-color: rgba(0, 0, 64, 0)
 }
 
 .selected.odd {
-  background-color: rgba(0, 0, 128, 0.2)
+  background-color: rgba(0, 0, 64, 0.4)
 }
 
 .selected.doubleOdd {
-  background-color: rgba(0, 0, 128, 0.3)
+  background-color: rgba(0, 0, 64, 0.6)
 }
 
 .even.selected {
-  background-color: rgb(196, 196, 255)
+  background-color: rgb(160, 160, 255)
 }
 
 td {
@@ -83,7 +83,7 @@ td, thead>th:not(:first-child) {
 }
 
 tr:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 td:hover::before, thead>th:not(:first-child):hover::before {
@@ -94,5 +94,5 @@ td:hover::before, thead>th:not(:first-child):hover::before {
   width: 100%;
   z-index: -1;
   content: "";
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
 }
