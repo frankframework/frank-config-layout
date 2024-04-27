@@ -1,50 +1,62 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
-import { Drawing, SvgGenerator } from '../../graphics/svg-generator';
-import $ from 'jquery'
+
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-frank-flowchart',
   templateUrl: './frank-flowchart.component.html',
   styleUrl: './frank-flowchart.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FrankFlowchartComponent {
-  private svgGenerator = new SvgGenerator()
-
-  private _drawing: Drawing|null = null
-  @Input() set drawing(drawing: Drawing|null) {
-    this._drawing = drawing
-    this.updateSvg()
-  }
-
-  updateSvg() {
-    if (this._drawing === null) {
-      return
-    }
-    $(document).ready(() => {
-      $('#container').html(this.svgGenerator.generateSvg(this._drawing!))
-      this._drawing!.rectangles.forEach(rectangle => {
-        const rectClass = this.svgGenerator.getNodeGroupClass(rectangle.id)
-        $(`.${rectClass}`).on('click', () => FrankFlowchartComponent.handleShapeClicked(rectangle.id, this))
-      })
-      this._drawing!.lines.forEach(line => {
-        const lineClass = this.svgGenerator.getEdgeGroupClass(line.id)
-        $(`.${lineClass}`).on('click', () => FrankFlowchartComponent.handleShapeClicked(line.id, this))
-      })
-    })
-  }
-
+  @Input() drawing: Drawing|null = null
   @Output() onShapeClicked: EventEmitter<string> = new EventEmitter()
 
   scale: string = '100';
 
-  static handleShapeClicked(id: string, context: FrankFlowchartComponent) {
-    console.log(`handleShapeClicked executed with id ${id}`)
-    context.onShapeClicked.emit(id)
+  handleShapeClicked(id: string) {
+    this.onShapeClicked.emit(id)
   }
 
   newScale(scale: number) {
     this.scale = '' + Math.round(scale * 100);
+  }
+}
+
+export interface Drawing {
+  width: number
+  height: number
+  rectangles: Rectangle[]
+  lines: Line[]
+}
+
+export interface Rectangle {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+  centerX: number
+  centerY: number
+  text: string
+  selected: boolean
+}
+
+export interface Line {
+  id: string
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  selected: boolean
+  arrow: boolean
+  isError: boolean
+}
+
+export function getEmptyDrawing(): Drawing {
+  return  {
+    width: 0,
+    height: 0,
+    rectangles: [],
+    lines: []
   }
 }

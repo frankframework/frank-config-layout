@@ -16,6 +16,21 @@ svg {
   height: 100%;
 }
 
+.rectangle {
+  fill: transparent;
+  stroke: black;
+  stroke-width: 3;
+}
+
+.line {
+  stroke: black;
+  stroke-width: 3;
+}
+
+.line.error {
+  stroke: red
+}
+
 g {
   pointer-events: all;
   cursor: pointer;
@@ -29,5 +44,27 @@ g {
     > .line-hover-padding {
       stroke-opacity: 0.5;
     }
+  }
+}
+
+.line-hover-padding {
+  stroke: #eee;
+  stroke-opacity: 0;
+  stroke-width: 13;
+
+  &.selected {
+    stroke: #bbf;
+    stroke-opacity: 0.3;
+  }
+}
+
+.rect-hover-padding {
+  fill: #eee;
+  opacity: 0;
+  stroke: none;
+
+  &.selected {
+    fill: #bbf;
+    opacity: 0.3;
   }
 }
