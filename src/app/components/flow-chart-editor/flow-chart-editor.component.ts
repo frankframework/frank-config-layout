@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Drawing, Line, Rectangle } from '../../graphics/svg-generator';
+import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
 import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
@@ -32,6 +32,7 @@ export class FlowChartEditorComponent {
   ];
 
   mermaidText: string = ''
+  committedMermaidText = ''
   layoutModel: NodeSequenceEditor | null = null
   selectionInModel: NodeOrEdgeSelection = new NodeOrEdgeSelection
   showNodeTextInDrawing: boolean = true
@@ -67,7 +68,8 @@ export class FlowChartEditorComponent {
   }
 
   loadMermaid(algorithm: LayerNumberAlgorithm) {
-    const graphOrError: GraphConnectionsDecoratorOrError = this.mermaid2graph(this.mermaidText)
+    this.committedMermaidText = this.mermaidText
+    const graphOrError: GraphConnectionsDecoratorOrError = this.mermaid2graph(this.committedMermaidText)
     if (graphOrError.error !== null) {
       alert(graphOrError.error)
       return

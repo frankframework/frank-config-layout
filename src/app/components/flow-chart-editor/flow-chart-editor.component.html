@@ -51,4 +51,15 @@ version.
   </tr>
 </table>
 
-<h1 End of new version></h1>
+<table>
+  <tr>
+    <td>
+      <h2>Static SVG</h2>
+      <app-calculated-static-svg [mermaid]="committedMermaidText" />      
+    </td>
+    <td id="staticSvgText">
+      <h2>Static SVG text</h2>
+      <app-calculated-static-svg-text [mermaid]="committedMermaidText" />
+    </td>
+  </tr>
+</table>

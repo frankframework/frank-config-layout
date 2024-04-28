@@ -1,95 +1,36 @@
-export interface Drawing {
-  width: number
-  height: number
-  rectangles: Rectangle[]
-  lines: Line[]
+import { CreationReason } from "../model/horizontalGrouping"
+import { Layout, PlacedEdge, PlacedNode } from "./edge-layout"
+
+export function generateSvg(layout: Layout) {
+  return openSvg(layout.width, layout.height)
+    + renderDefs()
+    + renderNodes(layout.getNodes().map(n => n as PlacedNode))
+    + renderEdges(layout.getEdges().map(e => e as PlacedEdge))
+    + closeSvg()
 }
 
-export interface Rectangle {
-  id: string
-  x: number
-  y: number
-  width: number
-  height: number
-  centerX: number
-  centerY: number
-  text: string
-  selected: boolean
+function openSvg(width: number, height: number) {
+  return `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
+  width="${width}" height="${height}" >
+`
 }
 
-export interface Line {
-  id: string
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  selected: boolean
-  arrow: boolean
-  isError: boolean
-}
-
-export function getEmptyDrawing(): Drawing {
-  return  {
-    width: 0,
-    height: 0,
-    rectangles: [],
-    lines: []
-  }
-}
-
-export class SvgGenerator {
-  generateSvg(d: Drawing) {
-    return this.openSvg(d.width, d.height)
-      + this.renderDefs()
-      + this.renderNodes(d.rectangles)
-      + this.renderEdges(d.lines)
-      + this.closeSvg()
-  }
-
-  private openSvg(width: number, height: number) {
-    return `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
-  appSvgZoomPan (newScale)="newScale($event)" preserveAspectRatio="none"
-  width="${width}" height="${height}" >`
-  }
-
-  private renderDefs() {
-    return `  <defs>
+function renderDefs() {
+  return `  <defs>
     <style>
       .rectangle {
         fill: transparent;
         stroke: black;
         stroke-width: 3;
       }
-      
+    
       .line {
         stroke: black;
         stroke-width: 3;
       }
-      
+
       .line.error {
         stroke: red
-      }
-
-      .line-hover-padding {
-        stroke: #ccc;
-        stroke-opacity: 0;
-        stroke-width: 13;
-      
-        &.selected {
-          stroke: #44f;
-          stroke-opacity: 0.3;
-        }
-      }
-      
-      .rect-hover-padding {
-        fill: #ccc;
-        opacity: 0;
-        stroke: none;
-      
-        &.selected {
-          fill: #44f;
-          opacity: 0.3;
-        }
       }
     </style>
     <!-- A marker to be used as an arrowhead -->
@@ -105,97 +46,66 @@ export class SvgGenerator {
     </marker>
   </defs>
 `
-  }
+}
 
-  private renderNodes(rectangles: readonly Rectangle[]): string {
-    return rectangles.map(r => this.renderNode(r)).join('')
-  }
+function renderNodes(nodes: readonly PlacedNode[]): string {
+  return nodes.filter(n => n.creationReason === CreationReason.ORIGINAL).map(n => renderOriginalNode(n)).join('')
+}
 
-  private renderNode(rectangle: Rectangle): string {
-    return `    <g class="${this.getNodeGroupClass(rectangle.id)}">
+function renderOriginalNode(n: PlacedNode): string {
+  return `  <g class="${getNodeGroupClass(n.getId())}">
     <rect class="rectangle"
-      x="${rectangle.x}"
-      y="${rectangle.y}"
-      width="${rectangle.width}"
-      height="${rectangle.height}"
-      id="${rectangle.id}"
+      x="${n.horizontalBox.minValue}"
+      y="${n.verticalBox.minValue}"
+      width="${n.horizontalBox.size}"
+      height="${n.verticalBox.size}"
       rx="5">
     </rect>
     <text
-      x="${rectangle.centerX}"
-      y="${rectangle.centerY}"
+      x="${n.horizontalBox.center}"
+      y="${n.verticalBox.center}"
       text-anchor="middle" dominant-baseline="middle" class="nodeText">
-      ${rectangle.text}
+        ${n.text}
     </text>
-    <rect
-      ${this.classOfHoverRectangle(rectangle)}
-      x="${rectangle.x - 5}"
-      y="${rectangle.y - 5}"
-      width="${rectangle.width + 10}"
-      height="${rectangle.height + 10}"
-      rx="10">
-    </rect>
   </g>
 `
-  }
+}
 
-  getNodeGroupClass(id: string) {
-    return "frank-flowchart-node-" + id
-  }
+function getNodeGroupClass(id: string) {
+  return "frank-flowchart-node-" + id
+}
 
-  private classOfHoverRectangle(rectangle: Rectangle): string {
-    if (rectangle.selected) {
-      return 'class="rect-hover-padding selected"'
-    } else {
-      return 'class="rect-hover-padding"'
-    }
-  }
+function renderEdges(edges: PlacedEdge[]): string {
+  return edges.map(edge => renderEdge(edge)).join('')
+}
 
-  private renderEdges(lines: Line[]): string {
-    return lines.map(line => this.renderEdge(line)).join('')
-  }
-
-  private renderEdge(line: Line): string {
-    return `    <g class="${this.getEdgeGroupClass(line.id)}">
-    <polyline ${this.classOfLine(line)}
-      points="${line.x1},${line.y1} ${line.x2},${line.y2}"
-      ${this.getMarkerEnd(line)}
-      id="${line.id}"/>
-    <polyline ${this.classOfHoverLine(line)}
-      points="${line.x1},${line.y1} ${line.x2},${line.y2}"/>
+function renderEdge(edge: PlacedEdge): string {
+  return `  <g class="${getEdgeGroupClass(edge.getKey())}">
+    <polyline ${classOfLine(edge)} points="${edge.line.startPoint.x},${edge.line.startPoint.y} ${edge.line.endPoint.x},${edge.line.endPoint.y}" ${getMarkerEnd(edge)}/>
   </g>
 `
-  }
+}
 
-  getEdgeGroupClass(id: string) {
-    return "frank-flowchart-edge-" + id
-  }
+function getEdgeGroupClass(key: string) {
+  return "frank-flowchart-edge-" + key
+}
 
-  private getMarkerEnd(line: Line): string {
-    if (line.arrow) {
-      return 'marker-end="url(#arrow)"'
-    } else {
-      return ''
-    }
+function getMarkerEnd(edge: PlacedEdge): string {
+  if (edge.isLastSegment) {
+    return 'marker-end="url(#arrow)"'
+  } else {
+    return ''
   }
+}
 
-  private classOfLine(line: Line): string {
-    if (line.isError) {
-      return 'class="line error"'
-    } else {
-      return 'class="line"'
-    }
+function classOfLine(edge: PlacedEdge): string {
+  if (edge.optionalOriginalText === 'error') {
+    return 'class="line error"'
+  } else {
+    return 'class="line"'
   }
+}
 
-  private classOfHoverLine(line: Line) {
-    if (line.selected) {
-      return 'class="line-hover-padding selected"'
-    } else {
-      return 'class="line-hover-padding"'
-    }
-  }
-
-  private closeSvg(): string {
-    return '</svg>'
-  }
+function closeSvg(): string {
+  return '</svg>'
 }
