@@ -24,7 +24,7 @@ N1 --> |success| N2`
     // under the heading "Static SVG". If that image looks good, copy
     // the text next to the static SVG here.
     //
-    // VS Code trick: VS Code may add too many or too few trailing spaces
+    // VS Code trick: VS Code may add too many or too few leading spaces
     // to each line. Fix this by finding the right indent of the line
     // "const expected = ``" before inserting the text inside the ``.
     const expected = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
