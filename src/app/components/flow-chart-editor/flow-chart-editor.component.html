@@ -55,11 +55,11 @@ version.
   <tr>
     <td>
       <h2>Static SVG</h2>
-      <app-calculated-static-svg [mermaid]="committedMermaidText" />      
+      <app-calculated-static-svg [show]="SHOW_IMAGE" [mermaid]="committedMermaidText" />      
     </td>
     <td id="staticSvgText">
       <h2>Static SVG text</h2>
-      <app-calculated-static-svg-text [mermaid]="committedMermaidText" />
+      <app-calculated-static-svg [show]="SHOW_TEXT" [mermaid]="committedMermaidText" />
     </td>
   </tr>
 </table>

@@ -12,7 +12,6 @@ import { RouterModule } from "@angular/router";
 import { routes } from "./app.routes";
 import { SvgZoomPanDirective } from './directives/svg-zoom-pan.directive'
 import { CalculatedStaticSvgComponent } from "./components/calculated-static-svg/calculated-static-svg.component";
-import { CalculatedStaticSvgTextComponent } from "./components/calculated-static-svg-text/calculated-static-svg-text.component";
 import { Mermaid2SvgDimensions, Mermaid2svgService } from "./services/mermaid2svg.service";
 import { Dimensions } from "./graphics/edge-layout";
 
@@ -36,8 +35,7 @@ export class OurMermaid2SvgDimensions implements Dimensions {
     FrankFlowchartComponent,
     SequenceEditorComponent,
     SvgZoomPanDirective,
-    CalculatedStaticSvgComponent,
-    CalculatedStaticSvgTextComponent
+    CalculatedStaticSvgComponent
   ],
   imports: [
     BrowserModule,

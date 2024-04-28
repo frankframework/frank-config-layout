@@ -82,7 +82,7 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
       nonLayeredIds.delete(k)
     })
     if (nonLayeredIds.size !== 0) {
-      throw new Error('Some nodes in the graph do not have a layer')
+      throw new Error(`The following nodes in the graph do not have a layer, ${[... nonLayeredIds].join(', ')}`)
     }
     const coveredLayers: number[] = Array.from(coveredLayersSet).sort((a, b) => a - b)
     if (coveredLayers.length === 0) {
