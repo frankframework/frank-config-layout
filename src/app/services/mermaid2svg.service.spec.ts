@@ -5,7 +5,7 @@ describe('Mermaid2svgService', () => {
   let service: Mermaid2svgService;
 
   beforeEach(() => {
-    // No need to test injection - if injection does not work then the app does not build
+    // No need to test injection - if injection does not work then the app does not show
     service = new Mermaid2svgService(new OurMermaid2SvgDimensions())
   });
 
