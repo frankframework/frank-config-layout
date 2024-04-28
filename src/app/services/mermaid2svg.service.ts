@@ -22,7 +22,12 @@ export class Mermaid2svgService {
     if (editorBuilder.orderedOmittedNodes.length >= 1) {
       throw new Error(`Probably the start node was part of a cycle; could not assign layer numers to [${editorBuilder.orderedOmittedNodes.map(n => n.getId())}]`)
     }
-    const model: NodeSequenceEditor = editorBuilder.build()
+    let model: NodeSequenceEditor
+    try {
+      model = editorBuilder.build()
+    } catch(e) {
+      throw e
+    }
     // TODO: Apply some algorithm to have the right sequence in the model
     const nodeLayoutBuiler = new NodeLayoutBuilder(model, this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
