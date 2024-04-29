@@ -19,7 +19,7 @@ export class PlacedNode implements Node {
   readonly originalStyle: string | null
   readonly layerNumber: number
   readonly horizontalBox: Interval
-  private verticalBox: Interval
+  readonly verticalBox: Interval
 
   constructor(p: Position, d: Dimensions) {
     this.id = p.node.getId()

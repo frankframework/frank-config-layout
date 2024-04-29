@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Drawing, Line, Rectangle, getEmptyDrawing } from '../frank-flowchart/frank-flowchart.component';
+import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
 import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
@@ -8,6 +8,7 @@ import { NodeLayoutBuilder } from '../../graphics/node-layout';
 import { Layout, PlacedEdge, PlacedNode, Dimensions } from '../../graphics/edge-layout';
 import { getFactoryDimensions } from '../dimensions-editor/dimensions-editor.component';
 import { Subject } from 'rxjs';
+import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
 
 export interface NodeSequenceEditorOrError {
   model: NodeSequenceEditor | null
@@ -26,12 +27,16 @@ export interface GraphConnectionsDecoratorOrError {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlowChartEditorComponent {
+  readonly SHOW_IMAGE = CalculatedStaticSvgComponent.SHOW_IMAGE
+  readonly SHOW_TEXT = CalculatedStaticSvgComponent.SHOW_TEXT
+
   readonly layerNumberAlgorithms: {key: LayerNumberAlgorithm, value: string}[] = [
     {key: LayerNumberAlgorithm.FIRST_OCCURING_PATH, value: 'first occuring path'},
     {key: LayerNumberAlgorithm.LONGEST_PATH, value: 'longest path'}
   ];
 
   mermaidText: string = ''
+  committedMermaidText = ''
   layoutModel: NodeSequenceEditor | null = null
   selectionInModel: NodeOrEdgeSelection = new NodeOrEdgeSelection
   showNodeTextInDrawing: boolean = true
@@ -82,6 +87,7 @@ export class FlowChartEditorComponent {
       return
     }
     this.layoutModel = modelOrError.model
+    this.committedMermaidText = this.mermaidText
     this.updateDrawing()
   }
 
@@ -104,7 +110,12 @@ export class FlowChartEditorComponent {
     if (builder.orderedOmittedNodes.length > 0) {
       return {model: null, error: 'Could not assign a layer to the following nodes: ' + builder.orderedOmittedNodes.map(n => n.getId()).join(', ')}
     }
-    return {model: builder.build(), error: null}
+    try {
+      return {model: builder.build(), error: null}
+    } catch(e) {
+      console.log(e)
+      return {model: null, error: (e as Error).message}
+    }
   }
 
   onSequenceEditorChanged() {
