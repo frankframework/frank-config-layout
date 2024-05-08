@@ -2,7 +2,7 @@
 
 Layout algorithm for Frank configs / flows. WeAreFrank! wishes to use a custom layout algorithm that should look better than images produced by Mermaid. This project assumes that the Frank!Framework can convert Frank configurations or adapters (XML code) to Mermaid commands. See [Mermaid example](src/assets/mermaid.txt) for the syntax of Mermaid files. This project reads Mermaid text and displays it using a custom algorithm.
 
-The algorithm has not been finished yet. In its current state, the produced drawing does not look like intended. There is a user interface that allows humans to improve the layout. This way, the developers can investigate how to improve the algorithm. A future release of this project should eliminate the need for human intervention. A future release will also provide an artifact published on https://www.npmjs.com/ that can be used by the Frank!Framework as a replacement of Mermaid.
+The algorithm has not been finished yet. In its current state, the produced drawing does not look like intended. There is a user interface that allows humans to improve the layout. This way, the developers can investigate how to improve the algorithm. A future release of this project should eliminate the need for human intervention.
 
 # Development environment and usage
 
@@ -18,3 +18,17 @@ To use this project, please do the following:
 * Try the controls to change the drawing.
 
 ![Load Mermaid](./readme-pictures/loadMermaid.jpg)
+
+# Publishing
+
+This project is published on npmjs. We publish a service that can produce a static SVG from Mermaid commands. Do the following to publish the next version on npmjs:
+
+* Ensure that the checkout directory does not contain folder `dist`.
+* Ensure that all development work has been committed.
+* Run `yarn install --immutable`.
+* Ensure that your development work has been tested.
+* If you fixed things, commit your work.
+* Run `yarn packagr`. This should produce folder `dist` within the checkout directory.
+* Change directory to `dist`. Then do `yarn pack`.
+* Publish using `yarn publish`.
+* When publishing has been successful, update the version number in `package.json` for the next release cycle.
