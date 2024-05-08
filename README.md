@@ -31,4 +31,7 @@ This project is published on npmjs. We publish a service that can produce a stat
 * Run `yarn packagr`. This should produce folder `dist` within the checkout directory.
 * Change directory to `dist`. Then do `yarn pack`.
 * Publish using `yarn publish`.
-* When publishing has been successful, update the version number in `package.json` for the next release cycle.
+* Run `git tag vX.Y.Z` with X.Y.Z the version you just published
+* Run `git push vX.Y.Z`.
+* Update the version number in `package.json` for the next release cycle. Commit and push that.
+
