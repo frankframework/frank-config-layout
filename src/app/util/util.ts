@@ -77,3 +77,7 @@ export function doRotateToSwapItems<T>(target: T[], posFrom: number, posTo: numb
   }
   target[posTo] = carry
 }
+
+export function escapeHtml(s: string): string {
+  return s.replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+} 

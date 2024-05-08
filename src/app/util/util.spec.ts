@@ -1,4 +1,4 @@
-import { doRotateToSwapItems, getRange, rotateToSwapItems, roundedMedian, sortedUniqNumbers } from './util'
+import { doRotateToSwapItems, getRange, escapeHtml, rotateToSwapItems, roundedMedian, sortedUniqNumbers } from './util'
 
 describe('Util test', () => {
   it('Get range', () => {
@@ -113,5 +113,9 @@ describe('Util test', () => {
     expect(permutation[2]).toEqual(3)
     expect(permutation[3]).toEqual(1)
     expect(permutation[4]).toEqual(4)
+  })
+
+  it('escapeHtml', () => {
+    expect(escapeHtml('<h1>Title</h1>')).toEqual('&lt;h1&gt;Title&lt;/h1&gt;')
   })
 })

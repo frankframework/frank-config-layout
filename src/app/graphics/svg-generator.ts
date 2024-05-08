@@ -1,4 +1,5 @@
 import { CreationReason } from "../model/horizontalGrouping"
+import { escapeHtml } from "../util/util"
 import { Layout, PlacedEdge, PlacedNode } from "./edge-layout"
 
 export function generateSvg(layout: Layout) {
@@ -65,7 +66,7 @@ function renderOriginalNode(n: PlacedNode): string {
       x="${n.horizontalBox.center}"
       y="${n.verticalBox.center}"
       text-anchor="middle" dominant-baseline="middle" class="nodeText">
-        ${n.text}
+        ${escapeHtml(n.text)}
     </text>
   </g>
 `

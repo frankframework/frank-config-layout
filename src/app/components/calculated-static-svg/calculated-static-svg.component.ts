@@ -1,5 +1,6 @@
 import { Component, ElementRef, Input } from '@angular/core';
 import { Mermaid2svgService } from '../../services/mermaid2svg.service';
+import { escapeHtml } from '../../util/util';
 
 @Component({
   selector: 'app-calculated-static-svg',
@@ -60,13 +61,9 @@ export class CalculatedStaticSvgComponent {
 
   showSvg(svg: string) {
     if (this._show === CalculatedStaticSvgComponent.SHOW_TEXT) {
-      this.rootElement.nativeElement.innerHTML = '<pre><code>' + htmlEscape(svg) + '</code></pre>'
+      this.rootElement.nativeElement.innerHTML = '<pre><code>' + escapeHtml(svg) + '</code></pre>'
     } else {
       this.rootElement.nativeElement.innerHTML = svg
     }
   }
 }
-
-function htmlEscape(s: string): string {
-  return s.replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-} 
