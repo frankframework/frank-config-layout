@@ -1,8 +1,8 @@
-import { Inject, Injectable, InjectionToken, input } from '@angular/core';
+import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Dimensions, Layout } from '../graphics/edge-layout';
 import { Graph, GraphBase, GraphConnectionsDecorator } from '../model/graph';
 import { getGraphFromMermaid } from '../parsing/mermaid-parser';
-import { NodeSequenceEditorBuilder, NodeForEditor, CreationReason, calculateLayerNumbersLongestPath } from '../model/horizontalGrouping';
+import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from '../model/horizontalGrouping';
 import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
 import { NodeLayoutBuilder } from '../graphics/node-layout';
 import { generateSvg } from '../graphics/svg-generator';
