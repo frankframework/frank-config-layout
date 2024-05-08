@@ -4,6 +4,7 @@
     "entryFile": "public_api.ts"
   },
   "allowedNonPeerDependencies": [
-    "@angular-builders/custom-webpack"
+    "@angular-builders/custom-webpack",
+    "@angular/animations"
   ]
 }
