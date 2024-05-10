@@ -20,21 +20,26 @@ export class AsynchronousCache {
     }
   }
 
-  async getValueBeingCalculated(key: string): Promise<string> {
+  private async getValueBeingCalculated(key: string): Promise<string> {
+    let progress: Progress = this.cache.get(key)!
+    while (progress.state === CalculationState.BUSY) {
+      await timeout(500)
+      progress = this.cache.get(key)!
+    }
+    return this.getCalculatedValue(key)
+  }
+
+  private getCalculatedValue(key: string) {
+    if ((! this.cache.has(key))) {
+      throw new Error(`Expected that cache has value for key ${key}`)
+    }
     const progress: Progress = this.cache.get(key)!
     if (progress.state === CalculationState.BUSY) {
-      await timeout(1000)
-      return this.getValueBeingCalculated(key)
+      throw new Error(`Expected that calculation for key ${key} was done`)
+    } else if(progress.state === CalculationState.DONE) {
+      return (progress as ProgressDone).result
     } else {
-      return new Promise((resolve, reject) => {
-        if (progress.state === CalculationState.DONE) {
-          resolve((progress as ProgressDone).result)
-        } else if (progress.state === CalculationState.ERROR) {
-          reject((progress as ProgressError).error)
-        } else {
-          throw new Error('Cannot happen - case already caught')
-        }
-      })
+      throw (progress as ProgressError).error
     }
   }
 }
