@@ -77,3 +77,8 @@ export function doRotateToSwapItems<T>(target: T[], posFrom: number, posTo: numb
   }
   target[posTo] = carry
 }
+
+// Copied from https://stackoverflow.com/questions/33289726/combination-of-async-function-await-settimeout
+export async function timeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

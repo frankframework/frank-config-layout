@@ -1,10 +1,12 @@
+import { timeout } from './util'
+
 export class AsynchronousCache {
   private cache: Map<string, Progress> = new Map()
 
   async get(key: string, valueCalculation: () => Promise<string>): Promise<string> {
-    return new Promise((resolve, reject) => {
-      if (! this.cache.has(key)) {
-        this.cache.set(key, new ProgressBusy())
+    if (! this.cache.has(key)) {
+      this.cache.set(key, new ProgressBusy())
+      return new Promise((resolve, reject) => {
         valueCalculation().then((value) => {
           this.cache.set(key, new ProgressDone(value))
           resolve(value)
@@ -12,29 +14,28 @@ export class AsynchronousCache {
           this.cache.set(key, new ProgressError(e))
           reject(e)
         })
-      } else {
-        this.getValueBeingCalculated(key)
-        .then((value => resolve(value)))
-        .catch(e => reject(e))
-      }
-    })
+      })
+    } else {
+      return this.getValueBeingCalculated(key)
+    }
   }
 
   async getValueBeingCalculated(key: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const progress: Progress = this.cache.get(key)!
-      if (progress.state === CalculationState.DONE) {
-        resolve( (progress as ProgressDone).result )
-      } else if (progress.state === CalculationState.ERROR) {
-        reject( (progress as ProgressError).error)
-      } else {
-        setTimeout(() => {
-          this.getValueBeingCalculated(key)
-          .then(value => resolve(value))
-          .catch(e => reject(e))
-        }, 1000)
-      }  
-    })
+    const progress: Progress = this.cache.get(key)!
+    if (progress.state === CalculationState.BUSY) {
+      await timeout(1000)
+      return this.getValueBeingCalculated(key)
+    } else {
+      return new Promise((resolve, reject) => {
+        if (progress.state === CalculationState.DONE) {
+          resolve((progress as ProgressDone).result)
+        } else if (progress.state === CalculationState.ERROR) {
+          reject((progress as ProgressError).error)
+        } else {
+          throw new Error('Cannot happen - case already caught')
+        }
+      })
+    }
   }
 }
 
