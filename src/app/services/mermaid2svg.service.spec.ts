@@ -9,7 +9,7 @@ describe('Mermaid2svgService', () => {
     service = new Mermaid2svgService(new OurMermaid2SvgDimensions())
   });
 
-  it('Please maintain this test using the GUI', () => {
+  it('Please maintain this test using the GUI', (done) => {
     const input = `Start("My start"):::normal
 N1("Node 1"):::normal
 N2("Node 2"):::normal
@@ -140,6 +140,9 @@ N1 --> |success| N2`
     <polyline class="line" points="44,164 59,245" marker-end="url(#arrow)"/>
   </g>
 </svg>`
-    expect(service.mermaid2svg(input).split('\n')).toEqual(expected!.split('\n'))
+    service.mermaid2svg(input).then((svg) => {
+      expect(svg.split('\n')).toEqual(expected!.split('\n'))
+      done()
+    })
   })
 });

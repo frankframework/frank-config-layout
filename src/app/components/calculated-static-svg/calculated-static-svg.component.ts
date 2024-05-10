@@ -38,15 +38,13 @@ export class CalculatedStaticSvgComponent {
         this.showNoSvg()
         return
       }
-      let svg: string|null = null
-      try {
-        svg = this.mermaid2svg.mermaid2svg(this._mermaid)
-      } catch(e) {
-        this.showError((e as Error).message)
-      }
-      if (svg !== null) {
+      this.mermaid2svg.mermaid2svg(this._mermaid)
+      .then((svg) => {
         this.showSvg(svg)
-      }
+      })
+      .catch((e) => {
+        this.showError((e as Error).message)
+      })
     }
   }
 

@@ -14,7 +14,7 @@ export class Mermaid2svgService {
   constructor(@Inject(Mermaid2SvgDimensions) private dimensions: Dimensions) {}
 
   // TODO: Cache results
-  mermaid2svg(mermaid: string) {
+  async mermaid2svg(mermaid: string): Promise<string> {
     const b: GraphBase = getGraphFromMermaid(mermaid)
     const g: Graph = new GraphConnectionsDecorator(b)
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g)
