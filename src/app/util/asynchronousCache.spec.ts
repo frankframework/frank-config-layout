@@ -24,19 +24,24 @@ describe('AsynchronousCache', () => {
 
   it('No duplicate calculation when calculation throws error', (done) => {
     const instance = new AsynchronousCache()
+    let caught1 = false
+    let caught2 = false
     const v1Promise: Promise<string> = instance.get('aap', () => generateError(500))
     const v2Promise: Promise<string> = instance.get('aap', () => generateError(500))
-    let caught = 0
-    v1Promise.catch(e => {
-      ++caught
-      expect((e as Error).message).toEqual(ERROR_MSG)
+    Promise.all([
+      v1Promise.catch(e1 => {
+        caught1 = true
+        expect((e1 as Error).message).toEqual(ERROR_MSG)
+      }).then(() => {}),
       v2Promise.catch((e2) => {
-        ++caught
+        caught2 = true
         expect((e2 as Error).message).toEqual(ERROR_MSG)
-        expect(caught).toEqual(2)
-        expect(numCalculations).toEqual(1)
-        done()
       })
+    ]).then(() => {}).then(() => {
+      expect(caught1).toEqual(true)
+      expect(caught2).toEqual(true)
+      expect(numCalculations).toEqual(1)
+      done()
     })
   })
 })
