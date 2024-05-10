@@ -1,9 +1,9 @@
 import { timeout } from './util'
 
-export class AsynchronousCache {
+export class AsynchronousCache<T> {
   private cache: Map<string, Progress> = new Map()
 
-  async get(key: string, valueCalculation: () => Promise<string>): Promise<string> {
+  async get(key: string, valueCalculation: () => Promise<T>): Promise<T> {
     if (! this.cache.has(key)) {
       this.cache.set(key, new ProgressBusy())
       return new Promise((resolve, reject) => {
@@ -20,7 +20,7 @@ export class AsynchronousCache {
     }
   }
 
-  private async getValueBeingCalculated(key: string): Promise<string> {
+  private async getValueBeingCalculated(key: string): Promise<T> {
     let progress: Progress = this.cache.get(key)!
     while (progress.state === CalculationState.BUSY) {
       await timeout(500)
@@ -29,7 +29,7 @@ export class AsynchronousCache {
     return this.getCalculatedValue(key)
   }
 
-  private getCalculatedValue(key: string) {
+  private getCalculatedValue(key: string): T {
     if ((! this.cache.has(key))) {
       throw new Error(`Expected that cache has value for key ${key}`)
     }
@@ -37,7 +37,7 @@ export class AsynchronousCache {
     if (progress.state === CalculationState.BUSY) {
       throw new Error(`Expected that calculation for key ${key} was done`)
     } else if(progress.state === CalculationState.DONE) {
-      return (progress as ProgressDone).result
+      return (progress as ProgressDone<T>).result
     } else {
       throw (progress as ProgressError).error
     }
@@ -60,9 +60,9 @@ class ProgressBusy implements Progress {
   }
 }
 
-class ProgressDone implements Progress {
+class ProgressDone<T> implements Progress {
   constructor(
-    readonly result: string
+    readonly result: T
   ) {}
 
   get state() {
