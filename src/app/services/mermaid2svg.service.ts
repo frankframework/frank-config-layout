@@ -6,18 +6,45 @@ import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from '../
 import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
 import { NodeLayoutBuilder } from '../graphics/node-layout';
 import { generateSvg } from '../graphics/svg-generator';
+import { AsynchronousCache } from '../util/asynchronousCache';
+import { sha256 } from '../util/hash';
 
 export const Mermaid2SvgDimensions = new InjectionToken("Mermaid2SvgDimensions")
 
+export interface Statistics {
+  svg: string,
+  numNodes: number,
+  numEdges: number,
+  numNodeVisitsDuringLayerCalculation: number
+}
+
 @Injectable()
 export class Mermaid2svgService {
+  private cache = new AsynchronousCache<Statistics>()
+
   constructor(@Inject(Mermaid2SvgDimensions) private dimensions: Dimensions) {}
 
-  // TODO: Cache results
   async mermaid2svg(mermaid: string): Promise<string> {
+    return (await this.mermaid2svgStatistics(mermaid)).svg
+  }
+
+  async mermaid2svgStatistics(mermaid: string): Promise<Statistics> {
+    let hash: string
+    try {
+      hash = await sha256(mermaid)
+    } catch(e) {
+      console.log(e)
+      throw new Error('Could not calculate hash')
+    }
+    return await this.cache.get(hash, () => this.mermaid2svgStatisticsImpl(mermaid))
+  }
+
+  // TODO: Cache results
+  private async mermaid2svgStatisticsImpl(mermaid: string): Promise<Statistics> {
     const b: GraphBase = getGraphFromMermaid(mermaid)
     const g: Graph = new GraphConnectionsDecorator(b)
-    const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g)
+    let numNodeVisits = 0
+    const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits)
     const editorBuilder: NodeSequenceEditorBuilder = new NodeSequenceEditorBuilder(nodeIdToLayer, g)
     if (editorBuilder.orderedOmittedNodes.length >= 1) {
       throw new Error(`Probably the start node was part of a cycle; could not assign layer numers to [${editorBuilder.orderedOmittedNodes.map(n => n.getId())}]`)
@@ -32,6 +59,11 @@ export class Mermaid2svgService {
     const nodeLayoutBuiler = new NodeLayoutBuilder(model, this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
     const layout = new Layout(nodeLayout, model, this.dimensions)
-    return generateSvg(layout)
+    return {
+      svg: generateSvg(layout),
+      numNodes: g.getNodes().length,
+      numEdges: g.getEdges().length,
+      numNodeVisitsDuringLayerCalculation: numNodeVisits
+    }
   }
 }
