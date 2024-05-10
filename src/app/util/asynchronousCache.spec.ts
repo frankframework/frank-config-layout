@@ -1,5 +1,7 @@
 import { AsynchronousCache } from "./asynchronousCache";
 
+const ERROR_MSG = 'Simulating error in value calculation'
+
 var numCalculations = 0
 
 describe('AsynchronousCache', () => {
@@ -19,11 +21,36 @@ describe('AsynchronousCache', () => {
       done()
     })
   })
+
+  it('No duplicate calculation when calculation throws error', (done) => {
+    const instance = new AsynchronousCache()
+    const v1Promise: Promise<string> = instance.get('aap', () => generateError(500))
+    const v2Promise: Promise<string> = instance.get('aap', () => generateError(500))
+    let caught = 0
+    v1Promise.catch(e => {
+      ++caught
+      expect((e as Error).message).toEqual(ERROR_MSG)
+      v2Promise.catch((e2) => {
+        ++caught
+        expect((e2 as Error).message).toEqual(ERROR_MSG)
+        expect(caught).toEqual(2)
+        expect(numCalculations).toEqual(1)
+        done()
+      })
+    })
+  })
 })
 
 async function calculateValue(value: string, time: number): Promise<string> {
   return new Promise((resolve, _) => {
     ++numCalculations
     setTimeout(() => resolve(value), time)
+  })
+}
+
+async function generateError(time: number): Promise<string> {
+  return new Promise((_, reject) => {
+    ++numCalculations
+    setTimeout(() => reject(new Error(ERROR_MSG)))
   })
 }
