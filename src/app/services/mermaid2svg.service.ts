@@ -48,7 +48,6 @@ export class Mermaid2svgService {
     return await this.cache.get(hash, () => this.mermaid2svgStatisticsImpl(mermaid))
   }
 
-  // TODO: Cache results
   private async mermaid2svgStatisticsImpl(mermaid: string): Promise<Statistics> {
     ++this._numSvgCalculations
     const b: GraphBase = getGraphFromMermaid(mermaid)
