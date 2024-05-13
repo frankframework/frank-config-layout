@@ -22,6 +22,15 @@ export interface Statistics {
 export class Mermaid2svgService {
   private cache = new AsynchronousCache<Statistics>()
 
+  private _numSvgCalculations = 0
+  get numSvgCalculations() {
+    return this._numSvgCalculations
+  }
+
+  getHashes() {
+    return [ ... this.cache.getSortedKeys() ]
+  }
+
   constructor(@Inject(Mermaid2SvgDimensions) private dimensions: Dimensions) {}
 
   async mermaid2svg(mermaid: string): Promise<string> {
@@ -41,6 +50,7 @@ export class Mermaid2svgService {
 
   // TODO: Cache results
   private async mermaid2svgStatisticsImpl(mermaid: string): Promise<Statistics> {
+    ++this._numSvgCalculations
     const b: GraphBase = getGraphFromMermaid(mermaid)
     const g: Graph = new GraphConnectionsDecorator(b)
     let numNodeVisits = 0

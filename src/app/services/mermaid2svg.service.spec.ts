@@ -1,4 +1,4 @@
-import { Mermaid2svgService } from './mermaid2svg.service';
+import { Mermaid2svgService, Statistics } from './mermaid2svg.service';
 import { OurMermaid2SvgDimensions } from '../app.module'
 
 const input = `Start("My start"):::normal
@@ -153,6 +153,18 @@ describe('Mermaid2svgService - please maintain this test using the GUI', () => {
       expect(statistics.numNodes).toEqual(4)
       expect(statistics.numEdges).toEqual(5)
       expect(statistics.numNodeVisitsDuringLayerCalculation).toEqual(6)
+      done()
+    })
+  })
+
+  it('Test that real calculation is done only once', (done) => {
+    const first: Promise<Statistics> = service.mermaid2svgStatistics(input)
+    const second: Promise<string> = service.mermaid2svg(input)
+    Promise.all([first, second]).then(() => {
+      expect(service.numSvgCalculations).toEqual(1)
+      expect(service.getHashes()).toHaveSize(1)
+      expect(service.getHashes()[0]).toHaveSize(64)
+      expect(service.getHashes()[0].length).toEqual(64)
       done()
     })
   })

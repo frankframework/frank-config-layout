@@ -3,6 +3,10 @@ import { timeout } from './util'
 export class AsynchronousCache<T> {
   private cache: Map<string, Progress> = new Map()
 
+  getSortedKeys(): string[] {
+    return [ ... this.cache.keys() ].sort()
+  }
+
   async get(key: string, valueCalculation: () => Promise<T>): Promise<T> {
     if (! this.cache.has(key)) {
       this.cache.set(key, new ProgressBusy())
