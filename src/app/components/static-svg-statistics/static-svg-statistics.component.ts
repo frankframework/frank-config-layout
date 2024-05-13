@@ -1,4 +1,4 @@
-import { Component, Input, NgZone } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, NgZone } from '@angular/core';
 import { Mermaid2svgService, Statistics } from '../../services/mermaid2svg.service';
 import { OnInit } from '@angular/core';
 
@@ -6,7 +6,8 @@ import { OnInit } from '@angular/core';
   selector: 'app-static-svg-statistics',
   standalone: false,
   templateUrl: './static-svg-statistics.component.html',
-  styleUrl: './static-svg-statistics.component.scss'
+  styleUrl: './static-svg-statistics.component.scss',
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class StaticSvgStatisticsComponent implements OnInit {
   numNodes: string|null = null
@@ -40,24 +41,20 @@ export class StaticSvgStatisticsComponent implements OnInit {
 
   private update() {
     if ( (this._mermaid === null) || (this._mermaid.length === 0) ) {
-      console.log('update: Nothing to do')
       return
     }
-    console.log('Updating statistics')
     this.mermaid2svg.mermaid2svgStatistics(this._mermaid!).then((statistics) => {
       this.updateStatistics(statistics)
     }).catch(() => {
-      console.log("Error updating statistics")
       this.reset()
     })
   }
 
   private updateStatistics(statistics: Statistics) {
     this.ngZone.run(() => {
-      console.log('Have the statistics, writing them')
       this.numNodes = `${statistics.numNodes}`
       this.numEdges = `${statistics.numEdges}`
-      this.numVisitsDuringLayerCalculation = `${statistics.numNodeVisitsDuringLayerCalculation}`  
+      this.numVisitsDuringLayerCalculation = `${statistics.numNodeVisitsDuringLayerCalculation}`
     })
   }
 }
