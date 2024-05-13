@@ -113,6 +113,7 @@ export class FlowChartEditorComponent {
     try {
       return {model: builder.build(), error: null}
     } catch(e) {
+      console.log(e)
       return {model: null, error: (e as Error).message}
     }
   }
