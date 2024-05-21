@@ -4,7 +4,6 @@ import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-static-svg-statistics',
-  standalone: false,
   templateUrl: './static-svg-statistics.component.html',
   styleUrl: './static-svg-statistics.component.scss',
   changeDetection: ChangeDetectionStrategy.Default
