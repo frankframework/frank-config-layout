@@ -24,7 +24,7 @@ export interface GraphConnectionsDecoratorOrError {
   selector: 'app-flow-chart-editor',
   templateUrl: './flow-chart-editor.component.html',
   styleUrl: './flow-chart-editor.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class FlowChartEditorComponent {
   readonly SHOW_IMAGE = CalculatedStaticSvgComponent.SHOW_IMAGE

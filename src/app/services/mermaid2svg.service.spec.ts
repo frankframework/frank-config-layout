@@ -1,16 +1,7 @@
-import { Mermaid2svgService } from './mermaid2svg.service';
+import { Mermaid2svgService, Statistics } from './mermaid2svg.service';
 import { OurMermaid2SvgDimensions } from '../app.module'
 
-describe('Mermaid2svgService', () => {
-  let service: Mermaid2svgService;
-
-  beforeEach(() => {
-    // No need to test injection - if injection does not work then the app does not show
-    service = new Mermaid2svgService(new OurMermaid2SvgDimensions())
-  });
-
-  it('Please maintain this test using the GUI', () => {
-    const input = `Start("My start"):::normal
+const input = `Start("My start"):::normal
 N1("Node 1"):::normal
 N2("Node 2"):::normal
 End("End node"):::normal
@@ -20,14 +11,14 @@ N1 --> |error| End
 N2 --> |success| End
 N1 --> |success| N2`
 
-    // In the GUI, enter the above Mermaid text. Then look at the bottom
-    // under the heading "Static SVG". If that image looks good, copy
-    // the text next to the static SVG here.
-    //
-    // VS Code trick: VS Code may add too many or too few leading spaces
-    // to each line. Fix this by finding the right indent of the line
-    // "const expected = ``" before inserting the text inside the ``.
-    const expected = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
+// In the GUI, enter the above Mermaid text. Then look at the bottom
+// under the heading "Static SVG". If that image looks good, copy
+// the text next to the static SVG here.
+//
+// VS Code trick: VS Code may add too many or too few leading spaces
+// to each line. Fix this by finding the right indent of the line
+// "const expected = ``" before inserting the text inside the ``.
+const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   width="195" height="480" >
   <defs>
     <style>
@@ -140,6 +131,41 @@ N1 --> |success| N2`
     <polyline class="line" points="44,164 59,245" marker-end="url(#arrow)"/>
   </g>
 </svg>`
-    expect(service.mermaid2svg(input).split('\n')).toEqual(expected!.split('\n'))
+
+describe('Mermaid2svgService - please maintain this test using the GUI', () => {
+  let service: Mermaid2svgService;
+
+  beforeEach(() => {
+    // No need to test injection - if injection does not work then the app does not show
+    service = new Mermaid2svgService(new OurMermaid2SvgDimensions())
+  });
+
+  it('Test the plain SVG', (done) => {
+    service.mermaid2svg(input).then((svg) => {
+      expect(svg.split('\n')).toEqual(expectedSvg!.split('\n'))
+      done()
+    })
+  })
+
+  it('Test with statistics', (done) => {
+    service.mermaid2svgStatistics(input).then(statistics => {
+      expect(statistics.svg).toEqual(expectedSvg)
+      expect(statistics.numNodes).toEqual(4)
+      expect(statistics.numEdges).toEqual(5)
+      expect(statistics.numNodeVisitsDuringLayerCalculation).toEqual(6)
+      done()
+    })
+  })
+
+  it('Test that real calculation is done only once', (done) => {
+    const first: Promise<Statistics> = service.mermaid2svgStatistics(input)
+    const second: Promise<string> = service.mermaid2svg(input)
+    Promise.all([first, second]).then(() => {
+      expect(service.numSvgCalculations).toEqual(1)
+      expect(service.getHashes()).toHaveSize(1)
+      expect(service.getHashes()[0]).toHaveSize(64)
+      expect(service.getHashes()[0].length).toEqual(64)
+      done()
+    })
   })
 });

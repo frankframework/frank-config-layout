@@ -14,6 +14,7 @@ import { SvgZoomPanDirective } from './directives/svg-zoom-pan.directive'
 import { CalculatedStaticSvgComponent } from "./components/calculated-static-svg/calculated-static-svg.component";
 import { Mermaid2SvgDimensions, Mermaid2svgService } from "./services/mermaid2svg.service";
 import { Dimensions } from "./graphics/edge-layout";
+import { StaticSvgStatisticsComponent } from "./components/static-svg-statistics/static-svg-statistics.component";
 
 @Injectable()
 export class OurMermaid2SvgDimensions implements Dimensions {
@@ -35,7 +36,8 @@ export class OurMermaid2SvgDimensions implements Dimensions {
     FrankFlowchartComponent,
     SequenceEditorComponent,
     SvgZoomPanDirective,
-    CalculatedStaticSvgComponent
+    CalculatedStaticSvgComponent,
+    StaticSvgStatisticsComponent
   ],
   imports: [
     BrowserModule,
