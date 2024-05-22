@@ -36,11 +36,11 @@ export function getFactoryDimensions(): Dimensions {
   return {
     layerHeight: 50,
     layerDistance: 120,
-    nodeBoxHeight: 40,
+    nodeBoxHeight: 50,
     intermediateWidth: 60,
-    nodeWidth: 120,
+    nodeWidth: 175,
     omittedPlaceholderWidth: 90,
-    nodeBoxWidth: 110,
+    nodeBoxWidth: 160,
     boxConnectorAreaPerc: 50
   }
 }

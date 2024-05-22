@@ -61,6 +61,7 @@ export class FlowChartEditorComponent {
   }
 
   dimensions = getFactoryDimensions()
+  static errorForwardNames = ['exception','failure','fail','timeout','illegalResult','presumedTimeout','interrupt','parserError','outputParserError','outputFailure'];
   drawing: Drawing|null = null
   numCrossingLines: number = 0
 
@@ -134,9 +135,11 @@ export class FlowChartEditorComponent {
       // No box around intermediate node
       .filter(n => n.creationReason === CreationReason.ORIGINAL)
       .map(n => { return {
-        id: n.getId(), x: n.left, y: n.top, width: n.width, height: n.height, centerX: n.centerX, centerY: n.centerY,
+        id: n.getId(),
+        x: n.left, y: n.top, width: n.width, height: n.height, centerX: n.centerX, centerY: n.centerY,
         text: getCaption(n, this.choiceShowNodeTextInDrawing),
-        selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!)
+        selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!),
+        styles: [n.originalStyle||'']
       }})
     const lines: Line[] = layout.getEdges()
       .map(edge => edge as PlacedEdge)
@@ -145,7 +148,7 @@ export class FlowChartEditorComponent {
         x2: edge.line.endPoint.x, y2: edge.line.endPoint.y,
         selected: this.selectionInModel.isEdgeHighlightedInDrawing(edge.getKey(), this.layoutModel!),
         arrow: edge.isLastSegment,
-        isError: edge.optionalOriginalText === 'error'
+        isError: FlowChartEditorComponent.errorForwardNames.includes(edge.optionalOriginalText||'success') || edge.getFrom().originalStyle === 'errorOutline'
       }})
     this.drawing = {width: layout.width, height: layout.height, rectangles, lines}
   }
