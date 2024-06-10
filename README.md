@@ -35,3 +35,7 @@ This project is published on npmjs. We publish a service that can produce a stat
 * Run `git push vX.Y.Z`.
 * Update the version number in `package.json` for the next release cycle. Commit and push that.
 
+# Checking licenses of dependencies
+
+Do `yarn run license-checker`.
+
