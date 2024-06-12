@@ -35,3 +35,9 @@ This project is published on npmjs. We publish a service that can produce a stat
 * Run `git push vX.Y.Z`.
 * Update the version number in `package.json` for the next release cycle. Commit and push that.
 
+# Checks on licensing
+
+* To check licenses of dependencies, do `yarn run license-checker`.
+* To check that each Typescript source file has a copyright notice, open a MinGW or Linux command prompt and do `./check_notices.sh` in the checkout directory. Only file `hash.ts` is permitted not to have a copyright notice because it was copied from StackOverflow.
+
+
