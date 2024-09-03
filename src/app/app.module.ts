@@ -19,12 +19,12 @@ import { Dimensions } from "./graphics/edge-layout";
 export class OurMermaid2SvgDimensions implements Dimensions {
   layerHeight = 50
   layerDistance = 120
-  nodeBoxHeight = 40
+  nodeBoxHeight = 50
   intermediateWidth = 60
-  nodeWidth = 120
+  nodeWidth = 175
   omittedPlaceholderWidth = 90
-  nodeBoxWidth = 110
-  boxConnectorAreaPerc = 30
+  nodeBoxWidth = 160
+  boxConnectorAreaPerc = 50
 }
 
 @NgModule({
