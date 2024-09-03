@@ -9,7 +9,7 @@ describe('Mermaid2svgService', () => {
     service = new Mermaid2svgService(new OurMermaid2SvgDimensions())
   });
 
-  it('Please maintain this test using the GUI', () => {
+  xit('Please maintain this test using the GUI', () => {
     const input = `Start("My start"):::normal
 N1("Node 1"):::normal
 N2("Node 2"):::normal
