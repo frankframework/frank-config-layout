@@ -27,7 +27,7 @@ export class CategorizedNode implements Node {
 }
 
 export class CategorizedEdge implements Edge {
-  constructor(private from: CategorizedNode, private to: CategorizedNode, readonly isError: boolean) {}
+  constructor(private from: CategorizedNode, private to: CategorizedNode, readonly text: string | undefined, readonly isError: boolean) {}
 
   getFrom(): Node {
     return this.from
@@ -65,14 +65,14 @@ function categorizeNode(n: ConcreteNode): CategorizedNode {
   }
 }
 
-function categorizeEdge(from: CategorizedNode, to: CategorizedNode, edgeText: string | undefined): CategorizedEdge {
+function categorizeEdge(from: CategorizedNode, to: CategorizedNode, edgeText?: string): CategorizedEdge {
   if (from.isError) {
-    return new CategorizedEdge(from, to, true)
+    return new CategorizedEdge(from, to, edgeText, true)
   }
   if (! edgeText) {
-    return new CategorizedEdge(from, to, false)
+    return new CategorizedEdge(from, to, edgeText, false)
   } else {
     console.log(`Checking whether "${edgeText}" is error forward name`)
-    return new CategorizedEdge(from, to, ERROR_FORWARD_NAMES.includes(edgeText))
+    return new CategorizedEdge(from, to, edgeText, ERROR_FORWARD_NAMES.includes(edgeText))
   }
 }

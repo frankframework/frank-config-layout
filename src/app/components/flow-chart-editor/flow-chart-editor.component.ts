@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
 import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
+import { categorize } from '../../model/error-flow'
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
 import { NodeOrEdgeSelection, NodeSequenceEditor } from '../../model/nodeSequenceEditor';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
@@ -19,6 +20,8 @@ export interface GraphConnectionsDecoratorOrError {
   graph: GraphConnectionsDecorator | null
   error: string | null
 }
+
+const ERROR_STYLE = 'errorOutline'
 
 @Component({
   selector: 'app-flow-chart-editor',
@@ -61,7 +64,6 @@ export class FlowChartEditorComponent {
   }
 
   dimensions = getFactoryDimensions()
-  static errorForwardNames = ['exception','failure','fail','timeout','illegalResult','presumedTimeout','interrupt','parserError','outputParserError','outputFailure'];
   drawing: Drawing|null = null
   numCrossingLines: number = 0
 
@@ -93,13 +95,14 @@ export class FlowChartEditorComponent {
   }
 
   mermaid2graph(text: string): GraphConnectionsDecoratorOrError {
-    let b: GraphBase
+    let c: GraphBase
     try {
-      b = getGraphFromMermaid(text)
+      const b = getGraphFromMermaid(text)
+      c = categorize(b)
     } catch(e) {
       return {graph: null, error: 'Invalid mermaid text:' + (e as Error).message}
     }
-    return {graph: new GraphConnectionsDecorator(b), error: null}
+    return {graph: new GraphConnectionsDecorator(c), error: null}
   }
 
   graph2Model(graph: GraphConnectionsDecorator|null, algorithm: LayerNumberAlgorithm): NodeSequenceEditorOrError {
@@ -139,7 +142,7 @@ export class FlowChartEditorComponent {
         x: n.left, y: n.top, width: n.width, height: n.height, centerX: n.centerX, centerY: n.centerY,
         text: getCaption(n, this.choiceShowNodeTextInDrawing),
         selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!),
-        styles: [n.originalStyle||'']
+        styles: [n.isError ? ERROR_STYLE : '']
       }})
     const lines: Line[] = layout.getEdges()
       .map(edge => edge as PlacedEdge)
@@ -148,7 +151,7 @@ export class FlowChartEditorComponent {
         x2: edge.line.endPoint.x, y2: edge.line.endPoint.y,
         selected: this.selectionInModel.isEdgeHighlightedInDrawing(edge.getKey(), this.layoutModel!),
         arrow: edge.isLastSegment,
-        isError: FlowChartEditorComponent.errorForwardNames.includes(edge.optionalOriginalText||'success') || edge.getFrom().originalStyle === 'errorOutline'
+        isError: edge.isError
       }})
     this.drawing = {width: layout.width, height: layout.height, rectangles, lines}
   }

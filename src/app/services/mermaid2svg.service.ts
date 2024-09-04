@@ -1,6 +1,7 @@
 import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Dimensions, Layout } from '../graphics/edge-layout';
 import { Graph, GraphBase, GraphConnectionsDecorator } from '../model/graph';
+import { categorize } from '../model/error-flow'
 import { getGraphFromMermaid } from '../parsing/mermaid-parser';
 import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from '../model/horizontalGrouping';
 import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
@@ -16,7 +17,8 @@ export class Mermaid2svgService {
   // TODO: Cache results
   mermaid2svg(mermaid: string) {
     const b: GraphBase = getGraphFromMermaid(mermaid)
-    const g: Graph = new GraphConnectionsDecorator(b)
+    const c = categorize(b)
+    const g: Graph = new GraphConnectionsDecorator(c)
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g)
     const editorBuilder: NodeSequenceEditorBuilder = new NodeSequenceEditorBuilder(nodeIdToLayer, g)
     if (editorBuilder.orderedOmittedNodes.length >= 1) {
