@@ -1,5 +1,21 @@
-import { FlowChartEditorComponent } from "../components/flow-chart-editor/flow-chart-editor.component"
+/*
+   Copyright 2024-2025 WeAreFrank!
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 import { CreationReason } from "../model/horizontalGrouping"
+import { FlowChartEditorComponent } from "../components/flow-chart-editor/flow-chart-editor.component"
 import { Layout, PlacedEdge, PlacedNode } from "./edge-layout"
 
 export function generateSvg(layout: Layout) {
@@ -77,7 +93,7 @@ function renderNodes(nodes: readonly PlacedNode[]): string {
 
 function renderOriginalNode(n: PlacedNode): string {
   return `  <g class="${getNodeGroupClass(n.getId())}" transform="translate(${n.horizontalBox.minValue}, ${n.verticalBox.minValue})">
-    <rect class="rectangle ${n.originalStyle}"
+    <rect class="${getRectangleClass(n)}"
       width="${n.horizontalBox.size}"
       height="${n.verticalBox.size}"
       rx="5">
@@ -97,14 +113,21 @@ function getNodeGroupClass(id: string) {
   return "frank-flowchart-node-" + id
 }
 
+function getRectangleClass(n: PlacedNode): string {
+  if (n.isError) {
+    return "rectangle errorOutline"
+  } else {
+    return "rectangle"
+  }
+}
+
 function renderEdges(edges: PlacedEdge[]): string {
   return edges.map(edge => renderEdge(edge)).join('')
 }
 
 function renderEdge(edge: PlacedEdge): string {
   return `  <g class="${getEdgeGroupClass(edge.getKey())}">
-    <polyline ${classOfLine(edge)} points="${edge.line.startPoint.x},${edge.line.startPoint.y} ${edge.line.endPoint.x},${edge.line.endPoint.y}" ${getMarkerEnd(edge)}
-      class="${FlowChartEditorComponent.errorForwardNames.includes(edge.optionalOriginalText||'success') || edge.getFrom().originalStyle === 'errorOutline' ? 'error' : ''}"/>
+    <polyline ${classOfLine(edge)} points="${edge.line.startPoint.x},${edge.line.startPoint.y} ${edge.line.endPoint.x},${edge.line.endPoint.y}" ${getMarkerEnd(edge)}/>
   </g>
 `
 }
@@ -122,7 +145,7 @@ function getMarkerEnd(edge: PlacedEdge): string {
 }
 
 function classOfLine(edge: PlacedEdge): string {
-  if (edge.optionalOriginalText === 'error') {
+  if (edge.isError) {
     return 'class="line error"'
   } else {
     return 'class="line"'

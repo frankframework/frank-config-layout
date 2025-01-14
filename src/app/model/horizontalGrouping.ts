@@ -1,3 +1,19 @@
+/*
+   Copyright 2024 WeAreFrank!
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 import { Node, Graph, GraphBase, Edge, ConcreteGraphBase, GraphConnectionsDecorator, getEdgeKey } from './graph'
 import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from './nodeSequenceEditor'
 import { getRange } from '../util/util'
@@ -180,7 +196,7 @@ export function calculateLayerNumbers(graph: GraphConnectionsDecorator, algorith
     case LayerNumberAlgorithm.FIRST_OCCURING_PATH:
       return calculateLayerNumbersFirstOccuringPath(graph);
     case LayerNumberAlgorithm.LONGEST_PATH:
-      return calculateLayerNumbersLongestPath(graph);
+      return calculateLayerNumbersLongestPath(graph, () => {});
   }
 }
 
@@ -222,10 +238,11 @@ export function calculateLayerNumbersFirstOccuringPath(graph: Graph): Map<string
   return layerMap
 }
 
-export function calculateLayerNumbersLongestPath(graph: Graph): Map<string, number> {
+export function calculateLayerNumbersLongestPath(graph: Graph, onNodeVisited: () => void): Map<string, number> {
   let layerMap: Map<string, number> = new Map()
   const startNodes: Node[] = graph.getNodes().filter(n => graph.getOrderedEdgesLeadingTo(n).length === 0);
   const recursiveWalkThrough = (currentNode: Node, layerIndex: number, visitedNodes: string[]) => {
+    onNodeVisited()
     const currentNodeId: string = currentNode.getId();
     const registeredLayer = layerMap.get(currentNodeId);
     if (registeredLayer === undefined || registeredLayer < layerIndex) {

@@ -14,11 +14,5 @@
    limitations under the License.
 */
 
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
-
-import { routes } from './app.routes';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes)]
-};
+export { Mermaid2svgService, Mermaid2SvgDimensions, Statistics } from './src/app/services/mermaid2svg.service'
+export { Dimensions } from './src/app/graphics/edge-layout'

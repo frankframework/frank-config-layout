@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
+  "lib": {
+    "entryFile": "public_api.ts"
+  },
+  "allowedNonPeerDependencies": [
+    "@angular-builders/custom-webpack",
+    "@angular/animations",
+    "@angular/cdk",
+    "@angular/common",
+    "@angular/compiler",
+    "@angular/core",
+    "@angular/forms",
+    "@angular/platform-browser",
+    "@angular/router",
+    "@rx-angular/cdk",
+    "@rx-angular/state",
+    "@rx-angular/template",
+    "css-loader",
+    "ng-packagr",
+    "rx-angular",
+    "rxjs",
+    "zone.js"
+  ]
+}
