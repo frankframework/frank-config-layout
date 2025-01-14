@@ -37,8 +37,6 @@ export interface GraphConnectionsDecoratorOrError {
   error: string | null
 }
 
-const ERROR_STYLE = 'errorOutline'
-
 @Component({
   selector: 'app-flow-chart-editor',
   templateUrl: './flow-chart-editor.component.html',
@@ -158,7 +156,7 @@ export class FlowChartEditorComponent {
         x: n.left, y: n.top, width: n.width, height: n.height, centerX: n.centerX, centerY: n.centerY,
         text: getCaption(n, this.choiceShowNodeTextInDrawing),
         selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!),
-        styles: [n.isError ? ERROR_STYLE : '']
+        isError: n.isError
       }})
     const lines: Line[] = layout.getEdges()
       .map(edge => edge as PlacedEdge)

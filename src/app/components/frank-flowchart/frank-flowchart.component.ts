@@ -54,6 +54,7 @@ export interface Rectangle {
   centerY: number
   text: string
   selected: boolean
+  isError: boolean
 }
 
 export interface Line {

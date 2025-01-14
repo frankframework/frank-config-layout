@@ -15,7 +15,6 @@
 */
 
 import { CreationReason } from "../model/horizontalGrouping"
-import { FlowChartEditorComponent } from "../components/flow-chart-editor/flow-chart-editor.component"
 import { Layout, PlacedEdge, PlacedNode } from "./edge-layout"
 
 export function generateSvg(layout: Layout) {
