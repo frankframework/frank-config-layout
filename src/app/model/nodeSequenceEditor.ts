@@ -6,7 +6,7 @@
 // supported here.
 
 import { Node, Edge, getEdgeKey, OptionalNode, OptionalEdge, Graph, NodeOrEdge } from './graph'
-import { getRange, rotateToSwapItems } from '../util/util'
+import { arraysEqual, getRange, rotateToSwapItems } from '../util/util'
 
 export enum UpdateResponse {
   ACCEPTED = "accepted",
@@ -28,8 +28,10 @@ export interface NodeSequenceEditor {
   getLayerOfPosition(position: number): number
   getLayerOfNode(node: Node): number
   getPositionsInLayer(layerNumber: number): number[]
+  getIdsInLayer(layerNumber: number): readonly OptionalString[]
   getSequence(): readonly OptionalNode[]
   getSequenceInLayer(layerNumber: number): readonly OptionalNode[]
+  setSequenceInLayer(layerNumber: number, sequence: string[]): void
   // Returns array with old index as key, new index as value
   rotateToSwap(posFrom: number, posTo: number): number[]
   omitNodeFrom(position: number): UpdateResponse
@@ -161,6 +163,19 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
     }
   }
 
+  setSequenceInLayer(layerNumber: number, newSequence: OptionalString[]) {
+    this.checkLayerNumber(layerNumber)
+    const oldSequence = this.getPositionsInLayer(layerNumber).map(index => this.sequence[index]);
+    if (oldSequence.length !== newSequence.length) throw Error(`New sequence [${newSequence}] for layer [${layerNumber}] has length [${newSequence.length}], but current sequence for that layer has length [${oldSequence.length}]`)
+    if (!arraysEqual([...oldSequence].sort(), [...newSequence].sort())) throw Error(`New sequence [${newSequence}] for layer [${layerNumber}] has different elements than current sequence for that layer [${oldSequence}]`)
+    const startIndex = this.layerStartPositions[layerNumber];
+    newSequence.forEach((id, index) => this.sequence[startIndex + index] = id);
+  }
+
+  getIdsInLayer(layerNumber: number): readonly OptionalString[] {
+    return this.getPositionsInLayer(layerNumber).map(index => this.sequence[index])
+  }
+
   getSequence(): readonly OptionalNode[] {
     return this.sequence.map(id => this.optionalNodeOf(id))
   }
@@ -171,7 +186,7 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
 
   getSequenceInLayer(layerNumber: number): readonly OptionalNode[] {
     this.checkLayerNumber(layerNumber)
-    return this.getPositionsInLayer(layerNumber).map(index => this.getSequence()[index])
+    return this.getPositionsInLayer(layerNumber).map(index => this.optionalNodeOf(this.sequence[index]))
   }
 
   rotateToSwap(posFrom: number, posTo: number): number[] {

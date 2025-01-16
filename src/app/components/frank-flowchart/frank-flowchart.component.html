@@ -16,24 +16,27 @@
         <path d="M 0 0 L 4 2 L 0 4 z" />
       </marker>
     </defs>
-    <g *ngFor="let rectangle of drawing.rectangles" (click)="handleShapeClicked(rectangle.id)">
+    <g *ngFor="let rectangle of drawing.rectangles" (click)="handleShapeClicked(rectangle.id)"
+      [attr.transform]="'translate(' + rectangle.x + ', ' + rectangle.y + ')'">
       <rect class="rectangle"
-        [attr.x]="rectangle.x"
-        [attr.y]="rectangle.y"
+        id="rectangle.id"
         [attr.width]="rectangle.width"
         [attr.height]="rectangle.height"
-        id="rectangle.id"
+        [class]="rectangle.styles"
         rx="5">
       </rect>
-      <text
+      <!-- <text
         [attr.x]="rectangle.centerX"
         [attr.y]="rectangle.centerY"
         text-anchor="middle" dominant-baseline="middle" class="nodeText">
         {{rectangle.text}}
-      </text>
+      </text> -->
+      <foreignObject [style.width]="rectangle.width + 'px'" [style.height]="rectangle.height + 'px'">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper"><div class="rect-text-box" [innerHTML]="rectangle.text"></div></div>
+      </foreignObject>
       <rect class="rect-hover-padding"
-        [attr.x]="rectangle.x - 5"
-        [attr.y]="rectangle.y - 5"
+        [attr.x]="-5"
+        [attr.y]="-5"
         [attr.width]="rectangle.width + 10"
         [attr.height]="rectangle.height + 10"
         [class.selected]="rectangle.selected"
@@ -45,7 +48,7 @@
         attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
         [attr.marker-end]="line.arrow ? 'url(#arrow)' : null"
         id="{{line.id}}"
-        [class.error]="line.isError"/>
+        [class]="line.styles"/>
       <polyline class="line-hover-padding"
         attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
         [class.selected]="line.selected"/>

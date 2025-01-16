@@ -39,6 +39,7 @@ export interface Rectangle {
   centerY: number
   text: string
   selected: boolean
+  styles: string[]
 }
 
 export interface Line {
@@ -49,7 +50,7 @@ export interface Line {
   y2: number
   selected: boolean
   arrow: boolean
-  isError: boolean
+  styles: string[]
 }
 
 export function getEmptyDrawing(): Drawing {
