@@ -27,6 +27,6 @@ For every node of B with some index **i**, we maintain a variable **n(i)**, the 
 
 When the future edge connects the current node of layer A, then its other end in B is to the right of the current node in B. The future edge will not intersect the current edge so it is irrelevant for the increments of the **n(i)**. It follows that only future edges connecting future nodes of A are relevant.
 
-A relevant future edge only crosses the current edge if its index **j** on layer B is smaller than **i**. We thus increment all **n(j)**, **j** < **i** when we visit an edge.
+A relevant future edge only crosses the current edge if its index **futureIndex** on layer B is smaller than **currentIndex**, the index of the current edge on layer B. We thus increment all **n(j)**, **j** < **currentIndex** when we visit an edge.
 
-The **n(j)** we maintain while visiting the edges allows us to calculate the number of crossings **c**. When we visit a new edge, the number of earlier edges it crosses equals **n(k)** with **k** the index of its endpoint on layer B. We increment **c** with **n(k)** and then update the **n(j)** as explained earlier. After visiting all edges, we have the total number of crossings in our variable **c**.
+The **n(i)** we maintain while visiting the edges allows us to calculate the number of crossings **c**. When we visit an edge, the number of earlier edges it crosses equals **n(currentIndex)**. We increment **c** with **n(currentIndex)** and then update the **n(i)** as explained earlier. After visiting all edges, we have the total number of crossings in our variable **c**.
