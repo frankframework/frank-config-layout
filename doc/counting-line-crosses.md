@@ -30,3 +30,10 @@ When the future edge connects the current node of layer A, then its other end in
 A relevant future edge only crosses the current edge if its index **futureIndex** on layer B is smaller than **currentIndex**, the index of the current edge on layer B. We thus increment all **n(j)**, **j** < **currentIndex** when we visit an edge.
 
 The **n(i)** we maintain while visiting the edges allows us to calculate the number of crossings **c**. When we visit an edge, the number of earlier edges it crosses equals **n(currentIndex)**. We increment **c** with **n(currentIndex)** and then update the **n(i)** as explained earlier. After visiting all edges, we have the total number of crossings in our variable **c**.
+
+Evaluating node swaps
+---------------------
+
+When developing a layout, the layout may be improved by swapping two adjacent layers within an horizontal layer. Many of such swaps have to be considered, so a fast algorithm is useful.
+
+We consider the change of the number of crossings when two adjacent nodes in layer A are swapped. We consider two arbitrary lines. If none of them visits one of the swapped nodes in A, then their crossing status is unchanged. If the first visits a swapped node in A and the second does not, then the second's node on layer A is either before or after all swapped nodes. The crossing status is not changed. So only lines starting from a swapped node have to be counted. The above algorithm should be applied only with the two swapped nodes in layer A. When this is done before and after swapping, the difference is the change of the total number of crossings.

@@ -26,8 +26,9 @@ interface TargetNode {
 }
 
 abstract class CrossingsCounter {
+  abstract getSequence(): string[]
   abstract count(): number
-  // Todo: add method to swap and count the difference
+  abstract swapAndGetCountChange(indexLeftmost: number): number
 }
 
 export class CrossingsCounterOneReferenceLayer extends CrossingsCounter {
@@ -40,6 +41,10 @@ export class CrossingsCounterOneReferenceLayer extends CrossingsCounter {
     this.nodes = [ ... nodes]
     this.checkReferenceNodesAndGetTheirNumber()
     this.refreshReferenceNodes()
+  }
+
+  getSequence(): string[] {
+    return this.nodes.map(n => n.id)
   }
 
   private checkReferenceNodesAndGetTheirNumber() {
@@ -75,6 +80,10 @@ export class CrossingsCounterOneReferenceLayer extends CrossingsCounter {
   }
 
   count(): number {
+    return this.countFor(this.nodes)
+  }
+
+  private countFor(targetNodes: TargetNode[]) {
     this.refreshReferenceNodes()
     let total:number = 0
     for(const node of this.nodes) {
@@ -86,5 +95,24 @@ export class CrossingsCounterOneReferenceLayer extends CrossingsCounter {
       }
     }
     return total
+  }
+
+  swapAndGetCountChange(indexLeftmost: number): number {
+    const indexRightmost = indexLeftmost + 1
+    if (indexRightmost >= this.nodes.length) {
+      throw Error(`Swapped nodes out of bounds: ${indexLeftmost} and ${indexRightmost}`)
+    }
+    let swappedNodes = this.extractTwoNodes(indexLeftmost, indexRightmost)
+    const countBefore = this.countFor(swappedNodes)
+    const temp = this.nodes[indexLeftmost]
+    this.nodes[indexLeftmost] = this.nodes[indexRightmost]
+    this.nodes[indexRightmost] = temp
+    swappedNodes = this.extractTwoNodes(indexLeftmost, indexRightmost)
+    const countAfter = this.countFor(swappedNodes)
+    return countAfter - countBefore
+  }
+
+  private extractTwoNodes(indexLeftmost: number, indexRightmost: number): TargetNode[] {
+    return [indexLeftmost, indexRightmost].map(i => this.nodes[i])
   }
 }

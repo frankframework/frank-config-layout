@@ -77,4 +77,34 @@ describe('Test counting line crosses', () => {
     expect(instance.count()).toEqual(3)
   })
 
+  function getSwapInstanceTest(): CrossingsCounterOneReferenceLayer {
+    return new CrossingsCounterOneReferenceLayer([
+      {id: 'zero', connections: [1]},
+      {id: 'one', connections: [1]},
+      {id: 'two', connections: [2]},
+      {id: 'three', connections: [2]},
+      {id: 'four', connections: [5]},
+      {id: 'five', connections: [4]}
+    ])
+  }
+
+  it('When a swap causes no extra crossings then change zero', () => {
+    let instance = getSwapInstanceTest()
+    expect(instance.getSequence()).toEqual(['zero', 'one', 'two', 'three', 'four', 'five'])
+    expect(instance.count()).toEqual(1)
+    expect(instance.swapAndGetCountChange(0)).toEqual(0)
+    expect(instance.getSequence()).toEqual(['one', 'zero', 'two', 'three', 'four', 'five'])
+    expect(instance.count()).toEqual(1)
+  })
+
+  it('When a swap causes one extra crossings then change one', () => {
+    let instance = getSwapInstanceTest()
+    expect(instance.getSequence()).toEqual(['zero', 'one', 'two', 'three', 'four', 'five'])
+    expect(instance.count()).toEqual(1)
+    expect(instance.swapAndGetCountChange(1)).toEqual(1)
+    expect(instance.getSequence()).toEqual(['zero', 'two', 'one', 'three', 'four', 'five'])
+    expect(instance.count()).toEqual(2)
+    expect(instance.swapAndGetCountChange(1)).toEqual(-1)
+    expect(instance.getSequence()).toEqual(['zero', 'one', 'two', 'three', 'four', 'five'])
+  })
 })
