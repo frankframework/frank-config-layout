@@ -79,7 +79,7 @@ export class CrossingsCounter {
   private countFor(targetNodes: TargetNode[]) {
     this.refreshReferenceNodes()
     let total:number = 0
-    for(const node of this.nodes) {
+    for(const node of targetNodes) {
       for(const refIndex of node.connections) {
         total += this.n[refIndex]
         for (let j = 0; j < refIndex; ++j) {
