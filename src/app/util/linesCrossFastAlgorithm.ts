@@ -43,19 +43,15 @@ export class CrossingsCounter {
   private checkReferenceNodesAndGetTheirNumber() {
     this.numReferenceNodes = 0
     for(const node of this.nodes) {
-      console.log('Target node id: ' + node.id)
       let prevRefIndex: number|undefined
       for (const refIndex of node.connections) {
-        console.log('refIndex: ' + refIndex)
         if (prevRefIndex !== undefined) {
           if (prevRefIndex > refIndex) {
             throw Error(`Ref indexes are not sorted, have ${node.connections}`)
           }
         }
         prevRefIndex = refIndex
-        console.log('prevRefIndex inside loop: ' + prevRefIndex)
       }
-      console.log('prevRefIndex: ' + prevRefIndex)
       if (prevRefIndex !== undefined) {
         const numRefNodesCandidate = prevRefIndex + 1
         if (numRefNodesCandidate > this.numReferenceNodes) {
