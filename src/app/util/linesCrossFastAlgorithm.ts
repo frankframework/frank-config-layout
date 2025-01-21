@@ -25,19 +25,12 @@ interface TargetNode {
   readonly connections: number[]
 }
 
-abstract class CrossingsCounter {
-  abstract getSequence(): string[]
-  abstract count(): number
-  abstract swapAndGetCountChange(indexLeftmost: number): number
-}
-
-export class CrossingsCounterOneReferenceLayer extends CrossingsCounter {
+export class CrossingsCounter {
   private n: number[] = []
   private nodes: TargetNode[]
   numReferenceNodes: number = 0
 
   constructor(nodes: TargetNode[]) {
-    super()
     this.nodes = [ ... nodes]
     this.checkReferenceNodesAndGetTheirNumber()
     this.refreshReferenceNodes()
