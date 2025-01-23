@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Dimensions, Layout } from '../graphics/edge-layout';
 import { Graph, GraphBase, GraphConnectionsDecorator } from '../model/graph';
+import { categorize } from '../model/error-flow'
 import { getGraphFromMermaid } from '../parsing/mermaid-parser';
 import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from '../model/horizontalGrouping';
 import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
@@ -67,7 +68,8 @@ export class Mermaid2svgService {
   private async mermaid2svgStatisticsImpl(mermaid: string): Promise<Statistics> {
     ++this._numSvgCalculations
     const b: GraphBase = getGraphFromMermaid(mermaid)
-    const g: Graph = new GraphConnectionsDecorator(b)
+    const c = categorize(b)
+    const g: Graph = new GraphConnectionsDecorator(c)
     let numNodeVisits = 0
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits)
     const editorBuilder: NodeSequenceEditorBuilder = new NodeSequenceEditorBuilder(nodeIdToLayer, g)

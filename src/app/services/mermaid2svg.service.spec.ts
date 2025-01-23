@@ -4,12 +4,15 @@ import { OurMermaid2SvgDimensions } from '../app.module'
 const input = `Start("My start"):::normal
 N1("Node 1"):::normal
 N2("Node 2"):::normal
+N3("Node 3"):::errorOutline
 End("End node"):::normal
 Start --> |success| N1
 Start --> |success| N2
-N1 --> |error| End
+Start --> |success| N3
+N1 --> |failure| End
 N2 --> |success| End
-N1 --> |success| N2`
+N1 --> |success| N2
+N3 --> |success| End`
 
 // In the GUI, enter the above Mermaid text. Then look at the bottom
 // under the heading "Static SVG". If that image looks good, copy
@@ -18,23 +21,48 @@ N1 --> |success| N2`
 // VS Code trick: VS Code may add too many or too few leading spaces
 // to each line. Fix this by finding the right indent of the line
 // "const expected = ``" before inserting the text inside the ``.
+//
+// TODO: This is certainly not a nice layout. This should be fixed when
+// Lenard's horizontal layout algorithm will have been added
 const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
-  width="195" height="480" >
+  width="410" height="480" >
   <defs>
     <style>
       .rectangle {
         fill: transparent;
-        stroke: black;
-        stroke-width: 3;
+        stroke: #8bc34a;
+        stroke-width: 4;
+      }
+
+      .rectangle.errorOutline {
+        stroke: #ec4758;
       }
     
       .line {
-        stroke: black;
+        stroke: #8bc34a;
         stroke-width: 3;
       }
 
       .line.error {
-        stroke: red
+        stroke: #ec4758;
+      }
+
+      .rect-text-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      .rect-text-box {
+        margin: 5px;
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-family: "trebuchet ms";
       }
     </style>
     <!-- A marker to be used as an arrowhead -->
@@ -49,86 +77,105 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       <path d="M 0 0 L 4 2 L 0 4 z" />
     </marker>
   </defs>
-  <g class="frank-flowchart-node-Start">
+  <g class="frank-flowchart-node-Start" transform="translate(182, 0)">
     <rect class="rectangle"
-      x="50"
-      y="5"
-      width="110"
-      height="40"
+      width="160"
+      height="50"
       rx="5">
     </rect>
-    <text
-      x="105"
-      y="25"
-      text-anchor="middle" dominant-baseline="middle" class="nodeText">
-        My start
-    </text>
+    <foreignObject style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+        <div class="rect-text-box">
+          My start
+        </div>
+      </div>
+    </foreignObject>
   </g>
-  <g class="frank-flowchart-node-N1">
+  <g class="frank-flowchart-node-N1" transform="translate(7, 120)">
     <rect class="rectangle"
-      x="5"
-      y="125"
-      width="110"
-      height="40"
+      width="160"
+      height="50"
       rx="5">
     </rect>
-    <text
-      x="60"
-      y="145"
-      text-anchor="middle" dominant-baseline="middle" class="nodeText">
-        Node 1
-    </text>
+    <foreignObject style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+        <div class="rect-text-box">
+          Node 1
+        </div>
+      </div>
+    </foreignObject>
   </g>
-  <g class="frank-flowchart-node-N2">
-    <rect class="rectangle"
-      x="20"
-      y="245"
-      width="110"
-      height="40"
+  <g class="frank-flowchart-node-N3" transform="translate(182, 120)">
+    <rect class="rectangle errorOutline"
+      width="160"
+      height="50"
       rx="5">
     </rect>
-    <text
-      x="75"
-      y="265"
-      text-anchor="middle" dominant-baseline="middle" class="nodeText">
-        Node 2
-    </text>
+    <foreignObject style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+        <div class="rect-text-box">
+          Node 3
+        </div>
+      </div>
+    </foreignObject>
   </g>
-  <g class="frank-flowchart-node-End">
+  <g class="frank-flowchart-node-N2" transform="translate(122, 240)">
     <rect class="rectangle"
-      x="65"
-      y="365"
-      width="110"
-      height="40"
+      width="160"
+      height="50"
       rx="5">
     </rect>
-    <text
-      x="120"
-      y="385"
-      text-anchor="middle" dominant-baseline="middle" class="nodeText">
-        End node
-    </text>
+    <foreignObject style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+        <div class="rect-text-box">
+          Node 2
+        </div>
+      </div>
+    </foreignObject>
+  </g>
+  <g class="frank-flowchart-node-End" transform="translate(240, 360)">
+    <rect class="rectangle"
+      width="160"
+      height="50"
+      rx="5">
+    </rect>
+    <foreignObject style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+        <div class="rect-text-box">
+          End node
+        </div>
+      </div>
+    </foreignObject>
   </g>
   <g class="frank-flowchart-edge-Start-N1">
-    <polyline class="line" points="89,44 60,125" marker-end="url(#arrow)"/>
+    <polyline class="line" points="222,49 87,120" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-Start-intermediate1">
-    <polyline class="line" points="121,44 150,145" />
+    <polyline class="line" points="301,49 380,145" />
   </g>
   <g class="frank-flowchart-edge-intermediate1-N2">
-    <polyline class="line" points="150,145 91,245" marker-end="url(#arrow)"/>
+    <polyline class="line" points="380,145 241,240" marker-end="url(#arrow)"/>
+  </g>
+  <g class="frank-flowchart-edge-Start-N3">
+    <polyline class="line" points="262,49 262,120" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N1-intermediate2">
-    <polyline class="line error" points="76,164 165,265" />
+    <polyline class="line error" points="126,169 320,265" />
   </g>
   <g class="frank-flowchart-edge-intermediate2-End">
-    <polyline class="line error" points="165,265 136,365" marker-end="url(#arrow)"/>
+    <polyline class="line error" points="320,265 320,360" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N2-End">
-    <polyline class="line" points="75,284 104,365" marker-end="url(#arrow)"/>
+    <polyline class="line" points="202,289 280,360" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N1-N2">
-    <polyline class="line" points="44,164 59,245" marker-end="url(#arrow)"/>
+    <polyline class="line" points="47,169 162,240" marker-end="url(#arrow)"/>
+  </g>
+  <g class="frank-flowchart-edge-N3-intermediate3">
+    <polyline class="line error" points="262,169 380,265" />
+  </g>
+  <g class="frank-flowchart-edge-intermediate3-End">
+    <polyline class="line error" points="380,265 359,360" marker-end="url(#arrow)"/>
   </g>
 </svg>`
 
@@ -150,9 +197,9 @@ describe('Mermaid2svgService - please maintain this test using the GUI', () => {
   it('Test with statistics', (done) => {
     service.mermaid2svgStatistics(input).then(statistics => {
       expect(statistics.svg).toEqual(expectedSvg)
-      expect(statistics.numNodes).toEqual(4)
-      expect(statistics.numEdges).toEqual(5)
-      expect(statistics.numNodeVisitsDuringLayerCalculation).toEqual(6)
+      expect(statistics.numNodes).toEqual(5)
+      expect(statistics.numEdges).toEqual(7)
+      expect(statistics.numNodeVisitsDuringLayerCalculation).toEqual(8)
       done()
     })
   })

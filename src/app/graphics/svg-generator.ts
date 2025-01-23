@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -36,17 +36,39 @@ function renderDefs() {
     <style>
       .rectangle {
         fill: transparent;
-        stroke: black;
-        stroke-width: 3;
+        stroke: #8bc34a;
+        stroke-width: 4;
+      }
+
+      .rectangle.errorOutline {
+        stroke: #ec4758;
       }
     
       .line {
-        stroke: black;
+        stroke: #8bc34a;
         stroke-width: 3;
       }
 
       .line.error {
-        stroke: red
+        stroke: #ec4758;
+      }
+
+      .rect-text-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      .rect-text-box {
+        margin: 5px;
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-family: "trebuchet ms";
       }
     </style>
     <!-- A marker to be used as an arrowhead -->
@@ -69,26 +91,33 @@ function renderNodes(nodes: readonly PlacedNode[]): string {
 }
 
 function renderOriginalNode(n: PlacedNode): string {
-  return `  <g class="${getNodeGroupClass(n.getId())}">
-    <rect class="rectangle"
-      x="${n.horizontalBox.minValue}"
-      y="${n.verticalBox.minValue}"
+  return `  <g class="${getNodeGroupClass(n.getId())}" transform="translate(${n.horizontalBox.minValue}, ${n.verticalBox.minValue})">
+    <rect class="${getRectangleClass(n)}"
       width="${n.horizontalBox.size}"
       height="${n.verticalBox.size}"
       rx="5">
     </rect>
-    <text
-      x="${n.horizontalBox.center}"
-      y="${n.verticalBox.center}"
-      text-anchor="middle" dominant-baseline="middle" class="nodeText">
-        ${n.text}
-    </text>
+    <foreignObject style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+        <div class="rect-text-box">
+          ${n.text}
+        </div>
+      </div>
+    </foreignObject>
   </g>
 `
 }
 
 function getNodeGroupClass(id: string) {
   return "frank-flowchart-node-" + id
+}
+
+function getRectangleClass(n: PlacedNode): string {
+  if (n.isError) {
+    return "rectangle errorOutline"
+  } else {
+    return "rectangle"
+  }
 }
 
 function renderEdges(edges: PlacedEdge[]): string {
@@ -115,7 +144,7 @@ function getMarkerEnd(edge: PlacedEdge): string {
 }
 
 function classOfLine(edge: PlacedEdge): string {
-  if (edge.optionalOriginalText === 'error') {
+  if (edge.isError) {
     return 'class="line error"'
   } else {
     return 'class="line"'
