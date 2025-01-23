@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -36,12 +36,12 @@ import { StaticSvgStatisticsComponent } from "./components/static-svg-statistics
 export class OurMermaid2SvgDimensions implements Dimensions {
   layerHeight = 50
   layerDistance = 120
-  nodeBoxHeight = 40
+  nodeBoxHeight = 50
   intermediateWidth = 60
-  nodeWidth = 120
+  nodeWidth = 175
   omittedPlaceholderWidth = 90
-  nodeBoxWidth = 110
-  boxConnectorAreaPerc = 30
+  nodeBoxWidth = 160
+  boxConnectorAreaPerc = 50
 }
 
 @NgModule({

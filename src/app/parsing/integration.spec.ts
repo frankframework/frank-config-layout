@@ -1,6 +1,7 @@
 import { getGraphFromMermaid } from './mermaid-parser';
 import { GraphBase, Graph, GraphConnectionsDecorator } from '../model/graph'
-import { calculateLayerNumbers, NodeSequenceEditorBuilder, NodeForEditor, CreationReason, calculateLayerNumbersFirstOccuringPath, LayerNumberAlgorithm } from '../model/horizontalGrouping';
+import { categorize, CategorizedEdge } from '../model/error-flow'
+import { NodeSequenceEditorBuilder, NodeForEditor, CreationReason, calculateLayerNumbersFirstOccuringPath, LayerNumberAlgorithm } from '../model/horizontalGrouping';
 import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
 import { FlowChartEditorComponent } from '../components/flow-chart-editor/flow-chart-editor.component';
 import { Dimensions } from '../graphics/edge-layout';
@@ -85,6 +86,27 @@ X2 --> |success| X1
     model.rotateToSwap(2, 1)
     expect(model?.getSequence().map(n => n?.getId())).toEqual(['Start', 'intermediate1', 'N1', 'N2', 'intermediate2', 'End'])
     expect(FlowChartEditorComponent.model2layout(model, getTestDimensions()).getNumCrossingLines()).toBe(0)
+  })
+
+  it('See isError', () => {
+    const mermaidNotNeedingIntermediateNodes = `Start("My start"):::normal
+N1("Node 1"):::normal
+N2("Node 2"):::normal
+End("End node"):::normal
+Start --> |success| N1
+Start --> |success| N2
+N1 --> |failure| End
+N2 --> |success| End
+`
+        const b: GraphBase = getGraphFromMermaid(mermaidNotNeedingIntermediateNodes)
+        const c = categorize(b)
+        const g: Graph = new GraphConnectionsDecorator(c)
+        const n1End = g.getEdgeByKey('N1-End') as CategorizedEdge
+        const startN1 = g.getEdgeByKey('Start-N1') as CategorizedEdge
+        expect(n1End.getKey()).toEqual('N1-End')
+        expect(startN1.getKey()).toEqual('Start-N1')
+        expect(n1End.isError).toEqual(true)
+        expect(startN1.isError).toEqual(false)
   })
 })
 

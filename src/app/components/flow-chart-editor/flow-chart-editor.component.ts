@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
 import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
+import { categorize } from '../../model/error-flow'
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
 import { NodeOrEdgeSelection, NodeSequenceEditor } from '../../model/nodeSequenceEditor';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
@@ -108,13 +109,14 @@ export class FlowChartEditorComponent {
   }
 
   mermaid2graph(text: string): GraphConnectionsDecoratorOrError {
-    let b: GraphBase
+    let c: GraphBase
     try {
-      b = getGraphFromMermaid(text)
+      const b = getGraphFromMermaid(text)
+      c = categorize(b)
     } catch(e) {
       return {graph: null, error: 'Invalid mermaid text:' + (e as Error).message}
     }
-    return {graph: new GraphConnectionsDecorator(b), error: null}
+    return {graph: new GraphConnectionsDecorator(c), error: null}
   }
 
   graph2Model(graph: GraphConnectionsDecorator|null, algorithm: LayerNumberAlgorithm): NodeSequenceEditorOrError {
@@ -150,9 +152,11 @@ export class FlowChartEditorComponent {
       // No box around intermediate node
       .filter(n => n.creationReason === CreationReason.ORIGINAL)
       .map(n => { return {
-        id: n.getId(), x: n.left, y: n.top, width: n.width, height: n.height, centerX: n.centerX, centerY: n.centerY,
+        id: n.getId(),
+        x: n.left, y: n.top, width: n.width, height: n.height, centerX: n.centerX, centerY: n.centerY,
         text: getCaption(n, this.choiceShowNodeTextInDrawing),
-        selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!)
+        selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!),
+        isError: n.isError
       }})
     const lines: Line[] = layout.getEdges()
       .map(edge => edge as PlacedEdge)
@@ -161,7 +165,7 @@ export class FlowChartEditorComponent {
         x2: edge.line.endPoint.x, y2: edge.line.endPoint.y,
         selected: this.selectionInModel.isEdgeHighlightedInDrawing(edge.getKey(), this.layoutModel!),
         arrow: edge.isLastSegment,
-        isError: edge.optionalOriginalText === 'error'
+        isError: edge.isError
       }})
     this.drawing = {width: layout.width, height: layout.height, rectangles, lines}
   }

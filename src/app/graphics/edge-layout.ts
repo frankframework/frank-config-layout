@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
    limitations under the License.
 */
 
-import { ConcreteEdge, ConcreteGraphBase, ConcreteNode, Edge, GraphBase, Node, NodeOrEdge, OptionalNode, getEdgeKey } from "../model/graph";
+import { ConcreteGraphBase, Edge, GraphBase, Node, NodeOrEdge, OptionalNode, getEdgeKey } from "../model/graph";
+import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
+
 import { CreationReason, EdgeForEditor, NodeForEditor, OriginalNode } from "../model/horizontalGrouping";
 import { NodeSequenceEditor } from "../model/nodeSequenceEditor";
 import { Interval } from "../util/interval";
@@ -32,7 +34,7 @@ export class PlacedNode implements Node {
   private id: string
   readonly creationReason: CreationReason
   readonly text: string
-  readonly originalStyle: string | null
+  readonly isError: boolean
   readonly layerNumber: number
   readonly horizontalBox: Interval
   readonly verticalBox: Interval
@@ -42,7 +44,7 @@ export class PlacedNode implements Node {
     this.text = p.node.getText()
     this.creationReason = (p.node as NodeForEditor).getCreationReason()
     const optionalOriginalNode = PlacedNode.optionalOriginalNode(p.node)
-    this.originalStyle = optionalOriginalNode === null ? null : optionalOriginalNode.style
+    this.isError = optionalOriginalNode === null ? false : optionalOriginalNode.isError
     this.layerNumber = p.layerNumber
     if (this.creationReason === CreationReason.ORIGINAL) {
       this.horizontalBox = Interval.createFromCenterSize(p.x!, d.nodeBoxWidth)
@@ -61,13 +63,13 @@ export class PlacedNode implements Node {
     return this.text
   }
 
-  private static optionalOriginalNode(rawNode: OptionalNode): ConcreteNode | null {
+  private static optionalOriginalNode(rawNode: OptionalNode): CategorizedNode | null {
     const node = rawNode as NodeForEditor
     if (node.getCreationReason() === CreationReason.INTERMEDIATE) {
       return null
     }
     const originalNode: Node = (node as OriginalNode).original
-    return originalNode as ConcreteNode
+    return originalNode as CategorizedNode
   }
 
   get centerTop(): Point {
@@ -107,6 +109,7 @@ export class PlacedEdge implements Edge {
   readonly key: string
   readonly creationReason: CreationReason
   readonly optionalOriginalText: string | null
+  readonly isError: boolean
   readonly line: Line
   readonly minLayerNumber: number
   readonly maxLayerNumber: number
@@ -117,7 +120,8 @@ export class PlacedEdge implements Edge {
     const edge = rawEdge as EdgeForEditor
     this.isLastSegment = edge.original.getTo().getId() === toNode.getId();
     this.creationReason = edge.creationReason
-    const originalEdge = edge.original as ConcreteEdge
+    const originalEdge = edge.original as CategorizedEdge
+    this.isError = originalEdge.isError
     this.optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
     this.line = line
     if (fromNode.layerNumber < toNode.layerNumber) {

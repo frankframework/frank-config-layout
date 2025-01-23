@@ -18,6 +18,7 @@
     </defs>
     <g *ngFor="let rectangle of drawing.rectangles" (click)="handleShapeClicked(rectangle.id)">
       <rect class="rectangle"
+        [class.errorOutline]="rectangle.isError"
         [attr.x]="rectangle.x"
         [attr.y]="rectangle.y"
         [attr.width]="rectangle.width"
