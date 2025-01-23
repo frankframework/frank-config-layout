@@ -20,17 +20,51 @@
 // the reference layer. The outer loop is then over the target
 // layer, while the inner loop is over the indexes pointed to.
 
-interface TargetNode {
+interface LayerCalculationNode {
   readonly id: string
   readonly connections: number[]
 }
 
-export class CrossingsCounter {
+// Exported only for unit testing
+export class Rank {
+  constructor(readonly newRank: number, readonly originalRank: number) {
+  }
+
+  compareTo(other: Rank): number {
+    let result: number = this.newRank - other.newRank
+    if (result === 0) {
+      result = this.originalRank - other.originalRank
+    }
+    return result
+  }
+}
+
+// Only exported for unit testing.
+//
+// We calculate the median multiplied by two. This
+// avoids floating point numbers.
+export function rankFromMedian(sortedValues: number[]): number {
+  if ( (sortedValues.length % 2) === 0) {
+    const highestMedianIndex = (sortedValues.length / 2)
+    const lowestMedianIndex = highestMedianIndex - 1
+    return sortedValues[lowestMedianIndex] + sortedValues[highestMedianIndex]
+  } else {
+    const medianIndex = (sortedValues.length - 1) / 2
+    return 2 * sortedValues[medianIndex]
+  }
+}
+
+class NodeWithRank {
+  constructor(readonly node: LayerCalculationNode, readonly rank: Rank) {
+  }
+}
+
+export class LayerCalculation {
   private n: number[] = []
-  private nodes: TargetNode[]
+  private nodes: LayerCalculationNode[]
   numReferenceNodes: number = 0
 
-  constructor(nodes: TargetNode[]) {
+  constructor(nodes: LayerCalculationNode[]) {
     this.nodes = [ ... nodes]
     this.checkReferenceNodesAndGetTheirNumber()
     this.refreshReferenceNodes()
@@ -72,7 +106,7 @@ export class CrossingsCounter {
     return this.countFor(this.nodes)
   }
 
-  private countFor(targetNodes: TargetNode[]) {
+  private countFor(targetNodes: LayerCalculationNode[]) {
     this.refreshReferenceNodes()
     let total:number = 0
     for(const node of targetNodes) {
@@ -101,7 +135,15 @@ export class CrossingsCounter {
     return countAfter - countBefore
   }
 
-  private extractTwoNodes(indexLeftmost: number, indexRightmost: number): TargetNode[] {
+  private extractTwoNodes(indexLeftmost: number, indexRightmost: number): LayerCalculationNode[] {
     return [indexLeftmost, indexRightmost].map(i => this.nodes[i])
+  }
+
+  alignToConnections() {
+    let nodesWithRanks = this.nodes.map( (node, index) => new NodeWithRank(node, new Rank(
+      rankFromMedian(node.connections), index
+    )))
+    nodesWithRanks.sort((first, second) => first.rank.compareTo(second.rank))
+    this.nodes = nodesWithRanks.map(nr => nr.node)
   }
 }
