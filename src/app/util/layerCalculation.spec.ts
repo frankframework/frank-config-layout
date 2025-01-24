@@ -131,6 +131,14 @@ describe('Rearranging nodes to put them above the median of the connections', ()
     expect(rankFromMedian([0, 1, 3, 10])).toEqual(4)
   })
 
+  it('When ranks from even and odd nodes are compared, there is no mismatch', () => {
+    const first = rankFromMedian([3, 5]) // Median is 4, double median is 8
+    const second = rankFromMedian([1, 5, 6]) // Median is 5, double median is 10
+    const third = rankFromMedian([1, 5, 7, 8]) // Median is 6, double median is 12
+    expect(first).toBeLessThan(second)
+    expect(second).toBeLessThan(third)
+  })
+
   it('When nodes are arranged in conflict with connections, then they are rearranged', () => {
     let instance = new LayerCalculation([
       {id: 'aap', connections: [5, 6]},
