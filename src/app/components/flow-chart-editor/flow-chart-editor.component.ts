@@ -20,7 +20,8 @@ import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
 import { categorize } from '../../model/error-flow'
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
-import { NodeOrEdgeSelection, NodeSequenceEditor } from '../../model/nodeSequenceEditor';
+import { NodeSequenceEditor } from '../../model/nodeSequenceEditor';
+import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
 import { Layout, PlacedEdge, PlacedNode, Dimensions } from '../../graphics/edge-layout';
 import { getFactoryDimensions } from '../dimensions-editor/dimensions-editor.component';
@@ -171,7 +172,8 @@ export class FlowChartEditorComponent {
   }
 
   static model2layout(model: NodeSequenceEditor, inDimensions: Dimensions): Layout {
-    const builder = new NodeLayoutBuilder(model, inDimensions)
+    const builder = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), inDimensions)
     const nodeLayout = builder.run()
     return new Layout(nodeLayout, model, inDimensions)
   }

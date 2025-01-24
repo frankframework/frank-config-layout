@@ -6,7 +6,8 @@ import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-lay
 describe('NodeLayoutBuilder', () => {
   it('Simple model', () => {
     const model: NodeSequenceEditor = getSimpleModel(getSimpleGraph())
-    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout: NodeLayout = instance.run()
     // Check that the original graph is represented correctly in the positions
     expect(layout.positions.map(p => p.node.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
@@ -26,7 +27,8 @@ describe('NodeLayoutBuilder', () => {
     const model: NodeSequenceEditor = getSimpleModel(getSimpleGraph())
     expect(model.getSequence()[1]!.getId()).toBe('N1')
     model.omitNodeFrom(1)
-    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout: NodeLayout = instance.run()
     // Check that the original graph is represented correctly in the positions
     expect(layout.positions.map(p => p.node.getId())).toEqual(['Start', 'N2', 'End'])
@@ -48,7 +50,8 @@ describe('NodeLayoutBuilder', () => {
 
   it('With conflict and intermediate', () => {
     const model = getModelWithConflictAndIntermediate(getGraphWithConflictAndIntermediate())
-    const instance = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout = instance.run()
     // Check that the graph is represented correctly
     expect(layout.positions.map(p => p.node.getId())).toEqual(['S1', 'S2', 'N1', 'intermediate1', 'End'])
@@ -73,7 +76,8 @@ describe('NodeLayoutBuilder', () => {
 
   it('With conflict and intermediate upside down', () => {
     const model = getModelWithConflictAndIntermediateOrderedUpsizeDown(getGraphWithConflictAndIntermediate())
-    const instance = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout = instance.run()
     // Check that the graph is represented correctly
     expect(layout.positions.map(p => p.node.getId())).toEqual(['End', 'N1', 'intermediate1', 'S1', 'S2'])

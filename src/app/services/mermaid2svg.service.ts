@@ -82,8 +82,9 @@ export class Mermaid2svgService {
     } catch(e) {
       throw e
     }
-    // TODO: Apply some algorithm to have the right sequence in the model
-    const nodeLayoutBuiler = new NodeLayoutBuilder(model, this.dimensions)
+    // TODO: Skip creating NodeSequenceEditor and apply some algorith
+    // to the LayoutBase before continuing.
+    const nodeLayoutBuiler = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
     const layout = new Layout(nodeLayout, model, this.dimensions)
     return {

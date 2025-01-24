@@ -16,7 +16,8 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
-import { NodeSequenceEditor, NodeSequenceEditorCell, NodeOrEdgeSelection } from '../../model/nodeSequenceEditor';
+import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../model/nodeSequenceEditor';
+import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { getRange } from '../../util/util';
 import { NodeCaptionChoice, NodeOrEdge, getCaption } from '../../model/graph';
 import { Observable, Subscription } from 'rxjs';

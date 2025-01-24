@@ -14,9 +14,9 @@
    limitations under the License.
 */
 
-import { OptionalNode } from "../model/graph";
+import { Graph, OptionalNode } from "../model/graph";
 import { CreationReason, NodeForEditor } from "../model/horizontalGrouping";
-import { NodeSequenceEditor } from "../model/nodeSequenceEditor";
+import { LayoutBase } from "../model/layoutBase";
 import { Interval } from "../util/interval";
 import { Node } from "../model/graph";
 import { getRange, sortedUniqNumbers } from "../util/util";
@@ -56,33 +56,33 @@ export class NodeLayoutBuilder {
   private layers: Layer[] = []
 
   constructor(
-    private model: NodeSequenceEditor,
+    private model: LayoutBase,
+    private graph: Graph,
     private dimensions: NodeSpacingDimensions
   ) {}
 
   run(): NodeLayout {
-    this.layers = getRange(0, this.model.getNumLayers())
+    this.layers = getRange(0, this.model.numLayers)
       .map(layerNumber => this.createLayer(layerNumber))
     this.setYCoordinates()
     const width = this.setXCoordinates()
     const positions: Position[] = this.layers.flatMap(layer => layer.positions)
     const positionMap: Map<string, Position> = new Map()
     positions.forEach(p => positionMap.set(p.node.getId(), p))
-    return {width, height: this.dimensions.layerDistance * this.model.getNumLayers(), positions, positionMap}
+    return {width, height: this.dimensions.layerDistance * this.model.numLayers, positions, positionMap}
   }
 
   private createLayer(layerNumber: number): Layer {
     const positions: Position[] = []
     const idToPosition: Map<string, Position> = new Map()
     let cursor = 0
-    this.model.getSequenceInLayer(layerNumber).forEach(optionalNode => {
-      if (optionalNode != null) {
-        const position = this.createPosition(optionalNode, cursor, layerNumber)
-        positions.push(position)
-        idToPosition.set(position.node.getId(), position)
-      }
-      cursor += this.widthOf(optionalNode)
-    })
+    const nodes: Node[] = this.model.getIdsOfLayer(layerNumber).map(id => this.graph.getNodeById(id)!)
+    for (let node of nodes) {
+      const position = this.createPosition(node, cursor, layerNumber)
+      positions.push(position)
+      idToPosition.set(position.node.getId(), position)
+      cursor += this.widthOf(node)
+    }
     const initialWidth = cursor
     return {positions, idToPosition, initialWidth, layerNumber}
   }
@@ -153,11 +153,7 @@ export class NodeLayoutBuilder {
   }
 
   getPredsFromLayer(position: Position, sourceLayer: Layer): number[] {
-    let sourceNodes: Node[] = [ ... this.model.getPredecessors(position.node.getId())]
-    sourceNodes.push(... this.model.getSuccessors(position.node.getId()))
-    return sortedUniqNumbers(sourceNodes.filter(n => sourceLayer.idToPosition.has(n.getId()))
-      .map(n => sourceLayer.idToPosition.get(n.getId())!)
-      .map(p => p.x!))
+    return this.model.getConnections(position.node.getId(), sourceLayer.layerNumber)
   }
 
   widthOf(n: OptionalNode) {
