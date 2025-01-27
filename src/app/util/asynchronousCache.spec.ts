@@ -32,12 +32,14 @@ describe('AsynchronousCache', () => {
     const v2Promise: Promise<string> = instance.get('aap', () => generateError(500))
     Promise.all([
       v1Promise.then(() => {
+        console.log('Unexpectedly called then handler of promise 1')
       })
       .catch(e1 => {
         caught1 = true
         expect((e1 as Error).message).toEqual(ERROR_MSG)
       }),
       v2Promise.then(() => {
+        console.log('Unexpectedly called then handler of promise 2')
       }).catch((e2) => {
         caught2 = true
         expect((e2 as Error).message).toEqual(ERROR_MSG)
