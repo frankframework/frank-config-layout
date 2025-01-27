@@ -88,7 +88,6 @@ function categorizeEdge(from: CategorizedNode, to: CategorizedNode, edgeText?: s
   if (! edgeText) {
     return new CategorizedEdge(from, to, edgeText, false)
   } else {
-    console.log(`Checking whether "${edgeText}" is error forward name`)
     return new CategorizedEdge(from, to, edgeText, ERROR_FORWARD_NAMES.includes(edgeText))
   }
 }

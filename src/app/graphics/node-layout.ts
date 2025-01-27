@@ -153,19 +153,17 @@ export class NodeLayoutBuilder {
   }
 
   getPredsFromLayer(position: Position, sourceLayer: Layer): number[] {
-    return this.model.getConnections(position.node.getId(), sourceLayer.layerNumber)
+    const predPositions: number[] =  this.model.getConnections(position.node.getId(), sourceLayer.layerNumber)
+    const result: number[] = predPositions.map(i => sourceLayer.positions[i]!.x!)
+    return result;
   }
 
-  widthOf(n: OptionalNode) {
-    if (n === null) {
-      return this.dimensions.omittedPlaceholderWidth
+  widthOf(n: Node) {
+    const cast = n! as NodeForEditor
+    if (cast.getCreationReason() === CreationReason.INTERMEDIATE) {
+      return this.dimensions.intermediateWidth
     } else {
-      const cast = n! as NodeForEditor
-      if (cast.getCreationReason() === CreationReason.INTERMEDIATE) {
-        return this.dimensions.intermediateWidth
-      } else {
-        return this.dimensions.nodeWidth
-      }
+      return this.dimensions.nodeWidth
     }
   }  
 }

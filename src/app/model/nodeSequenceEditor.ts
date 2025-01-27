@@ -82,7 +82,6 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
     this.nodeIdToLayer = new Map(nodeIdToLayer)
     this.checkNodeToLayerMap()
     const initialSequence: string[] = graph.getNodes().map(n => n.getId())
-    console.log(initialSequence)
     const numLayers = Math.max(... nodeIdToLayer.values()) + 1
     this.sequence = new LayoutBase(
       initialSequence,

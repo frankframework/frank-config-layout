@@ -88,10 +88,8 @@ function orderNodesByLabelButPreserveOrderWithinEachLayer(
   for(let layerNumber = 0; layerNumber < numLayers; ++layerNumber) {
     nodesByLayer.push([])
   }
-  console.log(sequence)
   for (const id of sequence) {
     const layer: number = nodeIdToLayer.get(id)!
-    console.log(`Layer: ${layer}`)
     nodesByLayer[layer].push(id)
   }
   return nodesByLayer
