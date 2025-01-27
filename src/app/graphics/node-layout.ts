@@ -153,10 +153,9 @@ export class NodeLayoutBuilder {
   }
 
   getPredsFromLayer(position: Position, sourceLayer: Layer): number[] {
-    const predPositions: number[] =  this.model.getConnections(position.node.getId(), sourceLayer.layerNumber)
-    const result: number[] = predPositions.map(i => sourceLayer.positions[i]!.x!)
-    return result;
-  }
+    const predPositionIndexes: number[] =  this.model.getConnections(position.node.getId(), sourceLayer.layerNumber)
+    return predPositionIndexes.map(i => sourceLayer.positions[i]!.x!)
+ }
 
   widthOf(n: Node) {
     const cast = n! as NodeForEditor
