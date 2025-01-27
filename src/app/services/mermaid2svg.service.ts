@@ -59,6 +59,7 @@ export class Mermaid2svgService {
     try {
       hash = await sha256(mermaid)
     } catch(e) {
+      console.log(e)
       throw new Error('Could not calculate hash')
     }
     return await this.cache.get(hash, () => this.mermaid2svgStatisticsImpl(mermaid))
