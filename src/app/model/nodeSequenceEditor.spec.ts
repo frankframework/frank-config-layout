@@ -310,4 +310,55 @@ describe('NodeSequenceEditor', () => {
     instance.omitNodeFrom(0)
     expect(instance.optionalPositionOfNode('A')).toEqual(null)
   })
+
+    // See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
+    // for the graphical representation of this layout.
+    function getOtherNodeSequenceEditor(): NodeSequenceEditor {
+      const b: ConcreteGraphBase = new ConcreteGraphBase()
+      b.addNode('S1', '', '')
+      b.addNode('S2', '', '')
+      b.addNode('N1', '', '')
+      b.addNode('N2', '', '')
+      b.addNode('N3', '', '')
+      b.addNode('E1', '', '')
+      b.addNode('E2', '', '')
+      b.addNode('E3', '', '')
+      b.connect(b.getNodeById('S1')!, b.getNodeById('N1')!)
+      b.connect(b.getNodeById('S1')!, b.getNodeById('N3')!)
+      b.connect(b.getNodeById('S2')!, b.getNodeById('N3')!)
+      b.connect(b.getNodeById('N1')!, b.getNodeById('E3')!)
+      b.connect(b.getNodeById('N2')!, b.getNodeById('E1')!)
+      b.connect(b.getNodeById('N3')!, b.getNodeById('E2')!)
+      const g: Graph = new GraphConnectionsDecorator(b)
+      const m: Map<string, number> = new Map([
+        ['S1', 0],
+        ['S2', 0],
+        ['N1', 1],
+        ['N2', 1],
+        ['N3', 1],
+        ['E1', 2],
+        ['E2', 2],
+        ['E3', 2]
+      ])
+      return new ConcreteNodeSequenceEditor(g, m)
+    }
+
+  it('When node is omitted then correct LayoutBase can still be extracted', () => {
+    let instance = getOtherNodeSequenceEditor()
+    instance.omitNodeFrom(4) // Holds N3
+    let lb = instance.getShownNodesLayoutBase()
+    expect(lb.getSequence()).toEqual(['S1', 'S2', 'N1', 'N2', 'E1', 'E2', 'E3'])
+    expect(lb.getIdsOfLayer(0)).toEqual(['S1', 'S2'])
+    expect(lb.getIdsOfLayer(1)).toEqual(['N1', 'N2'])
+    expect(lb.getIdsOfLayer(2)).toEqual(['E1', 'E2', 'E3'])
+    expect(lb.getConnections('S1', 1)).toEqual([0])
+    expect(lb.getConnections('S2', 1)).toEqual([])
+    expect(lb.getConnections('N1', 0)).toEqual([0])
+    expect(lb.getConnections('N2', 0)).toEqual([])
+    expect(lb.getConnections('N1', 2)).toEqual([2])
+    expect(lb.getConnections('N2', 2)).toEqual([0])
+    expect(lb.getConnections('E1', 1)).toEqual([1])
+    expect(lb.getConnections('E2', 1)).toEqual([])
+    expect(lb.getConnections('E3', 1)).toEqual([0])
+  })
 })
