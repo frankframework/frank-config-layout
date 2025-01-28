@@ -1,6 +1,6 @@
 import { ConcreteGraphBase, Graph, GraphConnectionsDecorator } from "../model/graph"
 import { NodeSequenceEditorBuilder } from "../model/horizontalGrouping"
-import { ConcreteNodeSequenceEditor, NodeSequenceEditor } from "../model/nodeSequenceEditor"
+import { NodeSequenceEditor } from "../model/nodeSequenceEditor"
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-layout"
 
 describe('NodeLayoutBuilder', () => {
@@ -21,6 +21,10 @@ describe('NodeLayoutBuilder', () => {
     expect(layout.positions.map(p => p.x)).toEqual([120, 60, 180, 120])
     expect(layout.width).toBe(240)
     expect(layout.height).toBe(360)
+    // Edges
+    expect(layout.edges.map(edge => edge.getKey())).toEqual([
+      'Start-N1', 'Start-N2', 'N1-End', 'N2-End'
+    ])
   })
 
   it('With omitted node', () => {
@@ -46,6 +50,10 @@ describe('NodeLayoutBuilder', () => {
     expect(layout.positions.map(p => p.x)).toEqual([60, 60, 60])
     expect(layout.width).toBe(120)
     expect(layout.height).toBe(360)
+    // Edges, only edges connecting remaining nodes should be present
+    expect(layout.edges.map(edge => edge.getKey())).toEqual([
+      'Start-N2', 'N2-End'
+    ])
   })
 
   it('With conflict and intermediate', () => {

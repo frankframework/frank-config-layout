@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
    limitations under the License.
 */
 
-import { Graph, OptionalNode } from "../model/graph";
+import { Graph, Edge } from "../model/graph";
 import { CreationReason, NodeForEditor } from "../model/horizontalGrouping";
 import { LayoutBase } from "../model/layoutBase";
 import { Interval } from "../util/interval";
 import { Node } from "../model/graph";
-import { getRange, sortedUniqNumbers } from "../util/util";
+import { getRange } from "../util/util";
 import { HorizontalConflictResolver } from "./horizontal-conflict";
 
 export interface NodeSpacingDimensions {
@@ -35,6 +35,7 @@ export interface NodeLayout {
   readonly height: number
   readonly positions: Position[]
   readonly positionMap: Map<string, Position>
+  readonly edges: Edge[]
 }
 
 export interface Position {
@@ -56,27 +57,33 @@ export class NodeLayoutBuilder {
   private layers: Layer[] = []
 
   constructor(
-    private model: LayoutBase,
+    private lb: LayoutBase,
     private graph: Graph,
     private dimensions: NodeSpacingDimensions
   ) {}
 
   run(): NodeLayout {
-    this.layers = getRange(0, this.model.numLayers)
+    this.layers = getRange(0, this.lb.numLayers)
       .map(layerNumber => this.createLayer(layerNumber))
     this.setYCoordinates()
     const width = this.setXCoordinates()
     const positions: Position[] = this.layers.flatMap(layer => layer.positions)
     const positionMap: Map<string, Position> = new Map()
     positions.forEach(p => positionMap.set(p.node.getId(), p))
-    return {width, height: this.dimensions.layerDistance * this.model.numLayers, positions, positionMap}
+    return {
+      width, height: this.dimensions.layerDistance * this.lb.numLayers,
+      positions, positionMap,
+      edges: [ ... this.graph.getEdges() ]
+        .filter(edge => positionMap.has(edge.getFrom().getId()))
+        .filter(edge => positionMap.has(edge.getTo().getId()))
+    }
   }
 
   private createLayer(layerNumber: number): Layer {
     const positions: Position[] = []
     const idToPosition: Map<string, Position> = new Map()
     let cursor = 0
-    const nodes: Node[] = this.model.getIdsOfLayer(layerNumber).map(id => this.graph.getNodeById(id)!)
+    const nodes: Node[] = this.lb.getIdsOfLayer(layerNumber).map(id => this.graph.getNodeById(id)!)
     for (let node of nodes) {
       const position = this.createPosition(node, cursor, layerNumber)
       positions.push(position)
@@ -153,7 +160,7 @@ export class NodeLayoutBuilder {
   }
 
   getPredsFromLayer(position: Position, sourceLayer: Layer): number[] {
-    const predPositionIndexes: number[] =  this.model.getConnections(position.node.getId(), sourceLayer.layerNumber)
+    const predPositionIndexes: number[] =  this.lb.getConnections(position.node.getId(), sourceLayer.layerNumber)
     return predPositionIndexes.map(i => sourceLayer.positions[i]!.x!)
  }
 

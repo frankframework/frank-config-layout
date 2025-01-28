@@ -18,7 +18,6 @@ import { ConcreteGraphBase, Edge, GraphBase, Node, NodeOrEdge, OptionalNode, get
 import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
 
 import { CreationReason, EdgeForEditor, NodeForEditor, OriginalNode } from "../model/horizontalGrouping";
-import { NodeSequenceEditor } from "../model/nodeSequenceEditor";
 import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
@@ -151,10 +150,10 @@ export class Layout implements GraphBase {
   readonly height: number
   private delegate: ConcreteGraphBase
 
-  constructor(layout: NodeLayout, model: NodeSequenceEditor, d: Dimensions) {
+  constructor(layout: NodeLayout, d: Dimensions) {
     this.width = layout.width
     this.height = layout.height
-    const calc = new Edge2LineCalculation(layout, model, d)
+    const calc = new Edge2LineCalculation(layout, d)
     this.delegate = new ConcreteGraphBase()
     calc.getPlacedNodes().forEach(n => this.delegate.addExistingNode(n))
     calc.getOriginalEdges().forEach(edge => {

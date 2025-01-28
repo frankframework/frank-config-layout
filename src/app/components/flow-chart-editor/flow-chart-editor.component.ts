@@ -175,7 +175,7 @@ export class FlowChartEditorComponent {
     const builder = new NodeLayoutBuilder(
       model.getShownNodesLayoutBase(), model.getGraph(), inDimensions)
     const nodeLayout = builder.run()
-    return new Layout(nodeLayout, model, inDimensions)
+    return new Layout(nodeLayout, inDimensions)
   }
 
   onNewDimensions(d: Dimensions) {

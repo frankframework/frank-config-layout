@@ -20,7 +20,7 @@ import { Graph, GraphBase, GraphConnectionsDecorator } from '../model/graph';
 import { categorize } from '../model/error-flow'
 import { getGraphFromMermaid } from '../parsing/mermaid-parser';
 import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from '../model/horizontalGrouping';
-import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
+import { LayoutBase } from '../model/layoutBase'
 import { NodeLayoutBuilder } from '../graphics/node-layout';
 import { generateSvg } from '../graphics/svg-generator';
 import { AsynchronousCache } from '../util/asynchronousCache';
@@ -76,17 +76,22 @@ export class Mermaid2svgService {
     if (editorBuilder.orderedOmittedNodes.length >= 1) {
       throw new Error(`Probably the start node was part of a cycle; could not assign layer numers to [${editorBuilder.orderedOmittedNodes.map(n => n.getId())}]`)
     }
-    let model: NodeSequenceEditor
+    let lb: LayoutBase
+    const numLayers = Math.max( ... editorBuilder.nodeIdToLayer.values()) + 1
+    const graphWithIntermediateNodes = new GraphConnectionsDecorator(editorBuilder.graph)
     try {
-      model = editorBuilder.build()
+      lb = new LayoutBase(editorBuilder.graph.getNodes().map(n => n.getId()!),
+        graphWithIntermediateNodes,
+        editorBuilder.nodeIdToLayer,
+        numLayers)
     } catch(e) {
       throw e
     }
-    // TODO: Skip creating NodeSequenceEditor and apply some algorith
-    // to the LayoutBase before continuing.
-    const nodeLayoutBuiler = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), this.dimensions)
+    // TODO: Implement and do manipulations in LayoutBase to get
+    // as less crossing lines as possible.
+    const nodeLayoutBuiler = new NodeLayoutBuilder(lb, graphWithIntermediateNodes, this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
-    const layout = new Layout(nodeLayout, model, this.dimensions)
+    const layout = new Layout(nodeLayout, this.dimensions)
     return {
       svg: generateSvg(layout),
       numNodes: g.getNodes().length,
