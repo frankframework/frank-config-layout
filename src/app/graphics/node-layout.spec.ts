@@ -1,12 +1,13 @@
 import { ConcreteGraphBase, Graph, GraphConnectionsDecorator } from "../model/graph"
 import { NodeSequenceEditorBuilder } from "../model/horizontalGrouping"
-import { ConcreteNodeSequenceEditor, NodeSequenceEditor } from "../model/nodeSequenceEditor"
+import { NodeSequenceEditor } from "../model/nodeSequenceEditor"
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-layout"
 
 describe('NodeLayoutBuilder', () => {
   it('Simple model', () => {
     const model: NodeSequenceEditor = getSimpleModel(getSimpleGraph())
-    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout: NodeLayout = instance.run()
     // Check that the original graph is represented correctly in the positions
     expect(layout.positions.map(p => p.node.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
@@ -20,13 +21,18 @@ describe('NodeLayoutBuilder', () => {
     expect(layout.positions.map(p => p.x)).toEqual([120, 60, 180, 120])
     expect(layout.width).toBe(240)
     expect(layout.height).toBe(360)
+    // Edges
+    expect(layout.edges.map(edge => edge.getKey())).toEqual([
+      'Start-N1', 'Start-N2', 'N1-End', 'N2-End'
+    ])
   })
 
   it('With omitted node', () => {
     const model: NodeSequenceEditor = getSimpleModel(getSimpleGraph())
     expect(model.getSequence()[1]!.getId()).toBe('N1')
     model.omitNodeFrom(1)
-    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance: NodeLayoutBuilder = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout: NodeLayout = instance.run()
     // Check that the original graph is represented correctly in the positions
     expect(layout.positions.map(p => p.node.getId())).toEqual(['Start', 'N2', 'End'])
@@ -44,11 +50,16 @@ describe('NodeLayoutBuilder', () => {
     expect(layout.positions.map(p => p.x)).toEqual([60, 60, 60])
     expect(layout.width).toBe(120)
     expect(layout.height).toBe(360)
+    // Edges, only edges connecting remaining nodes should be present
+    expect(layout.edges.map(edge => edge.getKey())).toEqual([
+      'Start-N2', 'N2-End'
+    ])
   })
 
   it('With conflict and intermediate', () => {
     const model = getModelWithConflictAndIntermediate(getGraphWithConflictAndIntermediate())
-    const instance = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout = instance.run()
     // Check that the graph is represented correctly
     expect(layout.positions.map(p => p.node.getId())).toEqual(['S1', 'S2', 'N1', 'intermediate1', 'End'])
@@ -73,7 +84,8 @@ describe('NodeLayoutBuilder', () => {
 
   it('With conflict and intermediate upside down', () => {
     const model = getModelWithConflictAndIntermediateOrderedUpsizeDown(getGraphWithConflictAndIntermediate())
-    const instance = new NodeLayoutBuilder(model, getTestDimensions())
+    const instance = new NodeLayoutBuilder(
+      model.getShownNodesLayoutBase(), model.getGraph(), getTestDimensions())
     const layout = instance.run()
     // Check that the graph is represented correctly
     expect(layout.positions.map(p => p.node.getId())).toEqual(['End', 'N1', 'intermediate1', 'S1', 'S2'])

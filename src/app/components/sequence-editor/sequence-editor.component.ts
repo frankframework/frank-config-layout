@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
-import { NodeSequenceEditor, NodeSequenceEditorCell, NodeOrEdgeSelection } from '../../model/nodeSequenceEditor';
+import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../model/nodeSequenceEditor';
+import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { getRange } from '../../util/util';
 import { NodeCaptionChoice, NodeOrEdge, getCaption } from '../../model/graph';
 import { Observable, Subscription } from 'rxjs';

@@ -1,7 +1,5 @@
-import { NodeSequenceEditor, ConcreteNodeSequenceEditor, UpdateResponse, NodeOrEdgeSelection } from "./nodeSequenceEditor";
+import { NodeSequenceEditor, ConcreteNodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
 import { ConcreteNode, Node, ConcreteEdge, Edge, ConcreteGraphBase, GraphBase, GraphConnectionsDecorator, Graph  } from "./graph"
-import { NodeSequenceEditorBuilder } from "./horizontalGrouping";
-import { getRange } from "../util/util";
 
 function getInstanceToCheckOrdering(): ConcreteNodeSequenceEditor {
   const g = new ConcreteGraphBase()
@@ -312,180 +310,55 @@ describe('NodeSequenceEditor', () => {
     instance.omitNodeFrom(0)
     expect(instance.optionalPositionOfNode('A')).toEqual(null)
   })
-})
 
-describe('NodeOrEdgeSelection', () => {
-  it ('Select position and undo again', () => {
-    const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
-    let instance = new NodeOrEdgeSelection()
-    checkNothingSelected(instance, m)
-    instance.selectPosition(1, m)
-    checkNodeN1SelectedCorrectly(instance, m)
-    instance.selectPosition(2, m)
-    expect(instance.isFromPositionHighlightedInEditor(2, m)).toBe(true)
-    instance.selectPosition(2, m)
-    checkNothingSelected(instance, m)
-  })
+    // See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
+    // for the graphical representation of this layout.
+    function getOtherNodeSequenceEditor(): NodeSequenceEditor {
+      const b: ConcreteGraphBase = new ConcreteGraphBase()
+      b.addNode('S1', '', '')
+      b.addNode('S2', '', '')
+      b.addNode('N1', '', '')
+      b.addNode('N2', '', '')
+      b.addNode('N3', '', '')
+      b.addNode('E1', '', '')
+      b.addNode('E2', '', '')
+      b.addNode('E3', '', '')
+      b.connect(b.getNodeById('S1')!, b.getNodeById('N1')!)
+      b.connect(b.getNodeById('S1')!, b.getNodeById('N3')!)
+      b.connect(b.getNodeById('S2')!, b.getNodeById('N3')!)
+      b.connect(b.getNodeById('N1')!, b.getNodeById('E3')!)
+      b.connect(b.getNodeById('N2')!, b.getNodeById('E1')!)
+      b.connect(b.getNodeById('N3')!, b.getNodeById('E2')!)
+      const g: Graph = new GraphConnectionsDecorator(b)
+      const m: Map<string, number> = new Map([
+        ['S1', 0],
+        ['S2', 0],
+        ['N1', 1],
+        ['N2', 1],
+        ['N3', 1],
+        ['E1', 2],
+        ['E2', 2],
+        ['E3', 2]
+      ])
+      return new ConcreteNodeSequenceEditor(g, m)
+    }
 
-  it('Select cell and undo again', () => {
-    const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
-    let instance = new NodeOrEdgeSelection()
-    checkNothingSelected(instance, m)
-    instance.selectCell(0, 1, m)
-    checkEdgeStartN1SelectedCorrectly(instance, m)
-    instance.selectPosition(1, m)
-    checkNodeN1SelectedCorrectly(instance, m)
-    instance.selectCell(0, 1, m)
-    checkEdgeStartN1SelectedCorrectly(instance, m)
-    instance.selectCell(0, 1, m)
-    checkNothingSelected(instance, m)
-  })
-
-  it ('Select node id and undo again', () => {
-    const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
-    let instance = new NodeOrEdgeSelection()
-    checkNothingSelected(instance, m)
-    instance.selectNodeId('N1', m)
-    checkNodeN1SelectedCorrectly(instance, m)
-    instance.selectNodeId('N2', m)
-    expect(instance.isFromPositionHighlightedInEditor(2, m)).toBe(true)
-    instance.selectNodeId('N2', m)
-    checkNothingSelected(instance, m)
-  })
-
-  it('Select edge key and undo again', () => {
-    const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
-    let instance = new NodeOrEdgeSelection()
-    checkNothingSelected(instance, m)
-    instance.selectEdgeKey('Start-N1', m)
-    checkEdgeStartN1SelectedCorrectly(instance, m)
-    instance.selectNodeId('N1', m)
-    checkNodeN1SelectedCorrectly(instance, m)
-    instance.selectEdgeKey('Start-N1', m)
-    checkEdgeStartN1SelectedCorrectly(instance, m)
-    instance.selectEdgeKey('Start-N1', m)
-    checkNothingSelected(instance, m)
+  it('When node is omitted then correct LayoutBase can still be extracted', () => {
+    let instance = getOtherNodeSequenceEditor()
+    instance.omitNodeFrom(4) // Holds N3
+    let lb = instance.getShownNodesLayoutBase()
+    expect(lb.getSequence()).toEqual(['S1', 'S2', 'N1', 'N2', 'E1', 'E2', 'E3'])
+    expect(lb.getIdsOfLayer(0)).toEqual(['S1', 'S2'])
+    expect(lb.getIdsOfLayer(1)).toEqual(['N1', 'N2'])
+    expect(lb.getIdsOfLayer(2)).toEqual(['E1', 'E2', 'E3'])
+    expect(lb.getConnections('S1', 1)).toEqual([0])
+    expect(lb.getConnections('S2', 1)).toEqual([])
+    expect(lb.getConnections('N1', 0)).toEqual([0])
+    expect(lb.getConnections('N2', 0)).toEqual([])
+    expect(lb.getConnections('N1', 2)).toEqual([2])
+    expect(lb.getConnections('N2', 2)).toEqual([0])
+    expect(lb.getConnections('E1', 1)).toEqual([1])
+    expect(lb.getConnections('E2', 1)).toEqual([])
+    expect(lb.getConnections('E3', 1)).toEqual([0])
   })
 })
-
-function getSelectionTestModel(): NodeSequenceEditor {
-  const b = new ConcreteGraphBase()
-  newNode('Start', b)
-  newNode('N1', b)
-  newNode('N2', b)
-  newNode('End', b)
-  insertNewEdge('Start', 'N1', b)
-  insertNewEdge('Start', 'N2', b)
-  insertNewEdge('N1', 'End', b)
-  insertNewEdge('N2', 'End', b)
-  const layerMap: Map<string, number> = new Map([
-    ['Start', 0],
-    ['N1', 1],
-    ['N2', 1],
-    ['End', 2]
-  ])
-  const builder = new NodeSequenceEditorBuilder(layerMap, b)
-  return builder.build()
-}
-
-function checkNothingSelected(instance: NodeOrEdgeSelection, m: NodeSequenceEditor) {
-  ['Start', 'N1', 'N2', 'End'].forEach(nodeId => {
-    expect(instance.isNodeHighlightedInDrawing(nodeId, m)).toBe(false)
-  });
-  ['Start-N1', 'Start-N2', 'N1-End', 'N2-End'].forEach(edgeKey => {
-    expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(false)
-  })
-  getRange(0, 4).forEach(index => {
-    expect(instance.isFromPositionHighlightedInEditor(index, m)).toBe(false)
-    expect(instance.isToPositionHighlightedInEditor(index, m)).toBe(false)
-  })
-  getRange(0, 4).forEach(indexFrom => {
-    getRange(0, 4).forEach(indexTo => {
-      expect(instance.isCellHighlightedInEditor(indexFrom, indexTo, m)).toBe(false)
-    })
-  })
-}
-
-function checkNodeN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: NodeSequenceEditor) {
-  ['Start', 'N2', 'End'].forEach(nodeId => {
-    expect(instance.isNodeHighlightedInDrawing(nodeId, m)).toBe(false)
-  });
-  expect(instance.isNodeHighlightedInDrawing('N1', m)).toBe(true);
-  ['Start-N1', 'N1-End'].forEach(edgeKey => {
-    expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(true)
-  });
-  ['Start-N2', 'N2-End'].forEach(edgeKey => {
-    expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(false)
-  });
-  [false, true, false, false].forEach((expectedToHighlighted, indexTo) => {
-    expect(instance.isToPositionHighlightedInEditor(indexTo, m)).toBe(expectedToHighlighted)
-  });
-  [false,
-  true,
-  false,
-  false].forEach((expectedFromHighlighted, indexFrom) => {
-    expect(instance.isFromPositionHighlightedInEditor(indexFrom, m)).toBe(expectedFromHighlighted)
-  });
-  [
-    [false, true, false, false],
-    [true, true, true, true],
-    [false, true, false, false],
-    [false, true, false, false]
-  ].forEach( (row, indexFrom) => {
-    row.forEach((expectedCellHighlighted, indexTo) => {
-      expect(instance.isCellHighlightedInEditor(indexFrom, indexTo, m)).toBe(expectedCellHighlighted)
-    })
-  })
-}
-
-function checkEdgeStartN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: NodeSequenceEditor) {
-  ['Start', 'N1'].forEach(nodeId => {
-    expect(instance.isNodeHighlightedInDrawing(nodeId, m)).toBe(true)
-  });
-  ['N2', 'End'].forEach(nodeId => {
-    expect(instance.isNodeHighlightedInDrawing(nodeId, m)).toBe(false)
-  });
-  expect(instance.isEdgeHighlightedInDrawing('Start-N1', m)).toBe(true);
-  ['Start-N2', 'N1-End', 'N2-End'].forEach(edgeKey => {
-    expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(false)
-  });
-  [false, true, false, false].forEach((expectedToHighlighted, indexTo) => {
-    expect(instance.isToPositionHighlightedInEditor(indexTo, m)).toBe(expectedToHighlighted)
-  });
-  [true,
-  false,
-  false,
-  false].forEach((expectedFromHighlighted, indexFrom) => {
-    expect(instance.isFromPositionHighlightedInEditor(indexFrom, m)).toBe(expectedFromHighlighted)
-  });
-  [
-    [false, true, false, false],
-    [false, false, false, false],
-    [false, false, false, false],
-    [false, false, false, false]
-  ].forEach((row, indexFrom) => {
-    row.forEach((expectedCellHighlighted, indexTo) => {
-      expect(instance.isCellHighlightedInEditor(indexFrom, indexTo, m)).toBe(expectedCellHighlighted)
-    })
-  })
-}
-
-function newNode(id: string, g: ConcreteGraphBase) {
-  g.addNode(id, '', '')
-}
-
-function insertNewEdge(fromId: string, toId: string, b: ConcreteGraphBase) {
-  const from: Node | undefined = b.getNodeById(fromId)
-  const to: Node | undefined = b.getNodeById(toId)
-  if (from === undefined) {
-    throw new Error(`Invalid test case, node with id ${fromId} does not exist`)
-  }
-  if (to === undefined) {
-    throw new Error(`Invalid test case, node with id ${toId} does not exist`)
-  }
-  b.connect(from!, to!, '')
-}

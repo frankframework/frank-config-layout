@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 
 import { Node, Edge, getEdgeKey, OptionalNode, OptionalEdge, Graph, NodeOrEdge } from './graph'
 import { getRange, rotateToSwapItems } from '../util/util'
+import { LayoutBase } from './layoutBase'
 
 export enum UpdateResponse {
   ACCEPTED = "accepted",
@@ -32,12 +33,13 @@ export enum UpdateResponse {
 type OptionalString = string | null
 
 export interface NodeSequenceEditor {
+  getGraph(): Graph
   getNodeById(id: string): Node | undefined
   getEdges(): readonly Edge[]
   getEdgeByKey(key: string): Edge | undefined
   parseNodeOrEdgeId(id: string): NodeOrEdge
-  getOrderedEdgesStartingFrom(startId: string): readonly Edge[]
-  getOrderedEdgesLeadingTo(endId: string): readonly Edge[]
+  getUnorderedEdgesStartingFrom(startId: string): readonly Edge[]
+  getUnorderedEdgesLeadingTo(endId: string): readonly Edge[]
   getSuccessors(nodeId: string): readonly Node[]
   getPredecessors(nodeId: string): readonly Node[]
   getNumLayers(): number
@@ -50,6 +52,7 @@ export interface NodeSequenceEditor {
   rotateToSwap(posFrom: number, posTo: number): number[]
   omitNodeFrom(position: number): UpdateResponse
   reintroduceNode(position: number, node: Node): UpdateResponse
+  getShownNodesLayoutBase(): LayoutBase
   getOrderedOmittedNodes(): readonly Node[]
   getOrderedOmittedNodesInLayer(layerNumber: number): readonly Node[]
   getCell(positionFrom: number, positionTo: number): NodeSequenceEditorCell
@@ -78,8 +81,14 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
     // Copy the map
     this.nodeIdToLayer = new Map(nodeIdToLayer)
     this.checkNodeToLayerMap()
-    this.sequence = orderNodesByLabelButPreserveOrderWithinEachLayer(
-      graph.getNodes(), this.nodeIdToLayer, Math.max( ... nodeIdToLayer.values()) + 1)
+    const initialSequence: string[] = graph.getNodes().map(n => n.getId())
+    const numLayers = Math.max(... nodeIdToLayer.values()) + 1
+    this.sequence = new LayoutBase(
+      initialSequence,
+      graph,
+      this.nodeIdToLayer,
+      numLayers
+    ).getSequence()
     this.layerStartPositions = calculateLayerStartPositions(
       this.sequence.map(os => os!), this.nodeIdToLayer)
     for(let i = 0; i < this.getNumLayers(); ++i) {
@@ -111,6 +120,10 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
     })
   }
 
+  getGraph() {
+    return this.graph
+  }
+
   getNodeById(id: string): Node | undefined {
     return this.graph.getNodeById(id)
   }
@@ -131,12 +144,14 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
     return this.layerStartPositions.length
   }
 
-  getOrderedEdgesStartingFrom(startId: string): readonly Edge[] {
+  // Unordered, because the sequence in the mode is not respected.
+  getUnorderedEdgesStartingFrom(startId: string): readonly Edge[] {
     this.checkNodeId(startId)
     return this.graph.getOrderedEdgesStartingFrom(this.getNodeById(startId)!)
   }
 
-  getOrderedEdgesLeadingTo(endId: string): readonly Edge[] {
+  // Unordered, because the sequence in the mode is not respected.
+  getUnorderedEdgesLeadingTo(endId: string): readonly Edge[] {
     this.checkNodeId(endId)
     return this.graph.getOrderedEdgesLeadingTo(this.getNodeById(endId)!)
   }
@@ -240,6 +255,14 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
     this.sequence[position] = node.getId()
     this.omittedByLayer[layerNumber].delete(node.getId())
     return UpdateResponse.ACCEPTED
+  }
+
+  getShownNodesLayoutBase(): LayoutBase {
+    const shownSequence: string[] = this.getSequence()
+      .filter(n => n !== null)
+      .map(n => n as Node)
+      .map(n => n.getId()!)
+    return new LayoutBase(shownSequence, this.graph, this.nodeIdToLayer, this.getNumLayers())
   }
 
   getOrderedOmittedNodes(): readonly Node[] {
@@ -348,23 +371,6 @@ class ConcreteNodeSequenceCell implements NodeSequenceEditorCell {
   }
 }
 
-function orderNodesByLabelButPreserveOrderWithinEachLayer(nodes: readonly Node[], nodeIdToLayer: Map<string, number>, numLayers: number): string[] {
-  let nodesByLayer: string[][] = []
-  // Do not work wity Array().fill().
-  // That fills every element with the *same* list
-  // If you then update one row, the other
-  // row get secretly updated too.
-  for(let layerNumber = 0; layerNumber < numLayers; ++layerNumber) {
-    nodesByLayer.push([])
-  }
-  nodes.forEach(n => {
-    const id: string = n.getId()
-    const layer: number = nodeIdToLayer.get(id)!
-    nodesByLayer[layer].push(id)
-  })
-  return nodesByLayer.flat()
-}
-
 function calculateLayerStartPositions(sequence: readonly string[], nodeIdToLayer: Map<string, number>): number[] {
   let layerStartPositions: number[] = []
   if (sequence.length > 0) {
@@ -378,239 +384,4 @@ function calculateLayerStartPositions(sequence: readonly string[], nodeIdToLayer
     }
   }
   return layerStartPositions
-}
-
-
-// If a node has been selected, all its incoming and outgoing
-// edges should also be highlighted.
-//
-// If an edge has been selected, the nodes it connects
-// should also be highlighted.
-
-interface NodeOrEdgeSelectionState {
-  followPermutation(permutation: number[], model: NodeSequenceEditor): void
-  isFromPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean
-  isToPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean
-  isCellHighlightedInEditor(indexFrom: number, indexTo: number, model: NodeSequenceEditor): boolean
-  isNodeHighlightedInDrawing(id: string, model: NodeSequenceEditor): boolean
-  isEdgeHighlightedInDrawing(key: string, model: NodeSequenceEditor): boolean
-  isSelectPositionUndoes(index: number): boolean
-  isSelectCellUndoes(indexFrom: number, indexTo: number): boolean
-}
-
-export class NodeOrEdgeSelection {
-  private state: NodeOrEdgeSelectionState = new NodeOrEdgeSelectionStateDefault()
-
-  clear() {
-    this.state = new NodeOrEdgeSelectionStateDefault()
-  }
-
-  selectPosition(index: number, model: NodeSequenceEditor) {
-    if (this.state.isSelectPositionUndoes(index)) {
-      this.state = new NodeOrEdgeSelectionStateDefault()
-    } else {
-      this.state = new NodeOrEdgeSelectionStatePosition(index)
-    }
-  }
-
-  selectCell(indexFrom: number, indexTo: number, model: NodeSequenceEditor) {
-    if (this.state.isSelectCellUndoes(indexFrom, indexTo)) {
-      this.state = new NodeOrEdgeSelectionStateDefault()
-    } else {
-      this.state = new NodeOrEdgeSelectionStateCell(indexFrom, indexTo)
-    }
-  }
-
-  selectNodeId(nodeId: string, model: NodeSequenceEditor) {
-    const position: number | null = model.optionalPositionOfNode(nodeId)
-    if (position !== null) {
-      this.selectPosition(position, model)
-    }
-  }
-
-  selectEdgeKey(key: string, model: NodeSequenceEditor) {
-    const edge: Edge | undefined = model.getEdgeByKey(key)
-    if (edge === undefined) {
-      return
-    }
-    const indexFrom = model.optionalPositionOfNode(edge.getFrom().getId())
-    const indexTo = model.optionalPositionOfNode(edge.getTo().getId())
-    if ( (indexFrom !== null) && (indexTo !== null)) {
-      this.selectCell(indexFrom, indexTo, model)
-    }
-  }
-
-  followPermutation(permutation: number[], model: NodeSequenceEditor) {
-    if (permutation.length != model.getSequence().length) {
-      throw new Error(`Invalid permutation ${permutation} because model has ${model.getSequence().length} positions`)
-    }
-    this.state.followPermutation(permutation, model)
-  }
-
-  isFromPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return this.state.isFromPositionHighlightedInEditor(index, model)
-  }
-
-  isToPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return this.state.isToPositionHighlightedInEditor(index, model)
-  }
-
-  isCellHighlightedInEditor(indexFrom: number, indexTo: number, model: NodeSequenceEditor): boolean {
-    return this.state.isCellHighlightedInEditor(indexFrom, indexTo, model)
-  }
-
-  isNodeHighlightedInDrawing(id: string, model: NodeSequenceEditor): boolean {
-    return this.state.isNodeHighlightedInDrawing(id, model)
-  }
-
-  isEdgeHighlightedInDrawing(key: string, model: NodeSequenceEditor): boolean {
-    return this.state.isEdgeHighlightedInDrawing(key, model)
-  }
-}
-
-class NodeOrEdgeSelectionStateDefault implements NodeOrEdgeSelectionState {
-  followPermutation(permutation: number[], model: NodeSequenceEditor) {
-  }
-
-  isFromPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return false
-  }
-
-  isToPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return false
-  }
-
-  isCellHighlightedInEditor(indexFrom: number, indexTo: number, model: NodeSequenceEditor): boolean {
-    return false
-  }
-
-  isNodeHighlightedInDrawing(id: string, model: NodeSequenceEditor): boolean {
-    return false
-  }
-
-  isEdgeHighlightedInDrawing(key: string, model: NodeSequenceEditor): boolean {
-    return false
-  }
-
-  isSelectPositionUndoes(index: number): boolean {
-    return false
-  }
-
-  isSelectCellUndoes(indexFrom: number, indexTo: number): boolean {
-    return false
-  }
-}
-
-class NodeOrEdgeSelectionStatePosition implements NodeOrEdgeSelectionState {
-  constructor(
-    private position: number,
-  ) {}
-
-  followPermutation(permutation: number[], model: NodeSequenceEditor) {
-    this.position = permutation[this.position]
-  }
-
-  isFromPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return index === this.position
-  }
-
-  isToPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return index === this.position
-  }
-
-  isCellHighlightedInEditor(indexFrom: number, indexTo: number, model: NodeSequenceEditor): boolean {
-    return (indexFrom === this.position) || (indexTo === this.position)
-  }
-
-  isNodeHighlightedInDrawing(id: string, model: NodeSequenceEditor): boolean {
-    const optionalSelectedNode = model.getSequence()[this.position]
-    return (optionalSelectedNode !== null) && (id === optionalSelectedNode.getId())
-  }
-
-  isEdgeHighlightedInDrawing(key: string, model: NodeSequenceEditor): boolean {
-    const optionalSelectedNode = model.getSequence()[this.position]
-    if (optionalSelectedNode === null) {
-      return false
-    }
-    const id = optionalSelectedNode.getId()
-    const edgeKeysOnSelectedNode: string[] =
-      [model.getOrderedEdgesStartingFrom(id), model.getOrderedEdgesLeadingTo(id)]
-      .flat()
-      .map(edge => edge.getKey())
-    if (edgeKeysOnSelectedNode.indexOf(key) >= 0) {
-      return true
-    }
-    return false
-  }
-
-  isSelectPositionUndoes(index: number): boolean {
-    return index === this.position
-  }
-
-  isSelectCellUndoes(indexFrom: number, indexTo: number): boolean {
-    return false
-  }
-}
-
-class NodeOrEdgeSelectionStateCell implements NodeOrEdgeSelectionState {
-  constructor(
-    private indexFrom: number,
-    private indexTo: number
-  ) {}
-
-  private getModelData(model: NodeSequenceEditor):
-      {optionalFromNode: OptionalNode, optionalToNode: OptionalNode, optionalSelectedEdge: OptionalEdge}
-  {
-    const optionalFromNode = model.getSequence()[this.indexFrom]
-    const optionalToNode = model.getSequence()[this.indexTo]
-    let optionalSelectedEdge: OptionalEdge
-    if ( (optionalFromNode !== null) && (optionalToNode !== null)) {
-      const key: string = getEdgeKey(optionalFromNode, optionalToNode)
-      const raw: Edge | undefined = model.getEdgeByKey(key)
-      optionalSelectedEdge = raw === undefined ? null : raw
-    } else {
-      optionalSelectedEdge = null
-    }
-    return {optionalFromNode, optionalToNode, optionalSelectedEdge}
-  }
-
-  followPermutation(permutation: number[], model: NodeSequenceEditor) {
-    this.indexFrom = permutation[this.indexFrom]
-    this.indexTo = permutation[this.indexTo]
-  }
-
-  isFromPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return index === this.indexFrom
-  }
-
-  isToPositionHighlightedInEditor(index: number, model: NodeSequenceEditor): boolean {
-    return index === this.indexTo
-  }
-
-  isCellHighlightedInEditor(indexFrom: number, indexTo: number, model: NodeSequenceEditor): boolean {
-    return (indexFrom === this.indexFrom) && (indexTo === this.indexTo)
-  }
-
-  isNodeHighlightedInDrawing(id: string, model: NodeSequenceEditor): boolean {
-    const modelData = this.getModelData(model)
-    return this.isIdMatchesOptionalNode(id, modelData.optionalFromNode) || this.isIdMatchesOptionalNode(id, modelData.optionalToNode)
-  }
-
-  private isIdMatchesOptionalNode(id: string, n: OptionalNode): boolean {
-    return (n !== null) && (id === n.getId())
-  }
-
-  isEdgeHighlightedInDrawing(key: string, model: NodeSequenceEditor): boolean {
-    const modelData = this.getModelData(model)
-    return (modelData.optionalSelectedEdge !== null)
-      && (key === modelData.optionalSelectedEdge.getKey())
-  }
-
-  isSelectPositionUndoes(index: number): boolean {
-    return false
-  }
-
-  isSelectCellUndoes(indexFrom: number, indexTo: number): boolean {
-    return (indexFrom === this.indexFrom) && (indexTo === this.indexTo)
-  }
 }

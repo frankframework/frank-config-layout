@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 */
 
 import { Edge } from "../model/graph";
-import { NodeSequenceEditor } from "../model/nodeSequenceEditor";
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
 import { Dimensions, PlacedNode } from "./edge-layout";
@@ -30,13 +29,10 @@ export class Edge2LineCalculation {
 
   constructor(
     nodeLayout: NodeLayout,
-    model: NodeSequenceEditor,
     d: Dimensions
   ) {
-    this.createNodes(nodeLayout, model, d)
-    model.getEdges()
-      .filter(edge => nodeLayout.positionMap.has(edge.getFrom().getId()))
-      .filter(edge => nodeLayout.positionMap.has(edge.getTo().getId()))
+    this.createNodes(nodeLayout, d)
+    nodeLayout.edges
       .forEach(edge => {
         this.edges.push(edge)
         this.connectEdge(edge)
@@ -48,7 +44,7 @@ export class Edge2LineCalculation {
     )))
   }
 
-  private createNodes(nodeLayout: NodeLayout, model: NodeSequenceEditor, d: Dimensions) {
+  private createNodes(nodeLayout: NodeLayout, d: Dimensions) {
     nodeLayout.positions.forEach(p => {
       const placedNode = new PlacedNode(p, d)
       this.placedNodes.push(placedNode)

@@ -19,8 +19,8 @@ describe('Layout', () => {
     const m = calculateLayerNumbersFirstOccuringPath(g)
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
-    const nodeLayout = new NodeLayoutBuilder(model, dimensions).run()
-    const layout = new Layout(nodeLayout, model, dimensions)
+    const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
+    const layout = new Layout(nodeLayout, dimensions)
     expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
     expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
