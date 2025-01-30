@@ -2,6 +2,14 @@
   padding-bottom: 10px
 }
 
+.tab {
+  background-color: lightgray
+}
+
+.tab.selected {
+  background-color: gray
+}
+
 [cdkDragHandle] {
   cursor:pointer;
 }
@@ -19,6 +27,12 @@ thead th {
   writing-mode: vertical-lr;
   vertical-align: bottom;
   cursor: default
+}
+
+#algorithm thead th {
+  text-align: right;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .odd {

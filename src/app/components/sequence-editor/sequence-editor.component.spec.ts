@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SequenceEditorComponent, View, BackgroundClass } from './sequence-editor.component';
+import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
 import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from '../../model/nodeSequenceEditor';
 
 import { ConcreteGraphBase, GraphConnectionsDecorator } from '../../model/graph';
@@ -45,12 +45,12 @@ describe('SequenceEditorComponent', () => {
     const model: NodeSequenceEditor = new ConcreteNodeSequenceEditor(new GraphConnectionsDecorator(b), m)
     model.omitNodeFrom(1)
     component.model = model
-    const actual: View = component.getView()
-    const expected = getTheView()
+    const actual: ManualView = component.getManualView()
+    const expected = getTheManualView()
     expect(actual).toEqual(expected)
   })
 
-  function getTheView(): View {
+  function getTheManualView(): ManualView {
     return {
       header: [
         {position: 0, backgroundClass: BackgroundClass.EVEN, nodeId: "Start", fillOptions: [], selected: false},

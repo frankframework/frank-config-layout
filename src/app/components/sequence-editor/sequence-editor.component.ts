@@ -16,11 +16,20 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
+import { LayoutBase } from '../../model/layoutBase'
 import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../model/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { getRange } from '../../util/util';
 import { NodeCaptionChoice, NodeOrEdge, getCaption } from '../../model/graph';
 import { Observable, Subscription } from 'rxjs';
+
+interface Tab {
+  id: string,
+  caption: string
+}
+
+const TAB_MANUAL = "MANUAL"
+const TAB_ALGORITHM = "ALGORITHM"
 
 @Component({
   selector: 'app-sequence-editor',
@@ -29,9 +38,20 @@ import { Observable, Subscription } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SequenceEditorComponent implements OnInit, OnDestroy {
-  view: View = this.getEmptyView()
+  TABS: Tab[] = [
+    { id: TAB_MANUAL, caption: "Manual" },
+    { id: TAB_ALGORITHM, caption: "Algorithm steps" }
+  ]
+
+  activeTab: string = TAB_MANUAL
+  manualView: ManualView = this.getEmptyManualView()
+  algorithmView: AlgorithmView = this.getEmptyAlgorithmView()
   showText: boolean = false
   captionChoice: NodeCaptionChoice = this.updateCaptionChoice()
+
+  selectTab(id: string) {
+    this.activeTab = id
+  }
 
   updateCaptionChoice(): NodeCaptionChoice {
     if (this.showText) {
@@ -43,9 +63,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
   onNewCaptionChoice() {
     this.showText = (! this.showText)
     this.captionChoice = this.updateCaptionChoice()
-    if (this.model !== null) {
-      this.view = this.getView()
-    }
+    this.updateViews()
   }
 
   private _model: NodeSequenceEditor | null = null
@@ -60,18 +78,29 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     // If the model has less positions, we would
     // have invalid positions if we did not clear.
     this.selection.clear()
-    if (this.model === null) {
-      this.view = this.getEmptyView()
-    } else {
-      this.view = this.getView()
-    }
+    this.updateViews()
     this.onChanged.emit(true)
   }
 
-  getEmptyView(): View {
+  updateViews() {
+    if (this.model === null) {
+      this.manualView = this.getEmptyManualView()
+      this.algorithmView = this.getEmptyAlgorithmView()
+    } else {
+      this.manualView = this.getManualView()
+      this.algorithmView = this.getAlgorithmView()
+    }
+  }
+  getEmptyManualView(): ManualView {
     return {
       header: [],
       body: []
+    }
+  }
+
+  getEmptyAlgorithmView(): AlgorithmView {
+    return {
+      layers: []
     }
   }
 
@@ -112,7 +141,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
       const indexTo = $event.currentIndex
       const permutation: number[] = this.model.rotateToSwap(indexFrom, indexTo)
       this.selection.followPermutation(permutation, this.model)
-      this.view = this.getView()
+      this.updateViews()
       this.onChanged.emit(true)
     }
   };
@@ -120,7 +149,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
   omit(position: number) {
     if (this.model !== null) {
       this.model!.omitNodeFrom(position)
-      this.view = this.getView()
+      this.updateViews()
       this.onChanged.emit(true)
     }
   }
@@ -130,14 +159,14 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
       const target = $event.target as HTMLSelectElement
       const option: string = target.value
       this.model!.reintroduceNode(position, this.model.getNodeById(option)!)
-      this.view = this.getView()
+      this.updateViews()
       this.onChanged.emit(true)
     }
   }
 
   selectNodeId(nodeId: string) {
     this.selection.selectNodeId(nodeId, this.model!)
-    this.view = this.getView()
+    this.updateViews()
     this.onChanged.emit(true)
   }
 
@@ -146,13 +175,13 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
       return
     }
     this.selection.selectPosition(index, this.model)
-    this.view = this.getView()
+    this.updateViews()
     this.onChanged.emit(true)
   }
 
   selectEdgeKey(key: string) {
     this.selection.selectEdgeKey(key, this.model!)
-    this.view = this.getView()
+    this.updateViews()
     this.onChanged.emit(true)
   }
 
@@ -161,26 +190,30 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
       return
     }
     this.selection.selectCell(indexFrom, indexTo, this.model)
-    this.view = this.getView()
+    this.updateViews()
     this.onChanged.emit(true)
   }
 
-  getClass(item: Position | Cell): string[] {
+  getManualClass(item: ManualPosition | ManualCell): string[] {
     const result = []
     if (item.selected === true) {
       result.push('selected')
     }
-    if (item.backgroundClass === BackgroundClass.EVEN) {
-      result.push('even')
-    } else if (item.backgroundClass === BackgroundClass.ODD) {
-      result.push('odd')
-    } else {
-      result.push('doubleOdd')
-    }
+    result.push(this.getBackgroundClass(item))
     return result
   }
 
-  getCellClass(cell: Cell) {
+  getBackgroundClass(item: ManualPosition | ManualCell | AlgorithmLayer): string {
+    if (item.backgroundClass === BackgroundClass.EVEN) {
+      return 'even'
+    } else if (item.backgroundClass === BackgroundClass.ODD) {
+      return 'odd'
+    } else {
+      return 'doubleOdd'
+    }
+  }
+
+  getCellClass(cell: ManualCell) {
     const result = []
     if (cell.fromPosition !== cell.toPosition) {
       result.push('edgeMark')
@@ -191,16 +224,16 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     return result
   }
 
-  getView(): View {
+  getManualView(): ManualView {
     return {
       header: getRange(0, this.model!.getSequence().length)
-        .map(indexTo => this.getPosition(indexTo, this.isToPositionHighlightedInEditor(indexTo))),
+        .map(indexTo => this.getManualPosition(indexTo, this.isToPositionHighlightedInEditor(indexTo))),
       body: getRange(0, this.model!.getSequence().length)
         .map(indexFrom => {
           return {
-            header: this.getPosition(indexFrom, this.isFromPositionHighlightedInEditor(indexFrom)),
+            header: this.getManualPosition(indexFrom, this.isFromPositionHighlightedInEditor(indexFrom)),
             cells: getRange(0, this.model!.getSequence().length)
-              .map(indexTo => this.getCell(indexFrom, indexTo))
+              .map(indexTo => this.getManualCell(indexFrom, indexTo))
           }
         })
     }
@@ -218,7 +251,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     return this.selection.isCellHighlightedInEditor(indexFrom, indexTo, this.model!)
   }
 
-  private getPosition(index: number, selected: boolean): Position {
+  private getManualPosition(index: number, selected: boolean): ManualPosition {
     const node = this.model!.getSequence()[index]
     return {
       position: index,
@@ -229,7 +262,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getCell(indexFrom: number, indexTo: number): Cell {
+  private getManualCell(indexFrom: number, indexTo: number): ManualCell {
     const modelCell: NodeSequenceEditorCell = this.model!.getCell(indexFrom, indexTo)
     let numOddLayers = 0
     if (modelCell.getLayerFrom() % 2 == 1) {
@@ -253,19 +286,32 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
       selected: this.isCellHighlightedInEditor(indexFrom, indexTo)
     }
   }
+
+  getAlgorithmView(): AlgorithmView {
+    const lb: LayoutBase = this.model!.getShownNodesLayoutBase()
+    let layers: AlgorithmLayer[] = []
+    for (let layerIndex = 0; layerIndex < lb.numLayers; ++layerIndex) {
+      layers.push({
+        layerNumber: layerIndex,
+        backgroundClass: layerIndex % 2 === 0 ? BackgroundClass.EVEN : BackgroundClass.ODD,
+        numNodes: lb.getIdsOfLayer(layerIndex).length
+      })
+    }
+    return { layers }
+  }
 }
 
-export interface View {
-  header: Position[],
+export interface ManualView {
+  header: ManualPosition[],
   body: BodyRow[]
 }
 
 interface BodyRow {
-  header: Position
-  cells: Cell[]
+  header: ManualPosition
+  cells: ManualCell[]
 }
 
-interface Position {
+interface ManualPosition {
   position: number
   backgroundClass: BackgroundClass
   nodeId: string | null
@@ -273,13 +319,23 @@ interface Position {
   selected: boolean
 }
 
-interface Cell {
+interface ManualCell {
   fromPosition: number,
   toPosition: number,
   backgroundClass: BackgroundClass
   fromAndToHaveNode: boolean,
   hasEdge: boolean
   selected: boolean
+}
+
+interface AlgorithmView {
+  layers: AlgorithmLayer[]
+}
+
+interface AlgorithmLayer {
+  layerNumber: number,
+  backgroundClass: string,
+  numNodes: number
 }
 
 export enum BackgroundClass {
