@@ -110,3 +110,7 @@ td:hover::before, thead>th:not(:first-child):hover::before {
   content: "";
   background-color: rgba(0, 0, 0, 0.1);
 }
+
+#algorithmOmittedNodes {
+  color: red
+}

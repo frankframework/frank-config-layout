@@ -39,6 +39,12 @@
     <div *ngIf="manualView.header.length == 0" class="placeholder">No Mermaid loaded yet</div>
   </div>
   <div id="algorithm" *ngIf="activeTab === 'ALGORITHM'">
+    <table>
+      <tr>
+        <td>Omitted nodes: </td>
+        <td id="algorithmOmittedNodes">{{ algorithmView.omittedNodes }}</td>
+      </tr>
+    </table>
     <div *ngIf="algorithmView.layers.length === 0">No Mermaid loaded yet</div>
     <table *ngIf="algorithmView.layers.length >= 1">
       <thead>

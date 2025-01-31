@@ -100,6 +100,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
 
   getEmptyAlgorithmView(): AlgorithmView {
     return {
+      omittedNodes: "",
       layers: []
     }
   }
@@ -297,7 +298,10 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
         numNodes: lb.getIdsOfLayer(layerIndex).length
       })
     }
-    return { layers }
+    const omittedNodes: string = this.model!.getOrderedOmittedNodes()
+      .map(n => getCaption(n, this.captionChoice))
+      .join(", ")
+    return { omittedNodes, layers }
   }
 }
 
@@ -329,6 +333,7 @@ interface ManualCell {
 }
 
 interface AlgorithmView {
+  omittedNodes: string
   layers: AlgorithmLayer[]
 }
 
