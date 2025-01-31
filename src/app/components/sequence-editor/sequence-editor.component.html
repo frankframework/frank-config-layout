@@ -44,6 +44,10 @@
         <td>Omitted nodes: </td>
         <td id="algorithmOmittedNodes">{{ algorithmView.omittedNodes }}</td>
       </tr>
+      <tr>
+        <td>Est. #crossings</td>
+        <td>{{ algorithmView.numCrossings }}</td>
+      </tr>
     </table>
     <div *ngIf="algorithmView.layers.length === 0">No Mermaid loaded yet</div>
     <table *ngIf="algorithmView.layers.length >= 1">

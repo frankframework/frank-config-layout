@@ -15,6 +15,7 @@
 */
 
 import { Graph } from './graph'
+import { LayerCalculationNode, LayerCalculation } from '../util/layerCalculation'
 
 // On ordering of nodes in nodes and edges in vertically-stacked layers.
 // These are numbered from top to bottom. Within each layer, the nodes are
@@ -60,6 +61,19 @@ export class LayoutBase {
     return [ ... this.nodesByLayer[layerNumber] ]
   }
 
+  putNewSequenceInLayer(layerNumber: number, newSequence: string[]) {
+    const invalidIds = newSequence.filter(newId => ! this.nodeIdToLayer.has(newId))
+    if (invalidIds.length >= 1) {
+      throw new Error(`Putting new ids in layer ${layerNumber}: ${invalidIds}`)
+    }
+    const oldNumNodes: number = this.getIdsOfLayer(layerNumber).length
+    const newNumNodes: number = newSequence.length
+    if (oldNumNodes !== newNumNodes) {
+      throw new Error(`Changing the number of nodes in layer ${layerNumber}: from ${oldNumNodes} to ${newNumNodes}`)
+    }
+    this.nodesByLayer[layerNumber] = newSequence
+  }
+
   positionsToIds(layerNumber: number, positions: number[]): string[] {
     return positions.map(p => this.nodesByLayer[layerNumber][p])
   }
@@ -93,4 +107,23 @@ function orderNodesByLabelButPreserveOrderWithinEachLayer(
     nodesByLayer[layer].push(id)
   }
   return nodesByLayer
+}
+
+export function getNumCrossings(lb: LayoutBase): number {
+  if (lb.numLayers <= 1) {
+    return 0
+  }
+  let numCrossings = 0
+  for (let layerNumber = 0; layerNumber < lb.numLayers - 1; ++layerNumber) {
+    numCrossings += getLayerCalculation(lb, layerNumber, layerNumber + 1).count()
+  }
+  return numCrossings
+}
+
+function getLayerCalculation(lb: LayoutBase, target: number, ref: number): LayerCalculation {
+  const calculationNodes: LayerCalculationNode[] = lb.getIdsOfLayer(target)
+    .map(id => { 
+      return {id: id, connections: lb.getConnections(id, ref)}
+    })
+  return new LayerCalculation(calculationNodes)
 }

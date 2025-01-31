@@ -16,7 +16,7 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
-import { LayoutBase } from '../../model/layoutBase'
+import { LayoutBase, getNumCrossings } from '../../model/layoutBase'
 import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../model/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { getRange } from '../../util/util';
@@ -101,6 +101,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
   getEmptyAlgorithmView(): AlgorithmView {
     return {
       omittedNodes: "",
+      numCrossings: 0,
       layers: []
     }
   }
@@ -301,7 +302,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     const omittedNodes: string = this.model!.getOrderedOmittedNodes()
       .map(n => getCaption(n, this.captionChoice))
       .join(", ")
-    return { omittedNodes, layers }
+    return { omittedNodes, numCrossings: getNumCrossings(lb), layers }
   }
 }
 
@@ -334,6 +335,7 @@ interface ManualCell {
 
 interface AlgorithmView {
   omittedNodes: string
+  numCrossings: number
   layers: AlgorithmLayer[]
 }
 
