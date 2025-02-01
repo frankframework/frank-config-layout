@@ -94,6 +94,30 @@ export function doRotateToSwapItems<T>(target: T[], posFrom: number, posTo: numb
   target[posTo] = carry
 }
 
+export function permutationFrom(oldSequence: (string | null)[], newSequence: string[]): number[] {
+  let newPositionMap = new Map<string, number>()
+  let cursorNew = 0
+  for (let position = 0; position < oldSequence.length; ++position) {
+    if (oldSequence[position] !== null) {
+      newPositionMap.set(newSequence[cursorNew++], position)
+    }
+  }
+  let result: number[] = []
+  for (let position = 0; position < oldSequence.length; ++position) {
+    const itemConsidered: string | null = oldSequence[position]
+    if (itemConsidered === null) {
+      result.push(position)
+    } else {
+      if (! newPositionMap.has(itemConsidered)) {
+        throw new Error(`Expected that item of old sequence is in new sequence: ${itemConsidered}`)
+      }
+      const newPosition: number = newPositionMap.get(itemConsidered)!
+      result.push(newPosition)
+    }
+  }
+  return result
+}
+
 // Copied from https://stackoverflow.com/questions/33289726/combination-of-async-function-await-settimeout
 export async function timeout(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));

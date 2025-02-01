@@ -1,4 +1,4 @@
-import { doRotateToSwapItems, getRange, rotateToSwapItems, roundedMedian, sortedUniqNumbers } from './util'
+import { doRotateToSwapItems, getRange, permutationFrom, rotateToSwapItems, roundedMedian, sortedUniqNumbers } from './util'
 
 describe('Util test', () => {
   it('Get range', () => {
@@ -113,5 +113,31 @@ describe('Util test', () => {
     expect(permutation[2]).toEqual(3)
     expect(permutation[3]).toEqual(1)
     expect(permutation[4]).toEqual(4)
+  })
+
+  it('When sequence is changed, permutationFrom gives at old position index of new position', () => {
+    const oldSequence = ["A", "B", "C"]
+    const newSequence = ["C", "A", "B"]
+    expect(permutationFrom(oldSequence, newSequence)).toEqual([1, 2, 0])
+  })
+
+  it('When sequence is not changed, permutationFrom gives identity permutation', () => {
+    const oldSequence = ["A", "B", "C"]
+    const newSequence = ["A", "B", "C"]
+    expect(permutationFrom(oldSequence, newSequence)).toEqual([0, 1, 2])
+  })
+
+  it('When first of old sequence is null, permutationFrom considers the new items pasted in the non-null spots', () => {
+    const oldSequence = [null, "A", "B", "C"]
+    // Taken to be null, "C", "A", "B"
+    const newSequence = ["C", "A", "B"]
+    expect(permutationFrom(oldSequence, newSequence)).toEqual([0, 2, 3, 1])
+  })
+
+  it('When second of old sequence is null, permutationFrom considers the new items pasted in the non-null spots', () => {
+    const oldSequence = ["A", null, "B", "C"]
+    // Taken to be "C", null, "A", "B"
+    const newSequence = ["C", "A", "B"]
+    expect(permutationFrom(oldSequence, newSequence)).toEqual([2, 1, 3, 0])
   })
 })
