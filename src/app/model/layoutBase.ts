@@ -71,7 +71,7 @@ export class LayoutBase {
     if (oldNumNodes !== newNumNodes) {
       throw new Error(`Changing the number of nodes in layer ${layerNumber}: from ${oldNumNodes} to ${newNumNodes}`)
     }
-    this.nodesByLayer[layerNumber] = newSequence
+    this.nodesByLayer[layerNumber] = [ ... newSequence]
   }
 
   positionsToIds(layerNumber: number, positions: number[]): string[] {
@@ -126,4 +126,24 @@ function getLayerCalculation(lb: LayoutBase, target: number, ref: number): Layer
       return {id: id, connections: lb.getConnections(id, ref)}
     })
   return new LayerCalculation(calculationNodes)
+}
+
+export function alignFromLayer(lb: LayoutBase, fixedLayerNumber: number) {
+  if (fixedLayerNumber >= 1) {
+    for (let target = fixedLayerNumber - 1; target >= 0; --target) {
+      alignFromLayerTo(lb, target, target + 1)
+    }
+  }
+  if (fixedLayerNumber <= lb.numLayers - 2) {
+    for (let target = fixedLayerNumber + 1; target <= lb.numLayers - 1; ++target) {
+      alignFromLayerTo(lb, target, target - 1)
+    }
+  }
+}
+
+function alignFromLayerTo(lb: LayoutBase, target: number, ref: number) {
+  let c: LayerCalculation = getLayerCalculation(lb, target, ref)
+  c.alignToConnections()
+  lb.putNewSequenceInLayer(target, c.getSequence())
+  ref = target
 }

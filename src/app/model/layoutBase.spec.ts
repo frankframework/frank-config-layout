@@ -1,5 +1,5 @@
 import { ConcreteGraphBase, GraphConnectionsDecorator, Graph } from './graph'
-import { LayoutBase, getNumCrossings } from './layoutBase'
+import { LayoutBase, getNumCrossings, alignFromLayer} from './layoutBase'
 
   // See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
   // for the graphical representation of this layout.
@@ -218,4 +218,61 @@ describe('Operations on LayoutBase', () => {
     expect(lb.getIdsOfLayer(2)).toEqual(["E1", "E3", "E2"])
     expect(getNumCrossings(lb)).toEqual(1)
   })
+
+  // Create the following LayoutBase:
+  //
+  //   0A  0B  0C
+  //      
+  //   1B  1C  1A
+  //
+  //   2C  2A  2B
+  //
+  // with nodes of same letters connected.
+  // Then do three different tests, each fixing
+  // one of the layers and aligning the other.
+  //
+  const alignmentCase = [
+    ['A', 'B', 'C'],
+    ['B', 'C', 'A'],
+    ['C', 'A', 'B']
+  ]
+
+  for (let alignmentLayer = 0; alignmentLayer <= 2; ++alignmentLayer) {
+    it(`When aligning with fixed layer ${alignmentLayer}, then others are aligned correctly`, () => {
+      const b: ConcreteGraphBase = new ConcreteGraphBase()
+      for (let layerNumber = 0; layerNumber <= 2; ++layerNumber) {
+        for (let position = 0; position <= 2; ++position) {
+          const id: string = '' + layerNumber + alignmentCase[layerNumber][position]
+          b.addNode(id, '', '')
+        }
+      }
+      for (let layerNumber = 0; layerNumber <= 1; ++layerNumber) {
+        for (const letterOfId of ['A', 'B', 'C']) {
+          const idFirst: string = '' + layerNumber + letterOfId
+          const nextLayerNumber: number = layerNumber + 1
+          const idSecond: string = '' + nextLayerNumber + letterOfId
+          b.connect(b.getNodeById(idFirst)!, b.getNodeById(idSecond)!)
+        }
+      }
+      const g: Graph = new GraphConnectionsDecorator(b)
+      const m: Map<string, number> = new Map([
+        ['0A', 0],
+        ['0B', 0],
+        ['0C', 0],
+        ['1A', 1],
+        ['1B', 1],
+        ['1C', 1],
+        ['2A', 2],
+        ['2B', 2],
+        ['2C', 2]
+      ])
+      const sequence: string[] = g.getNodes().map(n => n.getId())
+      let lb = new LayoutBase(sequence, g, m, 3)
+      alignFromLayer(lb, alignmentLayer)
+      const expectedSequenceOfLetters = alignmentCase[alignmentLayer]
+      for (let testLayer = 0; testLayer <= 2; ++testLayer) {
+        expect(lb.getIdsOfLayer(testLayer)).toEqual(expectedSequenceOfLetters.map(letter => '' + testLayer + letter))
+      }
+    })
+  }
 })
