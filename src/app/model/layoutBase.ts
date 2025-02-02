@@ -166,7 +166,8 @@ export function calculateNumCrossingsChangesFromAligning(original: LayoutBase): 
   return result;
 }
 
-class NumCrossingsJudgement {
+// Only exported for testing
+export class NumCrossingsJudgement {
   constructor(
     readonly layerNumber: number,
     readonly numNodes: number,
@@ -190,15 +191,12 @@ export function minimizeNumCrossings(lb: LayoutBase): LayoutBase {
   let current = lb.clone()
   while (true) {
     const crossingsChanges = calculateNumCrossingsChangesFromAligning(current)
-    console.log(`Crossings changes: ${crossingsChanges}`)
     const judgements: NumCrossingsJudgement[] = []
     for (let layerNumber = 0; layerNumber < lb.numLayers; ++layerNumber) {
       judgements.push(new NumCrossingsJudgement(layerNumber, lb.getIdsOfLayer(layerNumber).length, - crossingsChanges[layerNumber]))
     }
-    console.log(`Reduction diffs: ${judgements.map(j => j.numCrossingsReduction)}`)
     judgements.sort((a, b) => a.compareTo(b))
     const best: NumCrossingsJudgement = judgements[judgements.length - 1]
-    console.log(`Best: layerNumber=${best.layerNumber}, numNodes=${best.numNodes}, reduction=${best.numCrossingsReduction}`)
     if (best.numCrossingsReduction <= 0) {
       return current
     } else {

@@ -25,7 +25,7 @@ N3 --> |success| End`
 // TODO: This is certainly not a nice layout. This should be fixed when
 // Lenard's horizontal layout algorithm will have been added
 const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
-  width="410" height="480" >
+  width="439" height="480" >
   <defs>
     <style>
       .rectangle {
@@ -77,7 +77,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       <path d="M 0 0 L 4 2 L 0 4 z" />
     </marker>
   </defs>
-  <g class="frank-flowchart-node-Start" transform="translate(182, 0)">
+  <g class="frank-flowchart-node-Start" transform="translate(96, 0)">
     <rect class="rectangle"
       width="160"
       height="50"
@@ -91,7 +91,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       </div>
     </foreignObject>
   </g>
-  <g class="frank-flowchart-node-N1" transform="translate(7, 120)">
+  <g class="frank-flowchart-node-N1" transform="translate(96, 120)">
     <rect class="rectangle"
       width="160"
       height="50"
@@ -105,7 +105,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       </div>
     </foreignObject>
   </g>
-  <g class="frank-flowchart-node-N3" transform="translate(182, 120)">
+  <g class="frank-flowchart-node-N3" transform="translate(271, 120)">
     <rect class="rectangle errorOutline"
       width="160"
       height="50"
@@ -119,7 +119,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       </div>
     </foreignObject>
   </g>
-  <g class="frank-flowchart-node-N2" transform="translate(122, 240)">
+  <g class="frank-flowchart-node-N2" transform="translate(7, 240)">
     <rect class="rectangle"
       width="160"
       height="50"
@@ -133,7 +133,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       </div>
     </foreignObject>
   </g>
-  <g class="frank-flowchart-node-End" transform="translate(240, 360)">
+  <g class="frank-flowchart-node-End" transform="translate(125, 360)">
     <rect class="rectangle"
       width="160"
       height="50"
@@ -148,34 +148,34 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     </foreignObject>
   </g>
   <g class="frank-flowchart-edge-Start-N1">
-    <polyline class="line" points="222,49 87,120" marker-end="url(#arrow)"/>
+    <polyline class="line" points="176,49 176,120" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-Start-intermediate1">
-    <polyline class="line" points="301,49 380,145" />
+    <polyline class="line" points="136,49 59,145" />
   </g>
   <g class="frank-flowchart-edge-intermediate1-N2">
-    <polyline class="line" points="380,145 241,240" marker-end="url(#arrow)"/>
+    <polyline class="line" points="59,145 47,240" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-Start-N3">
-    <polyline class="line" points="262,49 262,120" marker-end="url(#arrow)"/>
+    <polyline class="line" points="215,49 351,120" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N1-intermediate2">
-    <polyline class="line error" points="126,169 320,265" />
+    <polyline class="line error" points="215,169 205,265" />
   </g>
   <g class="frank-flowchart-edge-intermediate2-End">
-    <polyline class="line error" points="320,265 320,360" marker-end="url(#arrow)"/>
+    <polyline class="line error" points="205,265 205,360" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N2-End">
-    <polyline class="line" points="202,289 280,360" marker-end="url(#arrow)"/>
+    <polyline class="line" points="87,289 165,360" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N1-N2">
-    <polyline class="line" points="47,169 162,240" marker-end="url(#arrow)"/>
+    <polyline class="line" points="136,169 126,240" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N3-intermediate3">
-    <polyline class="line error" points="262,169 380,265" />
+    <polyline class="line error" points="351,169 351,265" />
   </g>
   <g class="frank-flowchart-edge-intermediate3-End">
-    <polyline class="line error" points="380,265 359,360" marker-end="url(#arrow)"/>
+    <polyline class="line error" points="351,265 244,360" marker-end="url(#arrow)"/>
   </g>
 </svg>`
 

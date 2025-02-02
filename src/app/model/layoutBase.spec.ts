@@ -1,5 +1,5 @@
 import { ConcreteGraphBase, GraphConnectionsDecorator, Graph } from './graph'
-import { LayoutBase, getNumCrossings, alignFromLayer} from './layoutBase'
+import { LayoutBase, getNumCrossings, alignFromLayer, NumCrossingsJudgement} from './layoutBase'
 
   // See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
   // for the graphical representation of this layout.
@@ -275,4 +275,20 @@ describe('Operations on LayoutBase', () => {
       }
     })
   }
+})
+
+describe('LayoutBase NumCrossingsJudgement', () => {
+  it (`When NumCrossingsJudgements differ by crossings reduction and num nodes, then reduction takes precedence`, () => {
+    const first = new NumCrossingsJudgement(0, 10, 40)
+    const second = new NumCrossingsJudgement(1, 8, 45)
+    expect(first.compareTo(second)).toEqual(-5)
+    expect(second.compareTo(first)).toEqual(5)
+  })
+
+  it(`When NumCrossingsJudgements differ by num nodes, then that criterion is used`, () => {
+    const first = new NumCrossingsJudgement(0, 10, 40)
+    const second = new NumCrossingsJudgement(1, 8, 40)
+    expect(first.compareTo(second)).toEqual(2)
+    expect(second.compareTo(first)).toEqual(-2)
+  })
 })
