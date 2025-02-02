@@ -22,8 +22,6 @@ N3 --> |success| End`
 // to each line. Fix this by finding the right indent of the line
 // "const expected = ``" before inserting the text inside the ``.
 //
-// TODO: This is certainly not a nice layout. This should be fixed when
-// Lenard's horizontal layout algorithm will have been added
 const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   width="439" height="480" >
   <defs>
