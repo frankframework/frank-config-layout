@@ -54,11 +54,15 @@
       <thead>
         <th># layer</th>
         <th># nodes</th>
+        <th>Align from layer</th>
       </thead>
       <tr *ngFor="let layer of algorithmView.layers"
         [ngClass] = "getBackgroundClass(layer)">
         <th>{{ layer.layerNumber }}</th>
         <td>{{ layer.numNodes }}</td>
+        <td><button
+          [ngClass] = "layer.numCrossingsChangeByAligningFromJudgement"
+          (click)="onAlignFromLayer(layer.layerNumber)">A: {{layer.numCrossingsChangeByAligningFrom }}</button></td>
       </tr>
     </table>
   </div>

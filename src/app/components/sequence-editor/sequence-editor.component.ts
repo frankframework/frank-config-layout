@@ -16,7 +16,7 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
-import { LayoutBase, getNumCrossings } from '../../model/layoutBase'
+import { LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning } from '../../model/layoutBase'
 import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../model/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { getRange } from '../../util/util';
@@ -196,6 +196,17 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     this.onChanged.emit(true)
   }
 
+  onAlignFromLayer(layerNumber: number) {
+    if (this.model === null) {
+      return
+    }
+    const lb: LayoutBase = this.model.getShownNodesLayoutBase()
+    alignFromLayer(lb, layerNumber)
+    this.model.updatePositionsOfShownNodes(lb)
+    this.updateViews()
+    this.onChanged.emit(true)
+  }
+
   getManualClass(item: ManualPosition | ManualCell): string[] {
     const result = []
     if (item.selected === true) {
@@ -292,17 +303,30 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
   getAlgorithmView(): AlgorithmView {
     const lb: LayoutBase = this.model!.getShownNodesLayoutBase()
     let layers: AlgorithmLayer[] = []
+    const numCrossingsChangesByAligningFrom = calculateNumCrossingsChangesFromAligning(lb)
     for (let layerIndex = 0; layerIndex < lb.numLayers; ++layerIndex) {
       layers.push({
         layerNumber: layerIndex,
         backgroundClass: layerIndex % 2 === 0 ? BackgroundClass.EVEN : BackgroundClass.ODD,
-        numNodes: lb.getIdsOfLayer(layerIndex).length
+        numNodes: lb.getIdsOfLayer(layerIndex).length,
+        numCrossingsChangeByAligningFrom: numCrossingsChangesByAligningFrom[layerIndex],
+        numCrossingsChangeByAligningFromJudgement: this.judgementOfNumCrossingsChange(numCrossingsChangesByAligningFrom[layerIndex])
       })
     }
     const omittedNodes: string = this.model!.getOrderedOmittedNodes()
       .map(n => getCaption(n, this.captionChoice))
       .join(", ")
     return { omittedNodes, numCrossings: getNumCrossings(lb), layers }
+  }
+
+  private judgementOfNumCrossingsChange(change: number): string {
+    if (change > 0) {
+      return JUDGEMENT_BAD
+    } else if (change < 0) {
+      return JUDGEMENT_GOOD
+    } else {
+      return JUDGEMENT_NEUTRAL
+    }
   }
 }
 
@@ -343,6 +367,8 @@ interface AlgorithmLayer {
   layerNumber: number,
   backgroundClass: string,
   numNodes: number
+  numCrossingsChangeByAligningFrom: number
+  numCrossingsChangeByAligningFromJudgement: string
 }
 
 export enum BackgroundClass {
@@ -350,3 +376,7 @@ export enum BackgroundClass {
   ODD = "odd",
   DOUBLE_ODD = "doubleOdd"
 }
+
+const JUDGEMENT_GOOD = "good"
+const JUDGEMENT_BAD = "bad"
+const JUDGEMENT_NEUTRAL = "neutral"

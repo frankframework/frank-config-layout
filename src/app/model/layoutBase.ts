@@ -53,6 +53,10 @@ export class LayoutBase {
     }
   }
 
+  clone(): LayoutBase {
+    return new LayoutBase([ ... this.getSequence()], this.g, this.nodeIdToLayer, this.numLayers)
+  }
+
   getSequence(): string[] {
     return this.nodesByLayer.flat()
   }
@@ -146,4 +150,18 @@ function alignFromLayerTo(lb: LayoutBase, target: number, ref: number) {
   c.alignToConnections()
   lb.putNewSequenceInLayer(target, c.getSequence())
   ref = target
+}
+
+// TODO: I do not know how to test this automatically
+export function calculateNumCrossingsChangesFromAligning(original: LayoutBase): number[] {
+  const originalNumCrossings = getNumCrossings(original)
+  const result: number[] = []
+  for (let layerNumber = 0; layerNumber < original.numLayers; ++layerNumber) {
+    const lbNew: LayoutBase = original.clone()
+    alignFromLayer(lbNew, layerNumber)
+    const newNumCrossings = getNumCrossings(lbNew)
+    const changeOfNumCrossings = newNumCrossings - originalNumCrossings
+    result.push(changeOfNumCrossings)
+  }
+  return result;
 }
