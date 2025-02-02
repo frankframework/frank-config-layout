@@ -20,7 +20,7 @@ import { Graph, GraphBase, GraphConnectionsDecorator } from '../model/graph';
 import { categorize } from '../model/error-flow'
 import { getGraphFromMermaid } from '../parsing/mermaid-parser';
 import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from '../model/horizontalGrouping';
-import { LayoutBase } from '../model/layoutBase'
+import { LayoutBase, minimizeNumCrossings } from '../model/layoutBase'
 import { NodeLayoutBuilder } from '../graphics/node-layout';
 import { generateSvg } from '../graphics/svg-generator';
 import { AsynchronousCache } from '../util/asynchronousCache';
@@ -87,8 +87,7 @@ export class Mermaid2svgService {
     } catch(e) {
       throw e
     }
-    // TODO: Implement and do manipulations in LayoutBase to get
-    // as less crossing lines as possible.
+    lb = minimizeNumCrossings(lb)
     const nodeLayoutBuiler = new NodeLayoutBuilder(lb, graphWithIntermediateNodes, this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
     const layout = new Layout(nodeLayout, this.dimensions)

@@ -165,3 +165,44 @@ export function calculateNumCrossingsChangesFromAligning(original: LayoutBase): 
   }
   return result;
 }
+
+class NumCrossingsJudgement {
+  constructor(
+    readonly layerNumber: number,
+    readonly numNodes: number,
+    readonly numCrossingsReduction: number
+  ) {}
+
+  compareTo(other: NumCrossingsJudgement): number {
+    const crossingsReductionDiff = this.numCrossingsReduction - other.numCrossingsReduction
+    if (crossingsReductionDiff !== 0) {
+      return crossingsReductionDiff
+    }
+    const numNodesDiff: number = this.numNodes - other.numNodes
+    if (numNodesDiff !== 0) {
+      return numNodesDiff
+    }
+    return this.layerNumber - other.layerNumber
+  }
+}
+
+export function minimizeNumCrossings(lb: LayoutBase): LayoutBase {
+  let current = lb.clone()
+  while (true) {
+    const crossingsChanges = calculateNumCrossingsChangesFromAligning(current)
+    console.log(`Crossings changes: ${crossingsChanges}`)
+    const judgements: NumCrossingsJudgement[] = []
+    for (let layerNumber = 0; layerNumber < lb.numLayers; ++layerNumber) {
+      judgements.push(new NumCrossingsJudgement(layerNumber, lb.getIdsOfLayer(layerNumber).length, - crossingsChanges[layerNumber]))
+    }
+    console.log(`Reduction diffs: ${judgements.map(j => j.numCrossingsReduction)}`)
+    judgements.sort((a, b) => a.compareTo(b))
+    const best: NumCrossingsJudgement = judgements[judgements.length - 1]
+    console.log(`Best: layerNumber=${best.layerNumber}, numNodes=${best.numNodes}, reduction=${best.numCrossingsReduction}`)
+    if (best.numCrossingsReduction <= 0) {
+      return current
+    } else {
+      alignFromLayer(current, best.layerNumber)
+    }
+  }
+}
