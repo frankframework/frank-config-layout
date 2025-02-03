@@ -1,8 +1,9 @@
 import { getRange } from "../util/util"
-import { ConcreteGraphBase } from "./graph"
+import { ConcreteGraphBase, GraphConnectionsDecorator } from "./graph"
 import { Node } from "./graph"
+import { LayoutBase } from "./layoutBase"
 import { NodeSequenceEditorBuilder } from "./horizontalGrouping"
-import { NodeSequenceEditor } from "./nodeSequenceEditor"
+import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
 
 describe('NodeOrEdgeSelection', () => {
@@ -60,6 +61,37 @@ describe('NodeOrEdgeSelection', () => {
     checkEdgeStartN1SelectedCorrectly(instance, m)
     instance.selectEdgeKey('Start-N1', m)
     checkNothingSelected(instance, m)
+  })
+
+  it('When changed sequence from layoutBase is put back in model with omitted nodes, permutation correctly updates index of some selected node', () => {
+    const b = new ConcreteGraphBase()
+    newNode('N1', b)
+    newNode('N2', b)
+    newNode('N3', b)
+    newNode('N4', b)
+    const m: Map<string, number> = new Map([
+      ['N1', 0],
+      ['N2', 0],
+      ['N3', 0],
+      ['N4', 0]
+    ])
+    const g = new GraphConnectionsDecorator(b)
+    const builder = new NodeSequenceEditorBuilder(m, g)
+    const model: NodeSequenceEditor = builder.build()
+    // Omits N2
+    expect(model.omitNodeFrom(1)).toEqual(UpdateResponse.ACCEPTED)
+    const lb: LayoutBase = model.getShownNodesLayoutBase()
+    expect(lb.getSequence()).toEqual(['N1', 'N3', 'N4'])
+    lb.putNewSequenceInLayer(0, ['N3', 'N4', 'N1'])
+    const permutation = model.updatePositionsOfShownNodes(lb)
+    const updatedSequence: (string | null)[] = model.getSequence().map(n => n === null ? null : n.getId())
+    expect(updatedSequence).toEqual(['N3', null, 'N4', 'N1'])
+    // If N1 was selected, it was index 0 and becomes index 3
+    expect(permutation[0]).toEqual(3)
+    // N2 was omitted. No index change.
+    expect(permutation[1]).toEqual(1)
+    expect(permutation[2]).toEqual(0)
+    expect(permutation[3]).toEqual(2)
   })
 })
 

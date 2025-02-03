@@ -2,6 +2,14 @@
   padding-bottom: 10px
 }
 
+.tab {
+  background-color: lightgray
+}
+
+.tab.selected {
+  background-color: gray
+}
+
 [cdkDragHandle] {
   cursor:pointer;
 }
@@ -19,6 +27,12 @@ thead th {
   writing-mode: vertical-lr;
   vertical-align: bottom;
   cursor: default
+}
+
+#algorithm thead th {
+  text-align: right;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .odd {
@@ -95,4 +109,16 @@ td:hover::before, thead>th:not(:first-child):hover::before {
   z-index: -1;
   content: "";
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+#algorithmOmittedNodes {
+  color: red
+}
+
+.good {
+  color: green
+}
+
+.bad {
+  color: red
 }

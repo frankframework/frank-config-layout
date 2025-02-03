@@ -22,7 +22,7 @@
 // supported here.
 
 import { Node, Edge, getEdgeKey, OptionalNode, OptionalEdge, Graph, NodeOrEdge } from './graph'
-import { getRange, rotateToSwapItems } from '../util/util'
+import { getRange, rotateToSwapItems, permutationFrom } from '../util/util'
 import { LayoutBase } from './layoutBase'
 
 export enum UpdateResponse {
@@ -53,6 +53,7 @@ export interface NodeSequenceEditor {
   omitNodeFrom(position: number): UpdateResponse
   reintroduceNode(position: number, node: Node): UpdateResponse
   getShownNodesLayoutBase(): LayoutBase
+  updatePositionsOfShownNodes(lb: LayoutBase): number[]
   getOrderedOmittedNodes(): readonly Node[]
   getOrderedOmittedNodesInLayer(layerNumber: number): readonly Node[]
   getCell(positionFrom: number, positionTo: number): NodeSequenceEditorCell
@@ -263,6 +264,18 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
       .map(n => n as Node)
       .map(n => n.getId()!)
     return new LayoutBase(shownSequence, this.graph, this.nodeIdToLayer, this.getNumLayers())
+  }
+
+  updatePositionsOfShownNodes(lb: LayoutBase): number[] {
+    const newSequence = lb.getSequence()
+    const permutation = permutationFrom(this.sequence, newSequence)
+    let cursorInNewSequence = 0
+    for (let position = 0; position < this.sequence.length; ++position) {
+      if (this.sequence[position] !== null) {
+        this.sequence[position] = newSequence[cursorInNewSequence++]
+      }
+    }
+    return permutation
   }
 
   getOrderedOmittedNodes(): readonly Node[] {

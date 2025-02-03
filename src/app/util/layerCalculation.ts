@@ -20,7 +20,7 @@
 // the reference layer. The outer loop is then over the target
 // layer, while the inner loop is over the indexes pointed to.
 
-interface LayerCalculationNode {
+export interface LayerCalculationNode {
   readonly id: string
   readonly connections: number[]
 }

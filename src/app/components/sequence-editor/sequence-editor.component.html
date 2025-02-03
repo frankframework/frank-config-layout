@@ -1,32 +1,69 @@
 <div>
-  <div id="showTextContainer"><label>Show node text</label><input type="checkbox" [checked]="showText" (click)="onNewCaptionChoice()"/></div>
-  <table *ngIf="view.header.length > 0" cdkDropList (cdkDropListDropped)="drop($event)">
-    <thead>
-      <th></th>
-      <th *ngFor="let headerCell of view.header" [ngClass]="getClass(headerCell)" (click)="selectNode(headerCell.position)">
-        {{ headerCell.nodeId === null ? "\<empty\>" : headerCell.nodeId}}
-      </th>
-    </thead>
-    <tr *ngFor="let row of view.body" cdkDrag>
-      <th [ngClass]="getClass(row.header)">
-        <div class="row-header-omitted" *ngIf="row.header.nodeId === null">
-          <select (change)="reintroducePulldownSelect($event, row.header.position)" cdkDragHandle>
-            <option></option>
-            <option *ngFor="let option of row.header.fillOptions">{{ option }}</option>
-          </select>
-        </div>
-        <div class="row-header-present" *ngIf="row.header.nodeId !== null">
-          <div cdkDragHandle>{{ row.header.nodeId }}</div>
-          <button (click)="omit(row.header.position)">X</button>
-        </div>
-      </th>
-      <td *ngFor="let cell of row.cells" [ngClass]="getClass(cell)" (click)="selectCell(cell.fromPosition, cell.toPosition)">
-        <div
-          [ngClass]="getCellClass(cell)"
-          (click)="selectCell(cell.fromPosition, cell.toPosition)">
-        </div>
-      </td>
-    </tr>
-  </table>
-  <div *ngIf="view.header.length == 0" class="placeholder">No Mermaid loaded yet</div>
+  <div id="tabs">
+    <button *ngFor="let tab of TABS"
+      class="tab"
+      [class.selected] = "activeTab === tab.id"
+      id="tab.id"
+      (click)="selectTab(tab.id)">{{ tab.caption }}</button>
+  </div>
+  <div *ngIf="activeTab === 'MANUAL'">
+    <div id="showTextContainer"><label>Show node text</label><input type="checkbox" [checked]="showText" (click)="onNewCaptionChoice()"/></div>
+    <table *ngIf="manualView.header.length > 0" cdkDropList (cdkDropListDropped)="drop($event)">
+      <thead>
+        <th></th>
+        <th *ngFor="let headerCell of manualView.header" [ngClass]="getManualClass(headerCell)" (click)="selectNode(headerCell.position)">
+          {{ headerCell.nodeId === null ? "\<empty\>" : headerCell.nodeId}}
+        </th>
+      </thead>
+      <tr *ngFor="let row of manualView.body" cdkDrag>
+        <th [ngClass]="getManualClass(row.header)">
+          <div class="row-header-omitted" *ngIf="row.header.nodeId === null">
+            <select (change)="reintroducePulldownSelect($event, row.header.position)" cdkDragHandle>
+              <option></option>
+              <option *ngFor="let option of row.header.fillOptions">{{ option }}</option>
+            </select>
+          </div>
+          <div class="row-header-present" *ngIf="row.header.nodeId !== null">
+            <div cdkDragHandle>{{ row.header.nodeId }}</div>
+            <button (click)="omit(row.header.position)">X</button>
+          </div>
+        </th>
+        <td *ngFor="let cell of row.cells" [ngClass]="getManualClass(cell)" (click)="selectCell(cell.fromPosition, cell.toPosition)">
+          <div
+            [ngClass]="getCellClass(cell)"
+            (click)="selectCell(cell.fromPosition, cell.toPosition)">
+          </div>
+        </td>
+      </tr>
+    </table>
+    <div *ngIf="manualView.header.length == 0" class="placeholder">No Mermaid loaded yet</div>
+  </div>
+  <div id="algorithm" *ngIf="activeTab === 'ALGORITHM'">
+    <table>
+      <tr>
+        <td>Omitted nodes: </td>
+        <td id="algorithmOmittedNodes">{{ algorithmView.omittedNodes }}</td>
+      </tr>
+      <tr>
+        <td>Est. #crossings</td>
+        <td>{{ algorithmView.numCrossings }}</td>
+      </tr>
+    </table>
+    <div *ngIf="algorithmView.layers.length === 0">No Mermaid loaded yet</div>
+    <table *ngIf="algorithmView.layers.length >= 1">
+      <thead>
+        <th># layer</th>
+        <th># nodes</th>
+        <th>Align from layer</th>
+      </thead>
+      <tr *ngFor="let layer of algorithmView.layers"
+        [ngClass] = "getBackgroundClass(layer)">
+        <th>{{ layer.layerNumber }}</th>
+        <td>{{ layer.numNodes }}</td>
+        <td><button
+          [ngClass] = "layer.numCrossingsChangeByAligningFromJudgement"
+          (click)="onAlignFromLayer(layer.layerNumber)">A: {{layer.numCrossingsChangeByAligningFrom }}</button></td>
+      </tr>
+    </table>
+  </div>
 </div>
