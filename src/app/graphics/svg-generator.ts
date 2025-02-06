@@ -15,13 +15,13 @@
 */
 
 import { CreationReason } from "../model/horizontalGrouping"
-import { Layout, PlacedEdge, PlacedNode } from "./edge-layout"
+import { Layout, LayoutLineSegment, PlacedNode } from "./edge-layout"
 
 export function generateSvg(layout: Layout) {
   return openSvg(layout.width, layout.height)
     + renderDefs()
     + renderNodes(layout.getNodes().map(n => n as PlacedNode))
-    + renderEdges(layout.getEdges().map(e => e as PlacedEdge))
+    + renderEdges(layout.getLineSegments().map(e => e as LayoutLineSegment))
     + closeSvg()
 }
 
@@ -120,11 +120,11 @@ function getRectangleClass(n: PlacedNode): string {
   }
 }
 
-function renderEdges(edges: PlacedEdge[]): string {
+function renderEdges(edges: LayoutLineSegment[]): string {
   return edges.map(edge => renderEdge(edge)).join('')
 }
 
-function renderEdge(edge: PlacedEdge): string {
+function renderEdge(edge: LayoutLineSegment): string {
   return `  <g class="${getEdgeGroupClass(edge.getKey())}">
     <polyline ${classOfLine(edge)} points="${edge.line.startPoint.x},${edge.line.startPoint.y} ${edge.line.endPoint.x},${edge.line.endPoint.y}" ${getMarkerEnd(edge)}/>
   </g>
@@ -135,15 +135,15 @@ function getEdgeGroupClass(key: string) {
   return "frank-flowchart-edge-" + key
 }
 
-function getMarkerEnd(edge: PlacedEdge): string {
-  if (edge.isLastSegment) {
+function getMarkerEnd(lineSegment: LayoutLineSegment): string {
+  if (lineSegment.isLastLineSegment) {
     return 'marker-end="url(#arrow)"'
   } else {
     return ''
   }
 }
 
-function classOfLine(edge: PlacedEdge): string {
+function classOfLine(edge: LayoutLineSegment): string {
   if (edge.isError) {
     return 'class="line error"'
   } else {

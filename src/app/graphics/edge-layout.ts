@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { ConcreteGraphBase, Edge, GraphBase, Node, NodeOrEdge, OptionalNode, getEdgeKey } from "../model/graph";
+import { Edge, GraphBase, Node, NodeOrEdge, OptionalNode, getEdgeKey } from "../model/graph";
 import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
 
 import { CreationReason, EdgeForEditor, NodeForEditor, OriginalNode } from "../model/horizontalGrouping";
@@ -104,98 +104,87 @@ export class PlacedNode implements Node {
   }
 }
 
-export class PlacedEdge implements Edge {
-  readonly key: string
-  readonly creationReason: CreationReason
-  readonly optionalOriginalText: string | null
-  readonly isError: boolean
-  readonly line: Line
-  readonly minLayerNumber: number
-  readonly maxLayerNumber: number
-  readonly isLastSegment: boolean;
-
-  constructor (private fromNode: PlacedNode, private toNode: PlacedNode, rawEdge: Edge, line: Line) {
-    this.key = getEdgeKey(fromNode, toNode)
-    const edge = rawEdge as EdgeForEditor
-    this.isLastSegment = edge.original.getTo().getId() === toNode.getId();
-    this.creationReason = edge.creationReason
-    const originalEdge = edge.original as CategorizedEdge
-    this.isError = originalEdge.isError
-    this.optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
-    this.line = line
-    if (fromNode.layerNumber < toNode.layerNumber) {
-      this.minLayerNumber = fromNode.layerNumber
-      this.maxLayerNumber = toNode.layerNumber
-    } else {
-      this.minLayerNumber = toNode.layerNumber
-      this.maxLayerNumber = fromNode.layerNumber
-    }
+export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, rawEdge: Edge, line: Line): LayoutLineSegment {
+  const key: string = getEdgeKey(fromNode, toNode)
+  const edge = rawEdge as EdgeForEditor
+  const isLastSegment = edge.original.getTo().getId() === toNode.getId();
+  const originalEdge = edge.original as CategorizedEdge
+  const isError = originalEdge.isError
+  const optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
+  let minLayer = 0
+  let maxLayer = 0
+  if (fromNode.layerNumber < toNode.layerNumber) {
+    minLayer = fromNode.layerNumber
+    maxLayer = toNode.layerNumber
+  } else {
+    minLayer = toNode.layerNumber
+    maxLayer = fromNode.layerNumber
   }
+  return new LayoutLineSegment(key, line, optionalOriginalText, isError, isLastSegment, minLayer, maxLayer)
+}
 
-  getFrom(): PlacedNode {
-    return this.fromNode
-  }
-
-  getTo(): PlacedNode {
-    return this.toNode
-  }
+export class LayoutLineSegment {
+  constructor (
+    readonly key: string,
+    readonly line: Line,
+    readonly optionalOriginalText: string | null,
+    readonly isError: boolean,
+    readonly isLastLineSegment: boolean,
+    readonly minLayerNumber: number,
+    readonly maxLayerNumber: number
+) {}
 
   getKey(): string {
     return this.key
   }
 }
 
-export class Layout implements GraphBase {
+export class Layout {
   readonly width: number
   readonly height: number
-  private delegate: ConcreteGraphBase
+  private nodes: PlacedNode[] = []
+  private idToNode: Map<string, PlacedNode> = new Map<string, PlacedNode>()
+  private lineSegments: LayoutLineSegment[] = []
 
   constructor(layout: NodeLayout, d: Dimensions) {
     this.width = layout.width
     this.height = layout.height
     const calc = new Edge2LineCalculation(layout, d)
-    this.delegate = new ConcreteGraphBase()
-    calc.getPlacedNodes().forEach(n => this.delegate.addExistingNode(n))
-    calc.getOriginalEdges().forEach(edge => {
-      this.delegate.addEdge(new PlacedEdge(
-        this.delegate.getNodeById(edge.getFrom().getId())! as PlacedNode,
-        this.delegate.getNodeById(edge.getTo().getId())! as PlacedNode,
-        edge,
-        calc.edge2line(edge)))
-    })
+    this.nodes = [ ... calc.getPlacedNodes() ]
+    for (const n of this.nodes) {
+      this.idToNode.set(n.getId(), n)
+    }
+    this.lineSegments = calc.getOriginalEdges().map(e => createLayoutLineSegmentFromEdge(
+      this.idToNode.get(e.getFrom().getId())!,
+      this.idToNode.get(e.getTo().getId())!,
+      e,
+      calc.edge2line(e))
+    )
   }
 
   getNodes(): readonly Node[] {
-    return this.delegate.getNodes()
+    return [ ... this.nodes ]
   }
 
   getNodeById(id: string): Node | undefined {
-    return this.delegate.getNodeById(id)
+    return this.idToNode.get(id)
   }
 
-  getEdges(): readonly Edge[] {
-    return this.delegate.getEdges()
-  }
-
-  getEdgeByKey(key: string): Edge | undefined {
-    return this.delegate.getEdgeByKey(key)
-  }
-
-  parseNodeOrEdgeId(id: string): NodeOrEdge {
-    return this.delegate.parseNodeOrEdgeId(id)
+  getLineSegments(): LayoutLineSegment[] {
+    return [ ... this.lineSegments ]
   }
 
   getNumCrossingLines(): number {
-    const edges: PlacedEdge[] = this.getEdges().map(edge => edge as PlacedEdge)
+    const lineSegments: LayoutLineSegment[] = this.getLineSegments()
     let result = 0
-    edges.forEach((_, indexFirst) => {
-      edges.forEach((_, indexSecond) => {
+    lineSegments.forEach((_, indexFirst) => {
+      lineSegments.forEach((_, indexSecond) => {
         if (indexSecond > indexFirst) {
-          const layerSpanFirst = Interval.createFromMinMax(edges[indexFirst].minLayerNumber, edges[indexFirst].maxLayerNumber)
-          const layerSpanSecond = Interval.createFromMinMax(edges[indexSecond].minLayerNumber, edges[indexSecond].maxLayerNumber)
+          const layerSpanFirst = Interval.createFromMinMax(lineSegments[indexFirst].minLayerNumber, lineSegments[indexFirst].maxLayerNumber)
+          const layerSpanSecond = Interval.createFromMinMax(lineSegments[indexSecond].minLayerNumber, lineSegments[indexSecond].maxLayerNumber)
           const intersection: Interval | null = layerSpanFirst.toIntersected(layerSpanSecond)
           if ( (intersection !== null) && (intersection.size >= 2) ) {
-            if (this.edgesCross(edges[indexFirst], edges[indexSecond])) {
+            if (this.edgesCross(lineSegments[indexFirst], lineSegments[indexSecond])) {
               ++result
             }  
           }
@@ -205,7 +194,7 @@ export class Layout implements GraphBase {
     return result
   }
 
-  private edgesCross(first: PlacedEdge, second: PlacedEdge): boolean {
+  private edgesCross(first: LayoutLineSegment, second: LayoutLineSegment): boolean {
     let linesTouch = false
     const firstPoints: Point[] = [first.line.startPoint, first.line.endPoint]
     const secondPoints: Point[] = [second.line.startPoint, second.line.endPoint]
