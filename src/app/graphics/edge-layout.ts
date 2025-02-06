@@ -144,7 +144,7 @@ export class Layout {
   readonly height: number
   private nodes: PlacedNode[] = []
   private idToNode: Map<string, PlacedNode> = new Map<string, PlacedNode>()
-  private lineSegments: LayoutLineSegment[] = []
+  private layoutLineSegments: LayoutLineSegment[] = []
 
   constructor(layout: NodeLayout, d: Dimensions) {
     this.width = layout.width
@@ -154,7 +154,7 @@ export class Layout {
     for (const n of this.nodes) {
       this.idToNode.set(n.getId(), n)
     }
-    this.lineSegments = calc.getOriginalEdges().map(e => createLayoutLineSegmentFromEdge(
+    this.layoutLineSegments = calc.getOriginalEdges().map(e => createLayoutLineSegmentFromEdge(
       this.idToNode.get(e.getFrom().getId())!,
       this.idToNode.get(e.getTo().getId())!,
       e,
@@ -170,12 +170,12 @@ export class Layout {
     return this.idToNode.get(id)
   }
 
-  getLineSegments(): LayoutLineSegment[] {
-    return [ ... this.lineSegments ]
+  getLayoutLineSegments(): LayoutLineSegment[] {
+    return [ ... this.layoutLineSegments ]
   }
 
   getNumCrossingLines(): number {
-    const lineSegments: LayoutLineSegment[] = this.getLineSegments()
+    const lineSegments: LayoutLineSegment[] = this.getLayoutLineSegments()
     let result = 0
     lineSegments.forEach((_, indexFirst) => {
       lineSegments.forEach((_, indexSecond) => {

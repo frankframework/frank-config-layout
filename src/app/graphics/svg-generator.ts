@@ -21,7 +21,7 @@ export function generateSvg(layout: Layout) {
   return openSvg(layout.width, layout.height)
     + renderDefs()
     + renderNodes(layout.getNodes().map(n => n as PlacedNode))
-    + renderEdges(layout.getLineSegments().map(e => e as LayoutLineSegment))
+    + renderEdges(layout.getLayoutLineSegments().map(e => e as LayoutLineSegment))
     + closeSvg()
 }
 
