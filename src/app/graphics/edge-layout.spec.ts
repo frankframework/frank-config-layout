@@ -29,20 +29,20 @@ describe('Layout', () => {
     expect(layout.getNodes().map(n => (n as PlacedNode).centerY)).toEqual([25, 145, 145, 265, 265, 385])
     expect(layout.getNodes().map(n => (n as PlacedNode).left)).toEqual([50, 5, 150, 20, 165, 65])
     expect(layout.getNodes().map(n => (n as PlacedNode).top)).toEqual([5, 125, 145, 245, 265, 365])
-    expect(layout.getLayoutLineSegments().map(ls => ls.key)).toEqual(
+    expect(layout.getLayoutLineSegments().map(lls => lls.key)).toEqual(
       ['Start-N1', 'Start-intermediate1', 'intermediate1-N2', 'N1-intermediate2', 'intermediate2-End', 'N2-End', 'N1-N2']
     )
     // The center x-coordinates of the start nodes
-    expect(layout.getLayoutLineSegments().map(e => (e as LayoutLineSegment).line.startPoint.x)).toEqual([
+    expect(layout.getLayoutLineSegments().map(lls => lls.line.startPoint.x)).toEqual([
       105, 105, 150, 60, 165, 75, 60
     ])
-    expect(layout.getLayoutLineSegments().map(e => (e as LayoutLineSegment).line.startPoint.y)).toEqual([
+    expect(layout.getLayoutLineSegments().map(lls => lls.line.startPoint.y)).toEqual([
       44, 44, 145, 164, 265, 284, 164
     ])
-    expect(layout.getLayoutLineSegments().map(e => (e as LayoutLineSegment).line.endPoint.x)).toEqual([
+    expect(layout.getLayoutLineSegments().map(lls => lls.line.endPoint.x)).toEqual([
       60, 150, 75, 165, 120, 120, 75
     ])
-    expect(layout.getLayoutLineSegments().map(e => (e as LayoutLineSegment).line.endPoint.y)).toEqual([
+    expect(layout.getLayoutLineSegments().map(lls => lls.line.endPoint.y)).toEqual([
       125, 145, 245, 265, 365, 365, 245
     ])
   })
