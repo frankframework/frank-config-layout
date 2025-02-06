@@ -27,6 +27,7 @@ export interface Dimensions extends NodeSpacingDimensions {
   nodeBoxWidth: number
   nodeBoxHeight: number
   boxConnectorAreaPerc: number
+  intermediateLayerPassedByVerticalLine: boolean
 }
   
 export class PlacedNode implements Node {
@@ -50,7 +51,11 @@ export class PlacedNode implements Node {
       this.verticalBox = Interval.createFromCenterSize(p.y!, d.nodeBoxHeight)  
     } else {
       this.horizontalBox = Interval.createFromCenterSize(p.x!, 1)
-      this.verticalBox = Interval.createFromCenterSize(p.y!, 1)  
+      if (d.intermediateLayerPassedByVerticalLine) {
+        this.verticalBox = Interval.createFromCenterSize(p.y!, d.nodeBoxHeight)
+      } else {
+        this.verticalBox = Interval.createFromCenterSize(p.y!, 1)
+      }
     }
   }
 
@@ -107,7 +112,7 @@ export class PlacedNode implements Node {
 export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, rawEdge: Edge, line: Line): LayoutLineSegment {
   const key: string = getEdgeKey(fromNode, toNode)
   const edge = rawEdge as EdgeForEditor
-  const isLastSegment = edge.original.getTo().getId() === toNode.getId();
+  const isLastSegment = isLastLineSegment(edge, toNode)
   const originalEdge = edge.original as CategorizedEdge
   const isError = originalEdge.isError
   const optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
@@ -121,6 +126,10 @@ export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: Pl
     maxLayer = fromNode.layerNumber
   }
   return new LayoutLineSegment(key, line, optionalOriginalText, isError, isLastSegment, minLayer, maxLayer)
+}
+
+function isLastLineSegment(edge: EdgeForEditor, toNode: PlacedNode) {
+  return edge.original.getTo().getId() === toNode.getId();
 }
 
 export class LayoutLineSegment {
@@ -159,6 +168,48 @@ export class Layout {
       this.idToNode.get(e.getTo().getId())!,
       e,
       calc.edge2line(e))
+    )
+    if (d.intermediateLayerPassedByVerticalLine) {
+      this.addVerticalLineSegmentsForIntermediateNodes(calc.getOriginalEdges())
+    }
+  }
+
+  private addVerticalLineSegmentsForIntermediateNodes(originalEdges: Edge[]) {
+    const doneIntermediates: Set<string> = new Set<string>()
+    for (const rawOriginalEdge of originalEdges) {
+      const edge = rawOriginalEdge as EdgeForEditor
+      const from = edge.getFrom() as NodeForEditor
+      const fromIsIntermediate = from.getCreationReason() === CreationReason.INTERMEDIATE
+      const placedFrom: PlacedNode = this.idToNode.get(from.getId())!
+      const to = edge.getTo() as NodeForEditor
+      const toIsIntermediate = to.getCreationReason() === CreationReason.INTERMEDIATE
+      const placedTo: PlacedNode = this.idToNode.get(to.getId())!
+      const edgeGoesDown = placedFrom.centerY < placedTo.centerY
+      if (fromIsIntermediate && ! doneIntermediates.has(from.getId())) {
+        this.addVerticalLineSegment(placedFrom, edgeGoesDown, edge)
+        doneIntermediates.add(from.getId())
+      }
+      if (toIsIntermediate && ! doneIntermediates.has(to.getId())) {
+        this.addVerticalLineSegment(placedTo, edgeGoesDown, edge)
+        doneIntermediates.add(to.getId())
+      }
+    }
+  }
+
+  private addVerticalLineSegment(n: PlacedNode, goesDown: boolean, edge: EdgeForEditor) {
+    const originalEdge = edge.original as CategorizedEdge
+    const isError = originalEdge.isError
+    const optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
+    let line: Line
+    if (goesDown) {
+      line = new Line(n.centerTop, n.centerBottom)
+    } else {
+      line = new Line(n.centerBottom, n.centerTop)
+    }
+    const verticalLineSegmentKey = "pass-" + n.getId()
+    this.layoutLineSegments.push(new LayoutLineSegment(
+      verticalLineSegmentKey, line, optionalOriginalText, isError,
+      false, n.layerNumber, n.layerNumber)
     )
   }
 

@@ -50,12 +50,19 @@
             [(ngModel)]="editDimensions.nodeBoxWidth" type="number" minValue="1"
             [ngClass]="editDimensions.nodeBoxWidth !== lastPosted.nodeBoxWidth ? 'changed' : ''" />
           </td>
-          <tr>
-            <td>Connector area %:</td>
-            <td><input
+        </tr>
+        <tr>
+          <td>Connector area %:</td>
+          <td><input
               [(ngModel)]="editDimensions.boxConnectorAreaPerc" type="number" minValue="0" maxValue="100"
               [ngClass]="editDimensions.boxConnectorAreaPerc !== lastPosted.boxConnectorAreaPerc ? 'changed' : ''" />
-            </td>  
+          </td>
+        </tr>
+        <tr>
+          <td>Pass intermediate layers with vertical line segments</td>
+          <td><input
+            [(ngModel)]="editDimensions.intermediateLayerPassedByVerticalLine" type="checkbox"
+            [ngClass]="editDimensions.intermediateLayerPassedByVerticalLine !== lastPosted.intermediateLayerPassedByVerticalLine ? 'changed' : ''"/></td>
         </tr>
       </table>
     </td>
