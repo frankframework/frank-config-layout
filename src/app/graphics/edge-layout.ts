@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Edge, GraphBase, Node, NodeOrEdge, OptionalNode, getEdgeKey } from "../model/graph";
+import { Edge, Node, OptionalNode, getEdgeKey } from "../model/graph";
 import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
 
 import { CreationReason, EdgeForEditor, NodeForEditor, OriginalNode } from "../model/horizontalGrouping";

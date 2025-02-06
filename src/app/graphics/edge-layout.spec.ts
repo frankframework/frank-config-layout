@@ -1,6 +1,6 @@
-import { ConcreteGraphBase, GraphConnectionsDecorator, getEdgeKey } from "../model/graph"
+import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
 import { NodeSequenceEditorBuilder, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
-import { Layout, Dimensions, PlacedNode, LayoutLineSegment } from "./edge-layout"
+import { Layout, Dimensions, PlacedNode } from "./edge-layout"
 import { NodeLayoutBuilder } from "./node-layout"
 
 describe('Layout', () => {
