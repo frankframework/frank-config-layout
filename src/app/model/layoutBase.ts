@@ -30,31 +30,35 @@ import { LayerCalculationNode, LayerCalculation } from '../util/layerCalculation
 //
 
 export class LayoutBase {
-  private nodesByLayer: string[][]
-  private connectedIds: Map<string, Set<string>>
-
-  constructor(
-    sequence: string[],
-    readonly g: Graph,
-    readonly nodeIdToLayer: Map<string, number>,
-    readonly numLayers: number)
-  {
-    this.nodesByLayer = orderNodesByLabelButPreserveOrderWithinEachLayer(sequence, g, nodeIdToLayer, numLayers)
-    this.connectedIds = new Map()
+  static create(sequence: string[], g: Graph, nodeIdToLayer: Map<string, number>, numLayers: number): LayoutBase {
+    const nodesByLayer: string[][] = orderNodesByLabelButPreserveOrderWithinEachLayer(sequence, g, nodeIdToLayer, numLayers)
+    const connectedIds: Map<string, Set<string>> = new Map()
     for (const id of sequence) {
-      this.connectedIds.set(id, new Set())
+      connectedIds.set(id, new Set())
     }
     for (const edge of g.getEdges()) {
-      if (this.connectedIds.has(edge.getFrom().getId()) &&
-          this.connectedIds.has(edge.getTo().getId())) {
-        this.connectedIds.get(edge.getFrom().getId())!.add(edge.getTo().getId())
-        this.connectedIds.get(edge.getTo().getId())!.add(edge.getFrom().getId())
+      if (connectedIds.has(edge.getFrom().getId()) &&
+          connectedIds.has(edge.getTo().getId())) {
+        connectedIds.get(edge.getFrom().getId())!.add(edge.getTo().getId())
+        connectedIds.get(edge.getTo().getId())!.add(edge.getFrom().getId())
       }
     }
+    return new LayoutBase(nodesByLayer, connectedIds, nodeIdToLayer, numLayers)
   }
 
+  constructor(
+    private nodesByLayer: string[][],
+    readonly connectedIds: Map<string, Set<string>>,
+    readonly nodeIdToLayer: Map<string, number>,
+    readonly numLayers: number) {}
+
   clone(): LayoutBase {
-    return new LayoutBase([ ... this.getSequence()], this.g, this.nodeIdToLayer, this.numLayers)
+    const copyNodesByLayer: string[][] = []
+    for (const row of this.nodesByLayer) {
+      const newRow = [ ... row]
+      copyNodesByLayer.push(newRow)
+    }
+    return new LayoutBase(copyNodesByLayer, this.connectedIds, this.nodeIdToLayer, this.numLayers)
   }
 
   getSequence(): string[] {

@@ -80,7 +80,7 @@ export class Mermaid2svgService {
     const numLayers = Math.max( ... editorBuilder.nodeIdToLayer.values()) + 1
     const graphWithIntermediateNodes = new GraphConnectionsDecorator(editorBuilder.graph)
     try {
-      lb = new LayoutBase(editorBuilder.graph.getNodes().map(n => n.getId()!),
+      lb = LayoutBase.create(editorBuilder.graph.getNodes().map(n => n.getId()!),
         graphWithIntermediateNodes,
         editorBuilder.nodeIdToLayer,
         numLayers)
