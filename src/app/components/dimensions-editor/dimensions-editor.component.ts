@@ -58,6 +58,9 @@ export function getFactoryDimensions(): Dimensions {
     omittedPlaceholderWidth: 90,
     nodeBoxWidth: 160,
     boxConnectorAreaPerc: 50,
-    intermediateLayerPassedByVerticalLine: false
+    intermediateLayerPassedByVerticalLine: false,
+    estLabelWidth: 100,
+    estLabelHeight: 30,
+    preferredVertDistanceFromOrigin: 50
   }
 }

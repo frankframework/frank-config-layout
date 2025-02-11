@@ -125,7 +125,7 @@ function renderEdges(edges: LayoutLineSegment[]): string {
 }
 
 function renderEdge(edge: LayoutLineSegment): string {
-  return `  <g class="${getEdgeGroupClass(edge.getKey())}">
+  return `  <g class="${getEdgeGroupClass(edge.key)}">
     <polyline ${classOfLine(edge)} points="${edge.line.startPoint.x},${edge.line.startPoint.y} ${edge.line.endPoint.x},${edge.line.endPoint.y}" ${getMarkerEnd(edge)}/>
   </g>
 `

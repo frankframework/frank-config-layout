@@ -64,6 +64,27 @@
             [(ngModel)]="editDimensions.intermediateLayerPassedByVerticalLine" type="checkbox"
             [ngClass]="editDimensions.intermediateLayerPassedByVerticalLine !== lastPosted.intermediateLayerPassedByVerticalLine ? 'changed' : ''"/></td>
         </tr>
+        <tr>
+          <td>Est. edge label width:</td>
+          <td><input
+            [(ngModel)]="editDimensions.estLabelWidth"
+            [ngClass]="editDimensions.estLabelWidth !== lastPosted.estLabelWidth ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Est. edge label height:</td>
+          <td><input
+            [(ngModel)]="editDimensions.estLabelHeight"
+            [ngClass]="editDimensions.estLabelHeight !== lastPosted.estLabelHeight ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Preferred label offset:</td>
+          <td><input
+            [(ngModel)]="editDimensions.preferredVertDistanceFromOrigin"
+            [ngClass]="editDimensions.preferredVertDistanceFromOrigin !== lastPosted.preferredVertDistanceFromOrigin ? 'changed' : ''"/>
+          </td>
+        </tr>
       </table>
     </td>
     <td>

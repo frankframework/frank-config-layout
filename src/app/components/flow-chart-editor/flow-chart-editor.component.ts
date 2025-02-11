@@ -163,7 +163,7 @@ export class FlowChartEditorComponent {
       .map(lls => { return {
         id: lls.key, x1: lls.line.startPoint.x, y1: lls.line.startPoint.y,
         x2: lls.line.endPoint.x, y2: lls.line.endPoint.y,
-        selected: this.selectionInModel.isEdgeHighlightedInDrawing(lls.getKey(), this.layoutModel!),
+        selected: this.selectionInModel.isEdgeHighlightedInDrawing(lls.key, this.layoutModel!),
         arrow: lls.isLastLineSegment,
         isError: lls.isError
       }})

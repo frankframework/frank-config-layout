@@ -16,14 +16,15 @@
 
 import { Edge, Node, OptionalNode, getEdgeKey } from "../model/graph";
 import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
-
 import { CreationReason, EdgeForEditor, NodeForEditor, OriginalNode } from "../model/horizontalGrouping";
 import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
+import { EdgeLabelDimensions, EdgeLabelLayouter } from "./edge-label-layouter";
+import { templateTriggerHandling } from "@rx-angular/cdk/notifications";
 
-export interface Dimensions extends NodeSpacingDimensions {
+export interface Dimensions extends NodeSpacingDimensions, EdgeLabelDimensions {
   nodeBoxWidth: number
   nodeBoxHeight: number
   boxConnectorAreaPerc: number
@@ -112,6 +113,7 @@ export class PlacedNode implements Node {
 export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, rawEdge: Edge, line: Line): LayoutLineSegment {
   const key: string = getEdgeKey(fromNode, toNode)
   const edge = rawEdge as EdgeForEditor
+  const isFirstSegment = isFirstLineSegment(edge, fromNode)
   const isLastSegment = isLastLineSegment(edge, toNode)
   const originalEdge = edge.original as CategorizedEdge
   const isError = originalEdge.isError
@@ -125,27 +127,54 @@ export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: Pl
     minLayer = toNode.layerNumber
     maxLayer = fromNode.layerNumber
   }
-  return new LayoutLineSegment(key, line, optionalOriginalText, isError, isLastSegment, minLayer, maxLayer)
+  return {
+    key,
+    originId: fromNode.getId(),
+    line,
+    optionalOriginalText,
+    isError,
+    isFirstLineSegment: isFirstSegment,
+    isLastLineSegment: isLastSegment,
+    minLayerNumber: minLayer,
+    maxLayerNumber: maxLayer
+  }
 }
 
-function isLastLineSegment(edge: EdgeForEditor, toNode: PlacedNode) {
+function isLastLineSegment(edge: EdgeForEditor, toNode: PlacedNode): boolean {
   return edge.original.getTo().getId() === toNode.getId();
 }
 
-export class LayoutLineSegment {
-  constructor (
-    readonly key: string,
-    readonly line: Line,
-    readonly optionalOriginalText: string | null,
-    readonly isError: boolean,
-    readonly isLastLineSegment: boolean,
-    readonly minLayerNumber: number,
-    readonly maxLayerNumber: number
-) {}
+function isFirstLineSegment(edge: EdgeForEditor, fromNode: PlacedNode): boolean {
+  return edge.original.getFrom().getId() === fromNode.getId()
+}
 
-  getKey(): string {
-    return this.key
+export interface LayoutLineSegment {
+  readonly key: string,
+  readonly originId: string,
+  readonly line: Line,
+  readonly optionalOriginalText: string | null,
+  readonly isError: boolean,
+  readonly isFirstLineSegment: boolean,
+  readonly isLastLineSegment: boolean,
+  readonly minLayerNumber: number,
+  readonly maxLayerNumber: number
+}
+
+// TODO: Unit test
+export function compareOriginThenX(first: LayoutLineSegment, second: LayoutLineSegment) {
+  if (first.originId < second.originId) {
+    return -1
+  } else if (first.originId > second.originId) {
+    return 1
+  } else {
+    return first.line.startPoint.x - second.line.startPoint.x
   }
+}
+
+export interface EdgeLabel {
+  centerX: number,
+  centerY: number,
+  text: string
 }
 
 export class Layout {
@@ -154,6 +183,7 @@ export class Layout {
   private nodes: PlacedNode[] = []
   private idToNode: Map<string, PlacedNode> = new Map<string, PlacedNode>()
   private layoutLineSegments: LayoutLineSegment[] = []
+  readonly edgeLabels: EdgeLabel[]
 
   constructor(layout: NodeLayout, d: Dimensions) {
     this.width = layout.width
@@ -172,6 +202,7 @@ export class Layout {
     if (d.intermediateLayerPassedByVerticalLine) {
       this.addVerticalLineSegmentsForIntermediateNodes(calc.getOriginalEdges())
     }
+    this.edgeLabels = this.addEdgeLabels(d)
   }
 
   private addVerticalLineSegmentsForIntermediateNodes(originalEdges: Edge[]) {
@@ -207,10 +238,17 @@ export class Layout {
       line = new Line(n.centerBottom, n.centerTop)
     }
     const verticalLineSegmentKey = "pass-" + n.getId()
-    this.layoutLineSegments.push(new LayoutLineSegment(
-      verticalLineSegmentKey, line, optionalOriginalText, isError,
-      false, n.layerNumber, n.layerNumber)
-    )
+    this.layoutLineSegments.push({
+      key: verticalLineSegmentKey,
+      originId: n.getId(),
+      line,
+      optionalOriginalText,
+      isError,
+      isFirstLineSegment: false,
+      isLastLineSegment: false,
+      minLayerNumber: n.layerNumber,
+      maxLayerNumber: n.layerNumber
+    })
   }
 
   getNodes(): readonly Node[] {
@@ -257,5 +295,38 @@ export class Layout {
       })
     })
     return (! linesTouch) && (relateLines(first.line, second.line) === LineRelation.CROSS)
+  }
+
+  private addEdgeLabels(dimensions: EdgeLabelDimensions): EdgeLabel[] {
+    const firstLineSegments = this.layoutLineSegments
+      .filter(s => s.isFirstLineSegment)
+      .filter(s => (s.optionalOriginalText !== null) && (s.optionalOriginalText.length >= 1))
+    const upward = firstLineSegments.filter(s => s.line.startPoint.y > s.line.endPoint.y)
+    const downward = firstLineSegments.filter(s => s.line.startPoint.y < s.line.endPoint.y)
+    upward.sort(compareOriginThenX)
+    downward.sort(compareOriginThenX)
+    const result: EdgeLabel[] = []
+    result.push(... this.addEdgeLabelsFor(dimensions, upward))
+    result.push(... this.addEdgeLabelsFor(dimensions, downward))
+    return result
+  }
+
+  private addEdgeLabelsFor(dimensions: EdgeLabelDimensions, lineSegments: LayoutLineSegment[]): EdgeLabel[] {
+    const result: EdgeLabel[] = []
+    let isFirst: boolean = false
+    let currentOriginId: string | null = null
+    let layouter: EdgeLabelLayouter | null = null
+    for(const ls of lineSegments) {
+      if (isFirst || (currentOriginId !== ls.originId)) {
+        layouter = new EdgeLabelLayouter(dimensions)
+      }
+      const point: Point = layouter!.add(ls.line)
+      result.push({
+        centerX: point.x,
+        centerY: point.y,
+        text: ls.optionalOriginalText!
+      })
+    }
+    return result
   }
 }

@@ -109,7 +109,10 @@ const dimensions: Dimensions = {
   // It is complicated enough to understand the
   // calculation without.
   boxConnectorAreaPerc: 0,
-  intermediateLayerPassedByVerticalLine: false
+  intermediateLayerPassedByVerticalLine: false,
+  estLabelWidth: 100,
+  estLabelHeight: 30,
+  preferredVertDistanceFromOrigin: 50
 }
 
 const dimensionsIntermediateLayersVertical: Dimensions = {
@@ -124,5 +127,8 @@ const dimensionsIntermediateLayersVertical: Dimensions = {
   // It is complicated enough to understand the
   // calculation without.
   boxConnectorAreaPerc: 0,
-  intermediateLayerPassedByVerticalLine: true
+  intermediateLayerPassedByVerticalLine: true,
+  estLabelWidth: 100,
+  estLabelHeight: 30,
+  preferredVertDistanceFromOrigin: 50
 }
