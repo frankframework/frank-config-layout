@@ -1,4 +1,4 @@
-import { doRotateToSwapItems, getRange, permutationFrom, rotateToSwapItems, roundedMedian, sortedUniqNumbers } from './util'
+import { doRotateToSwapItems, getRange, permutationFrom, rotateToSwapItems, roundedMedian, sortedUniqNumbers, NumbersAroundZero } from './util'
 
 describe('Util test', () => {
   it('Get range', () => {
@@ -139,5 +139,14 @@ describe('Util test', () => {
     // Taken to be "C", null, "A", "B"
     const newSequence = ["C", "A", "B"]
     expect(permutationFrom(oldSequence, newSequence)).toEqual([2, 1, 3, 0])
+  })
+
+  it('NumbersAroundZero', () => {
+    const instance = new NumbersAroundZero()
+    expect(instance.next()).toEqual(0)
+    expect(instance.next()).toEqual(-1)
+    expect(instance.next()).toEqual(1)
+    expect(instance.next()).toEqual(-2)
+    expect(instance.next()).toEqual(2)
   })
 })
