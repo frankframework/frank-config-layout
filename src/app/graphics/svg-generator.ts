@@ -15,13 +15,14 @@
 */
 
 import { CreationReason } from "../model/horizontalGrouping"
-import { Layout, LayoutLineSegment, PlacedNode } from "./edge-layout"
+import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from "./edge-layout"
 
 export function generateSvg(layout: Layout) {
   return openSvg(layout.width, layout.height)
     + renderDefs()
     + renderNodes(layout.getNodes().map(n => n as PlacedNode))
     + renderEdges(layout.getLayoutLineSegments().map(e => e as LayoutLineSegment))
+    + renderLabels(layout.edgeLabels)
     + closeSvg()
 }
 
@@ -149,6 +150,15 @@ function classOfLine(edge: LayoutLineSegment): string {
   } else {
     return 'class="line"'
   }
+}
+
+function renderLabels(labels: EdgeLabel[]): string {
+  return labels.map(label => renderLabel(label)).join('')
+}
+
+function renderLabel(label: EdgeLabel): string {
+  return `  <text x="${label.centerX}" y="${label.centerY}" text-anchor="middle" dominant-baseline="middle">${label.text}</text>
+`
 }
 
 function closeSvg(): string {

@@ -37,6 +37,7 @@ export class DimensionsEditorComponent {
   }
 
   commit() {
+    console.log(`Vert edge label distance set to: ${this.editDimensions.preferredVertDistanceFromOrigin}`)
     this.lastPosted = { ... this.editDimensions }
     this.onDimensions.emit({ ... this.lastPosted })
   }
@@ -59,8 +60,8 @@ export function getFactoryDimensions(): Dimensions {
     nodeBoxWidth: 160,
     boxConnectorAreaPerc: 50,
     intermediateLayerPassedByVerticalLine: false,
-    estLabelWidth: 100,
-    estLabelHeight: 30,
-    preferredVertDistanceFromOrigin: 50
+    estLabelWidth: 70,
+    estLabelHeight: 13,
+    preferredVertDistanceFromOrigin: 30
   }
 }

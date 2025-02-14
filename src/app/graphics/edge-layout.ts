@@ -298,6 +298,7 @@ export class Layout {
   }
 
   private addEdgeLabels(dimensions: EdgeLabelDimensions): EdgeLabel[] {
+    console.log(`Layout.addEdgeLabels uses dimensions (${dimensions.preferredVertDistanceFromOrigin}, ${dimensions.estLabelWidth}, ${dimensions.estLabelHeight})`)
     const firstLineSegments = this.layoutLineSegments
       .filter(s => s.isFirstLineSegment)
       .filter(s => (s.optionalOriginalText !== null) && (s.optionalOriginalText.length >= 1))
@@ -312,15 +313,23 @@ export class Layout {
   }
 
   private addEdgeLabelsFor(dimensions: EdgeLabelDimensions, lineSegments: LayoutLineSegment[]): EdgeLabel[] {
+    console.log(`Calculating edge labels for: ${lineSegments.map(ls => ls.key)}`)
     const result: EdgeLabel[] = []
-    let isFirst: boolean = false
+    let isFirst: boolean = true
     let currentOriginId: string | null = null
     let layouter: EdgeLabelLayouter | null = null
     for(const ls of lineSegments) {
-      if (isFirst || (currentOriginId !== ls.originId)) {
+      console.log(`Have currentOriginId=${currentOriginId}, isFirst=${isFirst}`)
+      console.log(`Next line segment: ${ls.key}, ${ls.originId}, ${ls.line.startPoint.x}, ${ls.line.startPoint.y}, ${ls.line.endPoint.x}, ${ls.line.endPoint.y}`)
+      if ( (isFirst === true) || (currentOriginId !== ls.originId)) {
+        console.log('New layouter')
         layouter = new EdgeLabelLayouter(dimensions)
+        isFirst = false
+        currentOriginId = ls.originId
       }
+      console.log(`Adding line segment to layouter: ${ls.optionalOriginalText}, ${ls.line.startPoint.x}, ${ls.line.startPoint.y}, ${ls.line.endPoint.x}, ${ls.line.endPoint.y}`)
       const point: Point = layouter!.add(ls.line)
+      console.log(`Gives point (${point.x}, ${point.y})`)
       result.push({
         centerX: point.x,
         centerY: point.y,

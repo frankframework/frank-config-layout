@@ -15,6 +15,7 @@
 */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { EdgeLabel } from '../../graphics/edge-layout'
 
 @Component({
   selector: 'app-frank-flowchart',
@@ -42,6 +43,7 @@ export interface Drawing {
   height: number
   rectangles: Rectangle[]
   lines: Line[]
+  edgeLabels: EdgeLabel[]
 }
 
 export interface Rectangle {
@@ -73,6 +75,7 @@ export function getEmptyDrawing(): Drawing {
     width: 0,
     height: 0,
     rectangles: [],
-    lines: []
+    lines: [],
+    edgeLabels: []
   }
 }

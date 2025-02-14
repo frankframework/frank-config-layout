@@ -22,9 +22,11 @@ export class EdgeLabelLayouter {
   }
 
   add(line: Line): Point {
+    console.log(`Adding line, num boxes so far is: ${this.boxes.length}`)
     const vdistSources = new NumbersAroundZero()
     while (true) {
       const vdistSource: number = vdistSources.next()
+      console.log(`vdistSource = ${vdistSource}`)
       const vdist: number = this.dimensions.preferredVertDistanceFromOrigin + vdistSource * (this.dimensions.estLabelHeight + MARGIN)
       // Do not put the label in box from which the edge originates
       if (vdist <= 0) {

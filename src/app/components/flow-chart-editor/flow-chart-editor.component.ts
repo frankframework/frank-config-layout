@@ -23,7 +23,7 @@ import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequen
 import { NodeSequenceEditor } from '../../model/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
-import { Layout, PlacedNode, Dimensions } from '../../graphics/edge-layout';
+import { Layout, PlacedNode, Dimensions, EdgeLabel } from '../../graphics/edge-layout';
 import { getFactoryDimensions } from '../dimensions-editor/dimensions-editor.component';
 import { Subject } from 'rxjs';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
@@ -146,6 +146,10 @@ export class FlowChartEditorComponent {
 
   updateDrawing() {
     const layout = FlowChartEditorComponent.model2layout(this.layoutModel!, this.dimensions)
+    console.log("Calculated updated edge labels")
+    for (const label of layout.edgeLabels) {
+      console.log(`Label "${label.text}" at (${label.centerX}, ${label.centerY})`)
+    }
     this.numCrossingLines = layout.getNumCrossingLines()
     // TODO: Properly fill selected property
     const rectangles: Rectangle[] = layout.getNodes()
@@ -167,7 +171,13 @@ export class FlowChartEditorComponent {
         arrow: lls.isLastLineSegment,
         isError: lls.isError
       }})
-    this.drawing = {width: layout.width, height: layout.height, rectangles, lines}
+    this.drawing = {
+      width: layout.width,
+      height: layout.height,
+      rectangles,
+      lines,
+      edgeLabels: layout.edgeLabels
+    }
   }
 
   static model2layout(model: NodeSequenceEditor, inDimensions: Dimensions): Layout {
@@ -179,6 +189,7 @@ export class FlowChartEditorComponent {
 
   onNewDimensions(d: Dimensions) {
     this.dimensions = d
+    console.log(`Flow chart editor received vertical edge label distance: ${this.dimensions.preferredVertDistanceFromOrigin}`)
     this.updateDrawing()
   }
 }

@@ -43,9 +43,9 @@ export class OurMermaid2SvgDimensions implements Dimensions {
   nodeBoxWidth = 160
   boxConnectorAreaPerc = 50
   intermediateLayerPassedByVerticalLine = false
-  estLabelWidth = 100
-  estLabelHeight = 30
-  preferredVertDistanceFromOrigin = 50
+  estLabelWidth = 70
+  estLabelHeight = 13
+  preferredVertDistanceFromOrigin = 30
 }
 
 @NgModule({

@@ -67,21 +67,21 @@
         <tr>
           <td>Est. edge label width:</td>
           <td><input
-            [(ngModel)]="editDimensions.estLabelWidth"
+            [(ngModel)]="editDimensions.estLabelWidth" type="number"
             [ngClass]="editDimensions.estLabelWidth !== lastPosted.estLabelWidth ? 'changed' : ''"/>
           </td>
         </tr>
         <tr>
           <td>Est. edge label height:</td>
           <td><input
-            [(ngModel)]="editDimensions.estLabelHeight"
+            [(ngModel)]="editDimensions.estLabelHeight" type="number"
             [ngClass]="editDimensions.estLabelHeight !== lastPosted.estLabelHeight ? 'changed' : ''"/>
           </td>
         </tr>
         <tr>
           <td>Preferred label offset:</td>
           <td><input
-            [(ngModel)]="editDimensions.preferredVertDistanceFromOrigin"
+            [(ngModel)]="editDimensions.preferredVertDistanceFromOrigin" type="number"
             [ngClass]="editDimensions.preferredVertDistanceFromOrigin !== lastPosted.preferredVertDistanceFromOrigin ? 'changed' : ''"/>
           </td>
         </tr>
