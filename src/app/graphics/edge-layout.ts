@@ -157,17 +157,6 @@ export interface LayoutLineSegment {
   readonly passDirection: number
 }
 
-// TODO: Unit test
-export function compareOriginThenX(first: LayoutLineSegment, second: LayoutLineSegment) {
-  if (first.originId < second.originId) {
-    return -1
-  } else if (first.originId > second.originId) {
-    return 1
-  } else {
-    return first.line.startPoint.x - second.line.startPoint.x
-  }
-}
-
 export interface EdgeLabel {
   centerX: number,
   centerY: number,
