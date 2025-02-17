@@ -37,7 +37,6 @@ export class DimensionsEditorComponent {
   }
 
   commit() {
-    console.log(`Vert edge label distance set to: ${this.editDimensions.preferredVertDistanceFromOrigin}`)
     this.lastPosted = { ... this.editDimensions }
     this.onDimensions.emit({ ... this.lastPosted })
   }

@@ -16,13 +16,12 @@
 
 import { Edge, Node, OptionalNode, getEdgeKey } from "../model/graph";
 import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
-import { CreationReason, EdgeForEditor, NodeForEditor, OriginalNode } from "../model/horizontalGrouping";
+import { CreationReason, EdgeForEditor, IntermediateNode, NodeForEditor, OriginalNode, PASS_DIRECTION_DOWN } from "../model/horizontalGrouping";
 import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
 import { EdgeLabelDimensions, EdgeLabelLayouter } from "./edge-label-layouter";
-import { templateTriggerHandling } from "@rx-angular/cdk/notifications";
 
 export interface Dimensions extends NodeSpacingDimensions, EdgeLabelDimensions {
   nodeBoxWidth: number
@@ -39,11 +38,15 @@ export class PlacedNode implements Node {
   readonly layerNumber: number
   readonly horizontalBox: Interval
   readonly verticalBox: Interval
+  readonly intermediateNodePassDirection: number | null
+  readonly intermediateNodeOriginalEdge: Edge | null
 
   constructor(p: Position, d: Dimensions) {
     this.id = p.node.getId()
     this.text = p.node.getText()
     this.creationReason = (p.node as NodeForEditor).getCreationReason()
+    this.intermediateNodePassDirection = (this.creationReason === CreationReason.ORIGINAL ? null : (p.node as IntermediateNode).getPassDirection())
+    this.intermediateNodeOriginalEdge = (this.creationReason === CreationReason.ORIGINAL ? null : (p.node as IntermediateNode).originalEdge)
     const optionalOriginalNode = PlacedNode.optionalOriginalNode(p.node)
     this.isError = optionalOriginalNode === null ? false : optionalOriginalNode.isError
     this.layerNumber = p.layerNumber
@@ -113,8 +116,8 @@ export class PlacedNode implements Node {
 export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, rawEdge: Edge, line: Line): LayoutLineSegment {
   const key: string = getEdgeKey(fromNode, toNode)
   const edge = rawEdge as EdgeForEditor
-  const isFirstSegment = isFirstLineSegment(edge, fromNode)
-  const isLastSegment = isLastLineSegment(edge, toNode)
+  const isFirstSegment = edge.isFirstSegment
+  const isLastSegment = edge.isLastSegment
   const originalEdge = edge.original as CategorizedEdge
   const isError = originalEdge.isError
   const optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
@@ -136,16 +139,9 @@ export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: Pl
     isFirstLineSegment: isFirstSegment,
     isLastLineSegment: isLastSegment,
     minLayerNumber: minLayer,
-    maxLayerNumber: maxLayer
+    maxLayerNumber: maxLayer,
+    passDirection: edge.passDirection
   }
-}
-
-function isLastLineSegment(edge: EdgeForEditor, toNode: PlacedNode): boolean {
-  return edge.original.getTo().getId() === toNode.getId();
-}
-
-function isFirstLineSegment(edge: EdgeForEditor, fromNode: PlacedNode): boolean {
-  return edge.original.getFrom().getId() === fromNode.getId()
 }
 
 export interface LayoutLineSegment {
@@ -157,7 +153,8 @@ export interface LayoutLineSegment {
   readonly isFirstLineSegment: boolean,
   readonly isLastLineSegment: boolean,
   readonly minLayerNumber: number,
-  readonly maxLayerNumber: number
+  readonly maxLayerNumber: number,
+  readonly passDirection: number
 }
 
 // TODO: Unit test
@@ -200,55 +197,39 @@ export class Layout {
       calc.edge2line(e))
     )
     if (d.intermediateLayerPassedByVerticalLine) {
-      this.addVerticalLineSegmentsForIntermediateNodes(calc.getOriginalEdges())
+      this.addVerticalLineSegmentsForIntermediateNodes(calc.getPlacedNodes())
     }
     this.edgeLabels = this.addEdgeLabels(d)
   }
 
-  private addVerticalLineSegmentsForIntermediateNodes(originalEdges: Edge[]) {
-    const doneIntermediates: Set<string> = new Set<string>()
-    for (const rawOriginalEdge of originalEdges) {
-      const edge = rawOriginalEdge as EdgeForEditor
-      const from = edge.getFrom() as NodeForEditor
-      const fromIsIntermediate = from.getCreationReason() === CreationReason.INTERMEDIATE
-      const placedFrom: PlacedNode = this.idToNode.get(from.getId())!
-      const to = edge.getTo() as NodeForEditor
-      const toIsIntermediate = to.getCreationReason() === CreationReason.INTERMEDIATE
-      const placedTo: PlacedNode = this.idToNode.get(to.getId())!
-      const edgeGoesDown = placedFrom.centerY < placedTo.centerY
-      if (fromIsIntermediate && ! doneIntermediates.has(from.getId())) {
-        this.addVerticalLineSegment(placedFrom, edgeGoesDown, edge)
-        doneIntermediates.add(from.getId())
+  private addVerticalLineSegmentsForIntermediateNodes(nodes: PlacedNode[]) {
+    for (const n of nodes) {
+      if (n.creationReason === CreationReason.ORIGINAL) {
+        continue
       }
-      if (toIsIntermediate && ! doneIntermediates.has(to.getId())) {
-        this.addVerticalLineSegment(placedTo, edgeGoesDown, edge)
-        doneIntermediates.add(to.getId())
+      const edge = n.intermediateNodeOriginalEdge as CategorizedEdge
+      const isError = edge.isError
+      const optionalOriginalText = edge.text === undefined ? null : edge.text
+      let line: Line
+      if (n.intermediateNodePassDirection === PASS_DIRECTION_DOWN) {
+        line = new Line(n.centerTop, n.centerBottom)
+      } else {
+        line = new Line(n.centerBottom, n.centerTop)
       }
+      const verticalLineSegmentKey = "pass-" + n.getId()
+      this.layoutLineSegments.push({
+        key: verticalLineSegmentKey,
+        originId: n.getId(),
+        line,
+        optionalOriginalText,
+        isError,
+        isFirstLineSegment: false,
+        isLastLineSegment: false,
+        minLayerNumber: n.layerNumber,
+        maxLayerNumber: n.layerNumber,
+        passDirection: n.intermediateNodePassDirection!
+      })  
     }
-  }
-
-  private addVerticalLineSegment(n: PlacedNode, goesDown: boolean, edge: EdgeForEditor) {
-    const originalEdge = edge.original as CategorizedEdge
-    const isError = originalEdge.isError
-    const optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
-    let line: Line
-    if (goesDown) {
-      line = new Line(n.centerTop, n.centerBottom)
-    } else {
-      line = new Line(n.centerBottom, n.centerTop)
-    }
-    const verticalLineSegmentKey = "pass-" + n.getId()
-    this.layoutLineSegments.push({
-      key: verticalLineSegmentKey,
-      originId: n.getId(),
-      line,
-      optionalOriginalText,
-      isError,
-      isFirstLineSegment: false,
-      isLastLineSegment: false,
-      minLayerNumber: n.layerNumber,
-      maxLayerNumber: n.layerNumber
-    })
   }
 
   getNodes(): readonly Node[] {
@@ -312,25 +293,53 @@ export class Layout {
   }
 
   private addEdgeLabelsFor(dimensions: EdgeLabelDimensions, lineSegments: LayoutLineSegment[]): EdgeLabel[] {
+    const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(lineSegments)
     const result: EdgeLabel[] = []
-    let isFirst: boolean = true
-    let currentOriginId: string | null = null
-    let layouter: EdgeLabelLayouter | null = null
-    for(const ls of lineSegments) {
-      if ( (isFirst === true) || (currentOriginId !== ls.originId)) {
-        console.log('New layouter')
-        layouter = new EdgeLabelLayouter(dimensions)
-        isFirst = false
-        currentOriginId = ls.originId
+    for (const group of groups) {
+      const layouter = new EdgeLabelLayouter(dimensions)
+      for (const ls of group) {
+        const widthEstimate = (ls.optionalOriginalText!).length * dimensions.estCharacterWidth
+        const point: Point = layouter!.add(ls.line, widthEstimate)
+        result.push({
+          centerX: point.x,
+          centerY: point.y,
+          text: ls.optionalOriginalText!
+        })
       }
-      const widthEstimate = (ls.optionalOriginalText!).length * dimensions.estCharacterWidth
-      const point: Point = layouter!.add(ls.line, widthEstimate)
-      result.push({
-        centerX: point.x,
-        centerY: point.y,
-        text: ls.optionalOriginalText!
-      })
     }
     return result
   }
+}
+
+export interface Bucket {
+  readonly originId: string
+  readonly direction: number
+}
+
+export function compareBuckets(b1: Bucket, b2: Bucket) {
+  if (b1.originId < b2.originId) {
+    return -1
+  } else if (b1.originId > b2.originId) {
+    return 1
+  } else {
+    return b1.direction - b2.direction
+  }
+}
+
+export function groupForEdgeLabelLayout(segments: LayoutLineSegment[]): LayoutLineSegment[][] {
+  const groupsByBucket = new Map<Bucket, LayoutLineSegment[]>()
+  for (const segment of segments) {
+    const bucket = {originId: segment.originId, direction: segment.passDirection}
+    if (! groupsByBucket.has(bucket)) {
+      groupsByBucket.set(bucket, [])
+    }
+    groupsByBucket.get(bucket)!.push(segment)
+  }
+  const sortedBuckets = [ ... groupsByBucket.keys() ]
+  sortedBuckets.sort(compareBuckets)
+  const result: LayoutLineSegment[][] = []
+  for (const b of sortedBuckets) {
+    result.push(groupsByBucket.get(b)!)
+  }
+  return result
 }

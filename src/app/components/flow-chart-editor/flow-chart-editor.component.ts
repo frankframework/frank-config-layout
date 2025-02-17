@@ -146,10 +146,6 @@ export class FlowChartEditorComponent {
 
   updateDrawing() {
     const layout = FlowChartEditorComponent.model2layout(this.layoutModel!, this.dimensions)
-    console.log("Calculated updated edge labels")
-    for (const label of layout.edgeLabels) {
-      console.log(`Label "${label.text}" at (${label.centerX}, ${label.centerY})`)
-    }
     this.numCrossingLines = layout.getNumCrossingLines()
     // TODO: Properly fill selected property
     const rectangles: Rectangle[] = layout.getNodes()
@@ -189,7 +185,6 @@ export class FlowChartEditorComponent {
 
   onNewDimensions(d: Dimensions) {
     this.dimensions = d
-    console.log(`Flow chart editor received vertical edge label distance: ${this.dimensions.preferredVertDistanceFromOrigin}`)
     this.updateDrawing()
   }
 }

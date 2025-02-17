@@ -1,4 +1,5 @@
 import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
+import { categorize, CategorizedEdge } from "../model/error-flow"
 import { NodeSequenceEditorBuilder, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
 import { Layout, Dimensions, PlacedNode } from "./edge-layout"
 import { NodeLayoutBuilder } from "./node-layout"
@@ -15,7 +16,8 @@ describe('Layout', () => {
     b.connect(b.getNodeById('N1')!, b.getNodeById('End')!)
     b.connect(b.getNodeById('N2')!, b.getNodeById('End')!)
     b.connect(b.getNodeById('N1')!, b.getNodeById('N2')!)
-    const g = new GraphConnectionsDecorator(b)
+    const c = categorize(b)
+    const g = new GraphConnectionsDecorator(c)
     const m = calculateLayerNumbersFirstOccuringPath(g)
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
@@ -58,7 +60,11 @@ describe('Layout', () => {
     b.connect(b.getNodeById('N1')!, b.getNodeById('End')!)
     b.connect(b.getNodeById('N2')!, b.getNodeById('End')!)
     b.connect(b.getNodeById('N1')!, b.getNodeById('N2')!)
-    const g = new GraphConnectionsDecorator(b)
+    const c = categorize(b)
+    const anEdge = c.getEdgeByKey('Start-N1')
+    expect(anEdge!.getKey()).toEqual('Start-N1')
+    expect( (anEdge as CategorizedEdge).isError).toEqual(false)
+    const g = new GraphConnectionsDecorator(c)
     const m = calculateLayerNumbersFirstOccuringPath(g)
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()

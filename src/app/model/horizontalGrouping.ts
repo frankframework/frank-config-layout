@@ -50,7 +50,7 @@ export const PASS_DIRECTION_UP = 1
 
 export class IntermediateNode implements NodeForEditor {
   constructor(
-    private id: string, private passDirection: number
+    private id: string, private passDirection: number, readonly originalEdge: Edge
   ) {}
 
   getId() {
@@ -95,7 +95,8 @@ export class EdgeForEditor implements Edge {
     readonly from: NodeForEditor,
     readonly to: NodeForEditor,
     readonly isFirstSegment: boolean,
-    readonly isLastSegment: boolean
+    readonly isLastSegment: boolean,
+    readonly passDirection: number
   ) {}
 
   getFrom(): Node {
@@ -136,6 +137,7 @@ export class NodeSequenceEditorBuilder {
   handleEdge(edge: Edge): void {
     const layerFrom: number = this.nodeIdToLayer.get(edge.getFrom().getId())!
     const layerTo: number = this.nodeIdToLayer.get(edge.getTo().getId())!
+    const passDirection = layerFrom <= layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP
     if (Math.abs(layerTo - layerFrom) <= 1) {
       // We do not throw an error for edges within the same layer.
       // Maybe a future layering algorithm will allow this.
@@ -146,13 +148,12 @@ export class NodeSequenceEditorBuilder {
         edge,
         this.graph.getNodeById(edge.getFrom().getId()) as NodeForEditor,
         this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor,
-        true, true
+        true, true, passDirection
       ))
     } else {
-      const passDirection = layerFrom <= layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP
       const intermediateLayers: number[] = getIntermediateLayers(layerFrom, layerTo)
       const intermediateNodes: NodeForEditor[] = intermediateLayers.map(layer => new IntermediateNode(
-        `intermediate${this.nextSeqIntermediateNode++}`, passDirection
+        `intermediate${this.nextSeqIntermediateNode++}`, passDirection, edge
       ));
       intermediateNodes.forEach( (n, i) => (this.graph as ConcreteGraphBase).addExistingNode(n));
       (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
@@ -161,7 +162,8 @@ export class NodeSequenceEditorBuilder {
         this.graph.getNodeById(edge.getFrom().getId())! as NodeForEditor,
         intermediateNodes[0],
         true,
-        false
+        false,
+        passDirection
       ))
       for(let i = 1; i < intermediateNodes.length; ++i) {
         (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
@@ -170,7 +172,8 @@ export class NodeSequenceEditorBuilder {
           intermediateNodes[i-1],
           intermediateNodes[i],
           false,
-          false
+          false,
+          passDirection
         ))
       }
       (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
@@ -179,7 +182,8 @@ export class NodeSequenceEditorBuilder {
         intermediateNodes[intermediateNodes.length - 1],
         this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor,
         false,
-        true
+        true,
+        passDirection
       ))
       intermediateNodes.forEach((n, index) => this.nodeIdToLayer.set(n.getId(), intermediateLayers[index]))
     }
