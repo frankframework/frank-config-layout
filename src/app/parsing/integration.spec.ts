@@ -138,7 +138,7 @@ function getTestDimensions(): Dimensions {
     // Otherwise the test is incomprehensible.
     boxConnectorAreaPerc: 0,
     intermediateLayerPassedByVerticalLine: false,
-    estLabelWidth: 100,
+    estCharacterWidth: 9,
     estLabelHeight: 30,
     preferredVertDistanceFromOrigin: 50  
   }

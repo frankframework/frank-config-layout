@@ -153,11 +153,13 @@ function classOfLine(edge: LayoutLineSegment): string {
 }
 
 function renderLabels(labels: EdgeLabel[]): string {
-  return labels.map(label => renderLabel(label)).join('')
+  return '  <g text-anchor="middle" dominant-baseline="middle">\n'
+    + labels.map(label => renderLabel(label)).join('')
+    + '  </g>\n'
 }
 
 function renderLabel(label: EdgeLabel): string {
-  return `  <text x="${label.centerX}" y="${label.centerY}" text-anchor="middle" dominant-baseline="middle">${label.text}</text>
+  return `    <text x="${label.centerX}" y="${label.centerY}">${label.text}</text>
 `
 }
 

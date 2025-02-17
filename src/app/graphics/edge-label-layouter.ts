@@ -3,7 +3,7 @@ import { Interval } from "../util/interval"
 import { Line, Point } from "./graphics"
 
 export interface EdgeLabelDimensions {
-  estLabelWidth: number
+  estCharacterWidth: number
   estLabelHeight: number
   preferredVertDistanceFromOrigin: number
 }
@@ -21,7 +21,7 @@ export class EdgeLabelLayouter {
   constructor(readonly dimensions: EdgeLabelDimensions) {
   }
 
-  add(line: Line): Point {
+  add(line: Line, textWidth: number): Point {
     console.log(`Adding line, num boxes so far is: ${this.boxes.length}`)
     const vdistSources = new NumbersAroundZero()
     while (true) {
@@ -34,7 +34,7 @@ export class EdgeLabelLayouter {
       }
       const candidate: Point = this.pointAt(vdist, line)
       const candidateBox: Box = {
-        xspan: Interval.createFromCenterSize(candidate.x, this.dimensions.estLabelWidth),
+        xspan: Interval.createFromCenterSize(candidate.x, textWidth),
         yspan: Interval.createFromCenterSize(candidate.y, this.dimensions.estLabelHeight)}
       let isSpaceOccupied: boolean = false
       for (const existingBox of this.boxes) {

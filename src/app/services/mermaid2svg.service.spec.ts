@@ -175,6 +175,15 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   <g class="frank-flowchart-edge-intermediate3-End">
     <polyline class="line error" points="351,265 244,360" marker-end="url(#arrow)"/>
   </g>
+  <g text-anchor="middle" dominant-baseline="middle">
+    <text x="132" y="199">success</text>
+    <text x="212" y="199">failure</text>
+    <text x="120" y="319">success</text>
+    <text x="351" y="199">success</text>
+    <text x="112" y="79">success</text>
+    <text x="176" y="79">success</text>
+    <text x="272" y="79">success</text>
+  </g>
 </svg>`
 
 describe('Mermaid2svgService - please maintain this test using the GUI', () => {
