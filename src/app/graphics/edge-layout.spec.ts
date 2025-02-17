@@ -1,8 +1,69 @@
 import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
 import { categorize, CategorizedEdge } from "../model/error-flow"
-import { NodeSequenceEditorBuilder, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
-import { Layout, Dimensions, PlacedNode } from "./edge-layout"
+import { Point, Line } from "./graphics"
+import { NodeSequenceEditorBuilder, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
+import { Layout, Dimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
 import { NodeLayoutBuilder } from "./node-layout"
+
+interface LabelGroupTestSegmentBase {
+  originId: string
+  direction: number
+  edgeKey: string
+}
+
+function lsForGroup(t: LabelGroupTestSegmentBase): LayoutLineSegment {
+  const startPoint: Point = new Point(0, 0)
+  const endPoint: Point = new Point(0, 0)
+  const line = new Line(startPoint, endPoint)
+  return {
+    isError: false,
+    isFirstLineSegment: false,
+    isLastLineSegment: false,
+    key: t.edgeKey,
+    line,
+    maxLayerNumber: 1,
+    minLayerNumber: 0,
+    optionalOriginalText: "aap",
+    originId: t.originId,
+    passDirection: t.direction
+  }
+}
+
+describe('Grouping LayoutLineSegment-s for labels', () => {
+  it('When line segments are in the same group, then their order is preserved', () => {
+    const segments: LayoutLineSegment[] = [
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-A"}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-B"}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-C"}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-D"}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-E"})
+    ]
+    const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(segments)
+    expect(groups.length).toEqual(1)
+    const theGroup = groups[0]
+    expect(theGroup.map(ls => ls.key)).toEqual(["key-A", "key-B", "key-C", "key-D", "key-E"])
+  })
+
+  it('When line segments belong to different groups, then they appear in different groups', () => {
+    const segments: LayoutLineSegment[] = [
+      lsForGroup({originId: "B", direction: PASS_DIRECTION_UP, edgeKey: "key-A"}),
+      lsForGroup({originId: "B", direction: PASS_DIRECTION_DOWN, edgeKey: "key-B"}),
+      lsForGroup({originId: "A", direction: PASS_DIRECTION_DOWN, edgeKey: "key-C"}),
+      lsForGroup({originId: "A", direction: PASS_DIRECTION_DOWN, edgeKey: "key-D"}),
+      lsForGroup({originId: "A", direction: PASS_DIRECTION_UP, edgeKey: "key-E"})
+    ]
+    const groups = groupForEdgeLabelLayout(segments)
+    expect(groups.length).toEqual(4)
+    // A, DOWN
+    expect(groups[0].map(s => s.key)).toEqual(["key-C", "key-D"])
+    // A, UP
+    expect(groups[1].map(s => s.key)).toEqual(["key-E"])
+    // B, DOWN
+    expect(groups[2].map(s => s.key)).toEqual(["key-B"])
+    // B, UP
+    expect(groups[3].map(s => s.key)).toEqual(["key-A"])
+  })
+})
 
 describe('Layout', () => {
   it('Test with intermediate nodes', () => {

@@ -311,35 +311,28 @@ export class Layout {
   }
 }
 
-export interface Bucket {
-  readonly originId: string
-  readonly direction: number
-}
-
-export function compareBuckets(b1: Bucket, b2: Bucket) {
-  if (b1.originId < b2.originId) {
-    return -1
-  } else if (b1.originId > b2.originId) {
-    return 1
-  } else {
-    return b1.direction - b2.direction
-  }
-}
-
 export function groupForEdgeLabelLayout(segments: LayoutLineSegment[]): LayoutLineSegment[][] {
-  const groupsByBucket = new Map<Bucket, LayoutLineSegment[]>()
+  const segmentsByOriginAndDirection = new Map<string, Map<number, LayoutLineSegment[]>>()
   for (const segment of segments) {
-    const bucket = {originId: segment.originId, direction: segment.passDirection}
-    if (! groupsByBucket.has(bucket)) {
-      groupsByBucket.set(bucket, [])
+    if (! segmentsByOriginAndDirection.has(segment.originId)) {
+      segmentsByOriginAndDirection.set(segment.originId, new Map<number, LayoutLineSegment[]>())
     }
-    groupsByBucket.get(bucket)!.push(segment)
+    if (! segmentsByOriginAndDirection.get(segment.originId)!.has(segment.passDirection)) {
+      segmentsByOriginAndDirection.get(segment.originId)!.set(segment.passDirection, [])
+    }
+    segmentsByOriginAndDirection.get(segment.originId)!.get(segment.passDirection)!.push(segment)
   }
-  const sortedBuckets = [ ... groupsByBucket.keys() ]
-  sortedBuckets.sort(compareBuckets)
   const result: LayoutLineSegment[][] = []
-  for (const b of sortedBuckets) {
-    result.push(groupsByBucket.get(b)!)
+  const sortedOriginIds = [ ... segmentsByOriginAndDirection.keys() ]
+  sortedOriginIds.sort()
+  for (const originId of sortedOriginIds) {
+    const originGroup: Map<number, LayoutLineSegment[]> = segmentsByOriginAndDirection.get(originId)!
+    const sortedDirections: number[] = [ ... originGroup.keys() ]
+    sortedDirections.sort()
+    for (const direction of sortedDirections) {
+      const segmentGroup: LayoutLineSegment[] = originGroup.get(direction)!
+      result.push(segmentGroup)
+    }
   }
   return result
 }
