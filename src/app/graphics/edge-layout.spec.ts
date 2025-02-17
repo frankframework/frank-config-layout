@@ -9,11 +9,13 @@ interface LabelGroupTestSegmentBase {
   originId: string
   direction: number
   edgeKey: string
+  startX: number
+  endX: number
 }
 
 function lsForGroup(t: LabelGroupTestSegmentBase): LayoutLineSegment {
-  const startPoint: Point = new Point(0, 0)
-  const endPoint: Point = new Point(0, 0)
+  const startPoint: Point = new Point(t.startX, 0)
+  const endPoint: Point = new Point(t.endX, 0)
   const line = new Line(startPoint, endPoint)
   return {
     isError: false,
@@ -30,27 +32,27 @@ function lsForGroup(t: LabelGroupTestSegmentBase): LayoutLineSegment {
 }
 
 describe('Grouping LayoutLineSegment-s for labels', () => {
-  it('When line segments are in the same group, then their order is preserved', () => {
+  it('When line segments are in the same group, then they are sorted by x-coordinate', () => {
     const segments: LayoutLineSegment[] = [
-      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-A"}),
-      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-B"}),
-      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-C"}),
-      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-D"}),
-      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-E"})
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-A", startX: 30, endX: 10}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-B", startX: 20, endX: 0}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-C", startX: 30, endX: 0}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-D", startX: 30, endX: 20}),
+      lsForGroup({originId: "origin", direction: PASS_DIRECTION_DOWN, edgeKey: "key-E", startX: 40, endX: 20})
     ]
     const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(segments)
     expect(groups.length).toEqual(1)
     const theGroup = groups[0]
-    expect(theGroup.map(ls => ls.key)).toEqual(["key-A", "key-B", "key-C", "key-D", "key-E"])
+    expect(theGroup.map(ls => ls.key)).toEqual(["key-B", "key-C", "key-A", "key-D", "key-E"])
   })
 
   it('When line segments belong to different groups, then they appear in different groups', () => {
     const segments: LayoutLineSegment[] = [
-      lsForGroup({originId: "B", direction: PASS_DIRECTION_UP, edgeKey: "key-A"}),
-      lsForGroup({originId: "B", direction: PASS_DIRECTION_DOWN, edgeKey: "key-B"}),
-      lsForGroup({originId: "A", direction: PASS_DIRECTION_DOWN, edgeKey: "key-C"}),
-      lsForGroup({originId: "A", direction: PASS_DIRECTION_DOWN, edgeKey: "key-D"}),
-      lsForGroup({originId: "A", direction: PASS_DIRECTION_UP, edgeKey: "key-E"})
+      lsForGroup({originId: "B", direction: PASS_DIRECTION_UP, edgeKey: "key-A", startX: 0, endX: 0}),
+      lsForGroup({originId: "B", direction: PASS_DIRECTION_DOWN, edgeKey: "key-B", startX: 0, endX: 0}),
+      lsForGroup({originId: "A", direction: PASS_DIRECTION_DOWN, edgeKey: "key-C", startX: 0, endX: 0}),
+      lsForGroup({originId: "A", direction: PASS_DIRECTION_DOWN, edgeKey: "key-D", startX: 10, endX: 0}),
+      lsForGroup({originId: "A", direction: PASS_DIRECTION_UP, edgeKey: "key-E", startX: 0, endX: 0})
     ]
     const groups = groupForEdgeLabelLayout(segments)
     expect(groups.length).toEqual(4)

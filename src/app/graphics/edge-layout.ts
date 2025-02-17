@@ -319,9 +319,18 @@ export function groupForEdgeLabelLayout(segments: LayoutLineSegment[]): LayoutLi
     const sortedDirections: number[] = [ ... originGroup.keys() ]
     sortedDirections.sort()
     for (const direction of sortedDirections) {
-      const segmentGroup: LayoutLineSegment[] = originGroup.get(direction)!
+      const segmentGroup: LayoutLineSegment[] = [ ... originGroup.get(direction)! ]
+      segmentGroup.sort(compareByX)
       result.push(segmentGroup)
     }
   }
   return result
+}
+
+function compareByX(first: LayoutLineSegment, second: LayoutLineSegment) {
+  let result = first.line.startPoint.x - second.line.startPoint.x
+  if (result !== 0) {
+    return result
+  }
+  return first.line.endPoint.x - second.line.endPoint.x
 }
