@@ -282,18 +282,7 @@ export class Layout {
     const firstLineSegments = this.layoutLineSegments
       .filter(s => s.isFirstLineSegment)
       .filter(s => (s.optionalOriginalText !== null) && (s.optionalOriginalText.length >= 1))
-    const upward = firstLineSegments.filter(s => s.line.startPoint.y > s.line.endPoint.y)
-    const downward = firstLineSegments.filter(s => s.line.startPoint.y < s.line.endPoint.y)
-    upward.sort(compareOriginThenX)
-    downward.sort(compareOriginThenX)
-    const result: EdgeLabel[] = []
-    result.push(... this.addEdgeLabelsFor(dimensions, upward))
-    result.push(... this.addEdgeLabelsFor(dimensions, downward))
-    return result
-  }
-
-  private addEdgeLabelsFor(dimensions: EdgeLabelDimensions, lineSegments: LayoutLineSegment[]): EdgeLabel[] {
-    const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(lineSegments)
+    const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(firstLineSegments)
     const result: EdgeLabel[] = []
     for (const group of groups) {
       const layouter = new EdgeLabelLayouter(dimensions)
