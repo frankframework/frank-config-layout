@@ -24,9 +24,9 @@ export interface EdgeLabelDimensions {
   preferredVertDistanceFromOrigin: number
 }
 
-interface Box {
-  xspan: Interval
-  yspan: Interval
+export interface Box {
+  readonly horizontalBox: Interval
+  readonly verticalBox: Interval
 }
 
 const MARGIN = 2
@@ -37,7 +37,7 @@ export class EdgeLabelLayouter {
   constructor(readonly dimensions: EdgeLabelDimensions) {
   }
 
-  add(line: Line, textWidth: number): Point {
+  add(line: Line, textWidth: number): Box {
     const vdistSources = new NumbersAroundZero()
     while (true) {
       const vdistSource: number = vdistSources.next()
@@ -46,10 +46,10 @@ export class EdgeLabelLayouter {
       if (vdist <= 0) {
         continue
       }
-      const candidate: Point = this.pointAt(vdist, line)
+      const candidateCenter: Point = this.pointAt(vdist, line)
       const candidateBox: Box = {
-        xspan: Interval.createFromCenterSize(candidate.x, textWidth),
-        yspan: Interval.createFromCenterSize(candidate.y, this.dimensions.estLabelHeight)}
+        horizontalBox: Interval.createFromCenterSize(candidateCenter.x, textWidth),
+        verticalBox: Interval.createFromCenterSize(candidateCenter.y, this.dimensions.estLabelHeight)}
       let isSpaceOccupied: boolean = false
       for (const existingBox of this.boxes) {
         if (this.boxesIntersect(candidateBox, existingBox)) {
@@ -61,7 +61,7 @@ export class EdgeLabelLayouter {
         continue
       }
       this.boxes.push(candidateBox)
-      return candidate
+      return candidateBox
     }
   }
 
@@ -84,8 +84,8 @@ export class EdgeLabelLayouter {
   }
 
   private boxesIntersect(first: Box, second: Box) {
-    const x_intersection: Interval | null = first.xspan.toIntersected(second.xspan)
-    const y_intersection: Interval | null = first.yspan.toIntersected(second.yspan)
+    const x_intersection: Interval | null = first.horizontalBox.toIntersected(second.horizontalBox)
+    const y_intersection: Interval | null = first.verticalBox.toIntersected(second.verticalBox)
     return (x_intersection !== null) && (y_intersection !== null)
   }
 }

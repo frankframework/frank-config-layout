@@ -44,7 +44,7 @@ export class OurMermaid2SvgDimensions implements Dimensions {
   boxConnectorAreaPerc = 50
   intermediateLayerPassedByVerticalLine = false
   estCharacterWidth = 9
-  estLabelHeight = 13
+  estLabelHeight = 16
   preferredVertDistanceFromOrigin = 30
 }
 

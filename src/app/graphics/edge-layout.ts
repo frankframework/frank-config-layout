@@ -21,7 +21,7 @@ import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
-import { EdgeLabelDimensions, EdgeLabelLayouter } from "./edge-label-layouter";
+import { EdgeLabelDimensions, EdgeLabelLayouter, Box } from "./edge-label-layouter";
 
 export interface Dimensions extends NodeSpacingDimensions, EdgeLabelDimensions {
   nodeBoxWidth: number
@@ -158,8 +158,8 @@ export interface LayoutLineSegment {
 }
 
 export interface EdgeLabel {
-  centerX: number,
-  centerY: number,
+  horizontalBox: Interval,
+  verticalBox: Interval,
   text: string
 }
 
@@ -277,10 +277,10 @@ export class Layout {
       const layouter = new EdgeLabelLayouter(dimensions)
       for (const ls of group) {
         const widthEstimate = (ls.optionalOriginalText!).length * dimensions.estCharacterWidth
-        const point: Point = layouter!.add(ls.line, widthEstimate)
+        const box: Box = layouter!.add(ls.line, widthEstimate)
         result.push({
-          centerX: point.x,
-          centerY: point.y,
+          horizontalBox: box.horizontalBox,
+          verticalBox: box.verticalBox,
           text: ls.optionalOriginalText!
         })
       }

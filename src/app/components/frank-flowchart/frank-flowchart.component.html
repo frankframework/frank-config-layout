@@ -52,8 +52,8 @@
         [class.selected]="line.selected"/>
     </g>
     <text *ngFor="let label of drawing.edgeLabels"
-      attr.x="{{ label.centerX }}"
-      attr.y="{{ label.centerY }}"
+      attr.x="{{ label.horizontalBox.center }}"
+      attr.y="{{ label.verticalBox.center }}"
       text-anchor="middle"
       dominant-baseline="middle">{{ label.text }}</text>
   </svg>

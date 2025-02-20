@@ -176,13 +176,69 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     <polyline class="line error" points="351,265 244,360" marker-end="url(#arrow)"/>
   </g>
   <g text-anchor="middle" dominant-baseline="middle">
-    <text x="132" y="199">success</text>
-    <text x="212" y="199">failure</text>
-    <text x="120" y="319">success</text>
-    <text x="351" y="199">success</text>
-    <text x="112" y="79">success</text>
-    <text x="176" y="79">success</text>
-    <text x="272" y="79">success</text>
+    <foreignObject
+      x="101"
+      y="191"
+      width="63"
+      height="16">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        success
+      </div>
+    </foreignObject>
+    <foreignObject
+      x="181"
+      y="191"
+      width="63"
+      height="16">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        failure
+      </div>
+    </foreignObject>
+    <foreignObject
+      x="89"
+      y="311"
+      width="63"
+      height="16">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        success
+      </div>
+    </foreignObject>
+    <foreignObject
+      x="320"
+      y="191"
+      width="63"
+      height="16">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        success
+      </div>
+    </foreignObject>
+    <foreignObject
+      x="81"
+      y="71"
+      width="63"
+      height="16">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        success
+      </div>
+    </foreignObject>
+    <foreignObject
+      x="145"
+      y="71"
+      width="63"
+      height="16">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        success
+      </div>
+    </foreignObject>
+    <foreignObject
+      x="241"
+      y="71"
+      width="63"
+      height="16">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        success
+      </div>
+    </foreignObject>
   </g>
 </svg>`
 

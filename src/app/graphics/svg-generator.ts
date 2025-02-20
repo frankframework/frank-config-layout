@@ -159,7 +159,15 @@ function renderLabels(labels: EdgeLabel[]): string {
 }
 
 function renderLabel(label: EdgeLabel): string {
-  return `    <text x="${label.centerX}" y="${label.centerY}">${label.text}</text>
+  return `    <foreignObject
+      x="${label.horizontalBox.minValue}"
+      y="${label.verticalBox.minValue}"
+      width="${label.horizontalBox.size}"
+      height="${label.verticalBox.size}">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
+        ${label.text}
+      </div>
+    </foreignObject>
 `
 }
 
