@@ -56,6 +56,14 @@ export class CategorizedEdge implements Edge {
   getKey(): string {
     return getEdgeKey(this.getFrom(), this.getTo())
   }
+
+  getNumLines(): number {
+    if (this.text === undefined) {
+      return 0
+    } else {
+      return this.text.split('<br/>').length
+    }
+  }
 }
 
 export function categorize(b: GraphBase): GraphBase {
