@@ -81,9 +81,13 @@ N1 --> |exception| N2
     const input = `
 N1(""):::normal
 N2(""):::normal
-N1 --> |success<br/>exception| N2`
+N1 --> |success<br/>  exception  | N2`
     const b = getGraphFromMermaid(input)
     const c: GraphBase = categorize(b)
-    expect( (c.getEdgeByKey('N1-N2') as CategorizedEdge).getNumLines()).toEqual(2)
+    const instance = c.getEdgeByKey('N1-N2') as CategorizedEdge
+    expect(instance.getNumLines()).toEqual(2)
+    expect(instance.getTextLines()).toEqual(["success", "exception"])
+    // The second line is trimmed, length of word "exception"
+    expect(instance.getMaxLineLength()).toEqual(9)
   })
 })

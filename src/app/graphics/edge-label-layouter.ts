@@ -20,7 +20,7 @@ import { Line, Point } from "./graphics"
 
 export interface EdgeLabelDimensions {
   estCharacterWidth: number
-  estLabelHeight: number
+  estLabelLineHeight: number
   preferredVertDistanceFromOrigin: number
 }
 
@@ -29,7 +29,7 @@ export interface Box {
   readonly verticalBox: Interval
 }
 
-const MARGIN = 2
+const MARGIN = 0
 
 export class EdgeLabelLayouter {
   private boxes: Box[] = []
@@ -37,11 +37,12 @@ export class EdgeLabelLayouter {
   constructor(readonly dimensions: EdgeLabelDimensions) {
   }
 
-  add(line: Line, textWidth: number): Box {
+  add(line: Line, textWidth: number, numTextLines: number): Box {
     const vdistSources = new NumbersAroundZero()
     while (true) {
       const vdistSource: number = vdistSources.next()
-      const vdist: number = this.dimensions.preferredVertDistanceFromOrigin + vdistSource * (this.dimensions.estLabelHeight + MARGIN)
+      const vdist: number = this.dimensions.preferredVertDistanceFromOrigin
+        + vdistSource * (this.dimensions.estLabelLineHeight + MARGIN)
       // Do not put the label in box from which the edge originates
       if (vdist <= 0) {
         continue
@@ -49,7 +50,7 @@ export class EdgeLabelLayouter {
       const candidateCenter: Point = this.pointAt(vdist, line)
       const candidateBox: Box = {
         horizontalBox: Interval.createFromCenterSize(candidateCenter.x, textWidth),
-        verticalBox: Interval.createFromCenterSize(candidateCenter.y, this.dimensions.estLabelHeight)}
+        verticalBox: Interval.createFromCenterSize(candidateCenter.y, numTextLines * this.dimensions.estLabelLineHeight)}
       let isSpaceOccupied: boolean = false
       for (const existingBox of this.boxes) {
         if (this.boxesIntersect(candidateBox, existingBox)) {

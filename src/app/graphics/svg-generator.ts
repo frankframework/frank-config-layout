@@ -71,6 +71,24 @@ function renderDefs() {
         text-overflow: ellipsis;
         font-family: "trebuchet ms";
       }
+
+      .label-text-wrapper {
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-family: "trebuchet ms";
+        font-size: 10px;
+      }
+
+      .label-text-box {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
     </style>
     <!-- A marker to be used as an arrowhead -->
     <marker
@@ -159,15 +177,15 @@ function renderLabels(labels: EdgeLabel[]): string {
 }
 
 function renderLabel(label: EdgeLabel): string {
-  return `    <foreignObject
-      x="${label.horizontalBox.minValue}"
-      y="${label.verticalBox.minValue}"
-      width="${label.horizontalBox.size}"
-      height="${label.verticalBox.size}">
-      <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; justify-content: center">
-        ${label.text}
-      </div>
-    </foreignObject>
+  return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
+      <foreignObject style="width:${label.horizontalBox.size}px; height:${label.verticalBox.size}px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            ${label.text}
+          </div>
+        </div>
+      </foreignObject>
+    </g>
 `
 }
 

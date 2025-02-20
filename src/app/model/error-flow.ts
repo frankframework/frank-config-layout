@@ -43,7 +43,15 @@ export class CategorizedNode implements Node {
 }
 
 export class CategorizedEdge implements Edge {
-  constructor(private from: CategorizedNode, private to: CategorizedNode, readonly text: string | undefined, readonly isError: boolean) {}
+  private textLines: string[] | null
+
+  constructor(private from: CategorizedNode, private to: CategorizedNode, readonly text: string | undefined, readonly isError: boolean) {
+    if (text === undefined) {
+      this.textLines = null
+    } else {
+      this.textLines = text.split('<br/>').map(s => s.trim())
+    }
+  }
 
   getFrom(): Node {
     return this.from
@@ -58,10 +66,22 @@ export class CategorizedEdge implements Edge {
   }
 
   getNumLines(): number {
-    if (this.text === undefined) {
+    return this.textLines === null ? 0 : this.textLines.length
+  }
+
+  getMaxLineLength(): number {
+    if (this.textLines === null) {
       return 0
     } else {
-      return this.text.split('<br/>').length
+      return Math.max( ... this.textLines.map(s => s.length))
+    }
+  }
+
+  getTextLines(): string[] | null {
+    if (this.textLines === null) {
+      return null
+    } else {
+      return [ ... this.textLines ]
     }
   }
 }

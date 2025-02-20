@@ -26,6 +26,9 @@ function lsForGroup(t: LabelGroupTestSegmentBase): LayoutLineSegment {
     maxLayerNumber: 1,
     minLayerNumber: 0,
     optionalOriginalText: "aap",
+    numtextLines: 1,
+    textLines: ["aap"],
+    maxLineLength: 3,
     originId: t.originId,
     passDirection: t.direction
   }
@@ -180,7 +183,7 @@ const dimensions: Dimensions = {
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: false,
   estCharacterWidth: 9,
-  estLabelHeight: 30,
+  estLabelLineHeight: 30,
   preferredVertDistanceFromOrigin: 50
 }
 
@@ -198,6 +201,6 @@ const dimensionsIntermediateLayersVertical: Dimensions = {
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: true,
   estCharacterWidth: 9,
-  estLabelHeight: 30,
+  estLabelLineHeight: 30,
   preferredVertDistanceFromOrigin: 50
 }
