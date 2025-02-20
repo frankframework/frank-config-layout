@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -45,9 +45,12 @@ export class OriginalNode implements NodeForEditor {
   }
 }
 
+export const PASS_DIRECTION_DOWN = 0
+export const PASS_DIRECTION_UP = 1
+
 export class IntermediateNode implements NodeForEditor {
   constructor(
-    private id: string
+    private id: string, private passDirection: number, readonly originalEdge: Edge
   ) {}
 
   getId() {
@@ -60,6 +63,10 @@ export class IntermediateNode implements NodeForEditor {
 
   getCreationReason() {
     return CreationReason.INTERMEDIATE
+  }
+
+  getPassDirection() {
+    return this.passDirection
   }
 }
 
@@ -85,8 +92,11 @@ export class EdgeForEditor implements Edge {
   constructor(
     readonly creationReason: CreationReason,
     readonly original: Edge,
-    private from: NodeForEditor,
-    private to: NodeForEditor
+    readonly from: NodeForEditor,
+    readonly to: NodeForEditor,
+    readonly isFirstSegment: boolean,
+    readonly isLastSegment: boolean,
+    readonly passDirection: number
   ) {}
 
   getFrom(): Node {
@@ -127,6 +137,7 @@ export class NodeSequenceEditorBuilder {
   handleEdge(edge: Edge): void {
     const layerFrom: number = this.nodeIdToLayer.get(edge.getFrom().getId())!
     const layerTo: number = this.nodeIdToLayer.get(edge.getTo().getId())!
+    const passDirection = layerFrom <= layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP
     if (Math.abs(layerTo - layerFrom) <= 1) {
       // We do not throw an error for edges within the same layer.
       // Maybe a future layering algorithm will allow this.
@@ -136,33 +147,43 @@ export class NodeSequenceEditorBuilder {
         CreationReason.ORIGINAL,
         edge,
         this.graph.getNodeById(edge.getFrom().getId()) as NodeForEditor,
-        this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor
+        this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor,
+        true, true, passDirection
       ))
     } else {
       const intermediateLayers: number[] = getIntermediateLayers(layerFrom, layerTo)
       const intermediateNodes: NodeForEditor[] = intermediateLayers.map(layer => new IntermediateNode(
-        `intermediate${this.nextSeqIntermediateNode++}`
+        `intermediate${this.nextSeqIntermediateNode++}`, passDirection, edge
       ));
-      intermediateNodes.forEach(n => (this.graph as ConcreteGraphBase).addExistingNode(n));
+      intermediateNodes.forEach( (n, i) => (this.graph as ConcreteGraphBase).addExistingNode(n));
       (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
         CreationReason.INTERMEDIATE,
         edge,
         this.graph.getNodeById(edge.getFrom().getId())! as NodeForEditor,
-        intermediateNodes[0]
+        intermediateNodes[0],
+        true,
+        false,
+        passDirection
       ))
       for(let i = 1; i < intermediateNodes.length; ++i) {
         (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
           CreationReason.INTERMEDIATE,
           edge,
           intermediateNodes[i-1],
-          intermediateNodes[i]
+          intermediateNodes[i],
+          false,
+          false,
+          passDirection
         ))
       }
       (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
         CreationReason.INTERMEDIATE,
         edge,
         intermediateNodes[intermediateNodes.length - 1],
-        this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor
+        this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor,
+        false,
+        true,
+        passDirection
       ))
       intermediateNodes.forEach((n, index) => this.nodeIdToLayer.set(n.getId(), intermediateLayers[index]))
     }

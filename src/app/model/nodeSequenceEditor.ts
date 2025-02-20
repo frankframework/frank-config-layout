@@ -84,7 +84,7 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
     this.checkNodeToLayerMap()
     const initialSequence: string[] = graph.getNodes().map(n => n.getId())
     const numLayers = Math.max(... nodeIdToLayer.values()) + 1
-    this.sequence = new LayoutBase(
+    this.sequence = LayoutBase.create(
       initialSequence,
       graph,
       this.nodeIdToLayer,
@@ -263,7 +263,7 @@ export class ConcreteNodeSequenceEditor implements NodeSequenceEditor {
       .filter(n => n !== null)
       .map(n => n as Node)
       .map(n => n.getId()!)
-    return new LayoutBase(shownSequence, this.graph, this.nodeIdToLayer, this.getNumLayers())
+    return LayoutBase.create(shownSequence, this.graph, this.nodeIdToLayer, this.getNumLayers())
   }
 
   updatePositionsOfShownNodes(lb: LayoutBase): number[] {

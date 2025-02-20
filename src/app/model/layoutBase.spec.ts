@@ -30,7 +30,7 @@ import { LayoutBase, getNumCrossings, alignFromLayer, NumCrossingsJudgement} fro
       ['E2', 2],
       ['E3', 2]
     ])
-    return new LayoutBase(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g, m, 3)
+    return LayoutBase.create(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g, m, 3)
   }
 
 describe('LayoutBase', () => {
@@ -51,7 +51,7 @@ describe('LayoutBase', () => {
       ['N2', 1],
       ['End', 2]
     ])
-    return new LayoutBase(['Start', 'N1', 'N2', 'End'], g, m, 3)
+    return LayoutBase.create(['Start', 'N1', 'N2', 'End'], g, m, 3)
   }
 
   function getSimpleLayoutBaseFromOtherSequence() {
@@ -71,7 +71,7 @@ describe('LayoutBase', () => {
       ['N2', 1],
       ['End', 2]
     ])
-    return new LayoutBase(['Start', 'N1', 'N2', 'End'], g, m, 3)
+    return LayoutBase.create(['Start', 'N1', 'N2', 'End'], g, m, 3)
   }
 
   it('When LayoutBase is created then it holds the right connections and the right sequence', () => {
@@ -128,7 +128,7 @@ describe('LayoutBase', () => {
       ['E2', 2],
       ['E3', 2]
     ])
-    return new LayoutBase(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g, m, 3)
+    return LayoutBase.create(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g, m, 3)
   }
 
   it('When another LayoutBase is created then it holds the right connections and the right sequence', () => {
@@ -181,7 +181,7 @@ describe('Operations on LayoutBase', () => {
       ['E1', 1],
       ['E2', 1]
     ])
-    let lb = new LayoutBase(['S1', 'S2', 'E1', 'E2'], g, m, 2)
+    let lb = LayoutBase.create(['S1', 'S2', 'E1', 'E2'], g, m, 2)
     expect(getNumCrossings(lb)).toEqual(0)
   })
 
@@ -200,7 +200,7 @@ describe('Operations on LayoutBase', () => {
       ['E1', 1],
       ['E2', 1]
     ])
-    let lb = new LayoutBase(['S1', 'S2', 'E1', 'E2'], g, m, 2)
+    let lb = LayoutBase.create(['S1', 'S2', 'E1', 'E2'], g, m, 2)
     expect(getNumCrossings(lb)).toEqual(1)
   })
 
@@ -267,7 +267,7 @@ describe('Operations on LayoutBase', () => {
         ['2C', 2]
       ])
       const sequence: string[] = g.getNodes().map(n => n.getId())
-      let lb = new LayoutBase(sequence, g, m, 3)
+      let lb = LayoutBase.create(sequence, g, m, 3)
       alignFromLayer(lb, alignmentLayer)
       const expectedSequenceOfLetters = alignmentCase[alignmentLayer]
       for (let testLayer = 0; testLayer <= 2; ++testLayer) {

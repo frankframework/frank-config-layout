@@ -23,7 +23,7 @@ import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequen
 import { NodeSequenceEditor } from '../../model/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
-import { Layout, PlacedEdge, PlacedNode, Dimensions } from '../../graphics/edge-layout';
+import { Layout, PlacedNode, Dimensions, EdgeLabel } from '../../graphics/edge-layout';
 import { getFactoryDimensions } from '../dimensions-editor/dimensions-editor.component';
 import { Subject } from 'rxjs';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
@@ -159,16 +159,21 @@ export class FlowChartEditorComponent {
         selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!),
         isError: n.isError
       }})
-    const lines: Line[] = layout.getEdges()
-      .map(edge => edge as PlacedEdge)
-      .map(edge => { return {
-        id: edge.key, x1: edge.line.startPoint.x, y1: edge.line.startPoint.y,
-        x2: edge.line.endPoint.x, y2: edge.line.endPoint.y,
-        selected: this.selectionInModel.isEdgeHighlightedInDrawing(edge.getKey(), this.layoutModel!),
-        arrow: edge.isLastSegment,
-        isError: edge.isError
+    const lines: Line[] = layout.getLayoutLineSegments()
+      .map(lls => { return {
+        id: lls.key, x1: lls.line.startPoint.x, y1: lls.line.startPoint.y,
+        x2: lls.line.endPoint.x, y2: lls.line.endPoint.y,
+        selected: this.selectionInModel.isEdgeHighlightedInDrawing(lls.key, this.layoutModel!),
+        arrow: lls.isLastLineSegment,
+        isError: lls.isError
       }})
-    this.drawing = {width: layout.width, height: layout.height, rectangles, lines}
+    this.drawing = {
+      width: layout.width,
+      height: layout.height,
+      rectangles,
+      lines,
+      edgeLabels: layout.edgeLabels
+    }
   }
 
   static model2layout(model: NodeSequenceEditor, inDimensions: Dimensions): Layout {

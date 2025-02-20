@@ -1,5 +1,5 @@
 import { ConcreteNode, Node, ConcreteGraphBase, GraphConnectionsDecorator } from '../model/graph'
-import { calculateLayerNumbers, NodeSequenceEditorBuilder, NodeForEditor, OriginalNode, CreationReason, EdgeForEditor, LayerNumberAlgorithm, calculateLayerNumbersFirstOccuringPath, calculateLayerNumbersLongestPath } from './horizontalGrouping'
+import { calculateLayerNumbers, NodeSequenceEditorBuilder, NodeForEditor, OriginalNode, IntermediateNode, CreationReason, EdgeForEditor, LayerNumberAlgorithm, calculateLayerNumbersFirstOccuringPath, calculateLayerNumbersLongestPath, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP} from './horizontalGrouping'
 import { getRange } from '../util/util'
 
 function newNode(id: string): Node {
@@ -243,36 +243,52 @@ describe('NodeSequenceEditorBuilder', () => {
       .map(n => n as OriginalNode)
       .map(n => n.original.getId()))
       .toEqual(['N0', 'N1', 'N2', 'N3'])
+    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_DOWN)
+    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).originalEdge.getKey()).toEqual('N0-N2')
+    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_DOWN)
+    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).originalEdge.getKey()).toEqual('N0-N3')
+    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_DOWN)
+    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).originalEdge.getKey()).toEqual('N0-N3')
     let edge: EdgeForEditor = instance.graph.getEdges()[0] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('N0')
     expect(edge.getTo().getId()).toBe('N1')
     expect(edge.creationReason).toBe(CreationReason.ORIGINAL)
     expect(edge.original.getFrom().getId()).toBe('N0')
     expect(edge.original.getTo().getId()).toBe('N1')
+    expect(edge.isFirstSegment).toEqual(true)
+    expect(edge.isLastSegment).toEqual(true)
     edge = instance.graph.getEdges()[1] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('N0')
     expect(edge.getTo().getId()).toBe('intermediate1')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N0')
     expect(edge.original.getTo().getId()).toBe('N2')
+    expect(edge.isFirstSegment).toEqual(true)
+    expect(edge.isLastSegment).toEqual(false)
     edge = instance.graph.getEdges()[2] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('intermediate1')
     expect(edge.getTo().getId()).toBe('N2')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N0')
     expect(edge.original.getTo().getId()).toBe('N2')
+    expect(edge.isFirstSegment).toEqual(false)
+    expect(edge.isLastSegment).toEqual(true)
     edge = instance.graph.getEdges()[3] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('N0')
     expect(edge.getTo().getId()).toBe('intermediate2')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N0')
     expect(edge.original.getTo().getId()).toBe('N3')
+    expect(edge.isFirstSegment).toEqual(true)
+    expect(edge.isLastSegment).toEqual(false)
     edge = instance.graph.getEdges()[4] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('intermediate2')
     expect(edge.getTo().getId()).toBe('intermediate3')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N0')
     expect(edge.original.getTo().getId()).toBe('N3')
+    expect(edge.isFirstSegment).toEqual(false)
+    expect(edge.isLastSegment).toEqual(false)
     edge = instance.graph.getEdges()[5] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('intermediate3')
     expect(edge.getTo().getId()).toBe('N3')
@@ -280,6 +296,12 @@ describe('NodeSequenceEditorBuilder', () => {
     expect(edge.original.getFrom().getId()).toBe('N0')
     expect(edge.original.getTo().getId()).toBe('N3')
     expect(instance.graph.getEdges().length).toBe(6)
+    expect(edge.isFirstSegment).toEqual(false)
+    expect(edge.isLastSegment).toEqual(true)
+    // All edges go down
+    for (const edge of instance.graph.getEdges()) {
+      expect( (edge as EdgeForEditor).passDirection).toEqual(PASS_DIRECTION_DOWN)
+    }
   })
 
   function getInstanceDownwardLinks(): NodeSequenceEditorBuilder {
@@ -306,42 +328,60 @@ describe('NodeSequenceEditorBuilder', () => {
       .toEqual(['N0A', 'N0B', 'N1', 'N2', 'N3', 'intermediate1', 'intermediate2', 'intermediate3'])
     expect(instance.graph.getNodes().map(n => instance.nodeIdToLayer.get(n.getId())))
       .toEqual([0, 0, 1, 2, 3, 1, 2, 1])
+    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_UP)
+    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).originalEdge.getKey()).toEqual('N2-N0A')
+    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_UP)
+    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).originalEdge.getKey()).toEqual('N3-N0A')
+    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_UP)
+    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).originalEdge.getKey()).toEqual('N3-N0A')
     let edge = instance.graph.getEdges()[0] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('N0A')
     expect(edge.getTo().getId()).toBe('N0B')
     expect(edge.creationReason).toBe(CreationReason.ORIGINAL)
     expect(edge.original.getFrom().getId()).toBe('N0A')
     expect(edge.original.getTo().getId()).toBe('N0B')
+    expect(edge.isFirstSegment).toEqual(true)
+    expect(edge.isLastSegment).toEqual(true)
     edge = instance.graph.getEdges()[1] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('N1')
     expect(edge.getTo().getId()).toBe('N0A')
     expect(edge.creationReason).toBe(CreationReason.ORIGINAL)
     expect(edge.original.getFrom().getId()).toBe('N1')
     expect(edge.original.getTo().getId()).toBe('N0A')
+    expect(edge.isFirstSegment).toEqual(true)
+    expect(edge.isLastSegment).toEqual(true)
     edge = instance.graph.getEdges()[2] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('N2')
     expect(edge.getTo().getId()).toBe('intermediate1')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N2')
     expect(edge.original.getTo().getId()).toBe('N0A')
+    expect(edge.isFirstSegment).toEqual(true)
+    expect(edge.isLastSegment).toEqual(false)
     edge = instance.graph.getEdges()[3] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('intermediate1')
     expect(edge.getTo().getId()).toBe('N0A')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N2')
     expect(edge.original.getTo().getId()).toBe('N0A')
+    expect(edge.isFirstSegment).toEqual(false)
+    expect(edge.isLastSegment).toEqual(true)
     edge = instance.graph.getEdges()[4] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('N3')
     expect(edge.getTo().getId()).toBe('intermediate2')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N3')
     expect(edge.original.getTo().getId()).toBe('N0A')
+    expect(edge.isFirstSegment).toEqual(true)
+    expect(edge.isLastSegment).toEqual(false)
     edge = instance.graph.getEdges()[5] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('intermediate2')
     expect(edge.getTo().getId()).toBe('intermediate3')
     expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
     expect(edge.original.getFrom().getId()).toBe('N3')
     expect(edge.original.getTo().getId()).toBe('N0A')
+    expect(edge.isFirstSegment).toEqual(false)
+    expect(edge.isLastSegment).toEqual(false)
     edge = instance.graph.getEdges()[6] as EdgeForEditor
     expect(edge.getFrom().getId()).toBe('intermediate3')
     expect(edge.getTo().getId()).toBe('N0A')
@@ -349,6 +389,14 @@ describe('NodeSequenceEditorBuilder', () => {
     expect(edge.original.getFrom().getId()).toBe('N3')
     expect(edge.original.getTo().getId()).toBe('N0A')
     expect(instance.graph.getEdges().length).toBe(7)
+    expect(edge.isFirstSegment).toEqual(false)
+    expect(edge.isLastSegment).toEqual(true)
+    // All edges go up
+    for (const edge of instance.graph.getEdges()) {
+      if (edge.getKey() !== "N0A-N0B") {
+        expect( (edge as EdgeForEditor).passDirection).toEqual(PASS_DIRECTION_UP)
+      }
+    }
   })
 
   function getInstanceUpwardLinks(): NodeSequenceEditorBuilder {

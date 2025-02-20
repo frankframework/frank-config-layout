@@ -122,3 +122,23 @@ export function permutationFrom(oldSequence: (string | null)[], newSequence: str
 export async function timeout(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+// Gives number 0, -1, +1, -2, +2, ...
+export class NumbersAroundZero {
+  private current = 0;
+
+  NumbersAroundZero() {
+  }
+
+  next(): number {
+    const previous = this.current
+    if (previous === 0) {
+      this.current = -1
+    } else if (previous < 0) {
+      this.current = - previous
+    } else {
+      this.current = - (previous + 1)
+    }
+    return previous
+  }
+}

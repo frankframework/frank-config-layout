@@ -50,12 +50,40 @@
             [(ngModel)]="editDimensions.nodeBoxWidth" type="number" minValue="1"
             [ngClass]="editDimensions.nodeBoxWidth !== lastPosted.nodeBoxWidth ? 'changed' : ''" />
           </td>
-          <tr>
-            <td>Connector area %:</td>
-            <td><input
+        </tr>
+        <tr>
+          <td>Connector area %:</td>
+          <td><input
               [(ngModel)]="editDimensions.boxConnectorAreaPerc" type="number" minValue="0" maxValue="100"
               [ngClass]="editDimensions.boxConnectorAreaPerc !== lastPosted.boxConnectorAreaPerc ? 'changed' : ''" />
-            </td>  
+          </td>
+        </tr>
+        <tr>
+          <td>Pass intermediate layers with vertical line segments</td>
+          <td><input
+            [(ngModel)]="editDimensions.intermediateLayerPassedByVerticalLine" type="checkbox"
+            [ngClass]="editDimensions.intermediateLayerPassedByVerticalLine !== lastPosted.intermediateLayerPassedByVerticalLine ? 'changed' : ''"/></td>
+        </tr>
+        <tr>
+          <td>Est. edge label char width:</td>
+          <td><input
+            [(ngModel)]="editDimensions.estCharacterWidth" type="number"
+            [ngClass]="editDimensions.estCharacterWidth !== lastPosted.estCharacterWidth ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Est. edge label height:</td>
+          <td><input
+            [(ngModel)]="editDimensions.estLabelHeight" type="number"
+            [ngClass]="editDimensions.estLabelHeight !== lastPosted.estLabelHeight ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Preferred label offset:</td>
+          <td><input
+            [(ngModel)]="editDimensions.preferredVertDistanceFromOrigin" type="number"
+            [ngClass]="editDimensions.preferredVertDistanceFromOrigin !== lastPosted.preferredVertDistanceFromOrigin ? 'changed' : ''"/>
+          </td>
         </tr>
       </table>
     </td>

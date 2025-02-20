@@ -136,6 +136,10 @@ function getTestDimensions(): Dimensions {
     nodeBoxWidth: 110,
     // Do not test spreading the edge connection points.
     // Otherwise the test is incomprehensible.
-    boxConnectorAreaPerc: 0
+    boxConnectorAreaPerc: 0,
+    intermediateLayerPassedByVerticalLine: false,
+    estCharacterWidth: 9,
+    estLabelHeight: 30,
+    preferredVertDistanceFromOrigin: 50  
   }
 }
