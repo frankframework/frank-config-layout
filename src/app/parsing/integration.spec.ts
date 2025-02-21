@@ -139,7 +139,7 @@ function getTestDimensions(): Dimensions {
     boxConnectorAreaPerc: 0,
     intermediateLayerPassedByVerticalLine: false,
     estCharacterWidth: 9,
-    estLabelHeight: 30,
+    estLabelLineHeight: 30,
     preferredVertDistanceFromOrigin: 50  
   }
 }

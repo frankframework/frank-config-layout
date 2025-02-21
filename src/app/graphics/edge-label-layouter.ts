@@ -20,16 +20,16 @@ import { Line, Point } from "./graphics"
 
 export interface EdgeLabelDimensions {
   estCharacterWidth: number
-  estLabelHeight: number
+  estLabelLineHeight: number
   preferredVertDistanceFromOrigin: number
 }
 
-interface Box {
-  xspan: Interval
-  yspan: Interval
+export interface Box {
+  readonly horizontalBox: Interval
+  readonly verticalBox: Interval
 }
 
-const MARGIN = 2
+const MARGIN = 0
 
 export class EdgeLabelLayouter {
   private boxes: Box[] = []
@@ -37,19 +37,20 @@ export class EdgeLabelLayouter {
   constructor(readonly dimensions: EdgeLabelDimensions) {
   }
 
-  add(line: Line, textWidth: number): Point {
+  add(line: Line, textWidth: number, numTextLines: number): Box {
     const vdistSources = new NumbersAroundZero()
     while (true) {
       const vdistSource: number = vdistSources.next()
-      const vdist: number = this.dimensions.preferredVertDistanceFromOrigin + vdistSource * (this.dimensions.estLabelHeight + MARGIN)
+      const vdist: number = this.dimensions.preferredVertDistanceFromOrigin
+        + vdistSource * (this.dimensions.estLabelLineHeight + MARGIN)
       // Do not put the label in box from which the edge originates
       if (vdist <= 0) {
         continue
       }
-      const candidate: Point = this.pointAt(vdist, line)
+      const candidateCenter: Point = this.pointAt(vdist, line)
       const candidateBox: Box = {
-        xspan: Interval.createFromCenterSize(candidate.x, textWidth),
-        yspan: Interval.createFromCenterSize(candidate.y, this.dimensions.estLabelHeight)}
+        horizontalBox: Interval.createFromCenterSize(candidateCenter.x, textWidth),
+        verticalBox: Interval.createFromCenterSize(candidateCenter.y, numTextLines * this.dimensions.estLabelLineHeight)}
       let isSpaceOccupied: boolean = false
       for (const existingBox of this.boxes) {
         if (this.boxesIntersect(candidateBox, existingBox)) {
@@ -61,7 +62,7 @@ export class EdgeLabelLayouter {
         continue
       }
       this.boxes.push(candidateBox)
-      return candidate
+      return candidateBox
     }
   }
 
@@ -84,8 +85,8 @@ export class EdgeLabelLayouter {
   }
 
   private boxesIntersect(first: Box, second: Box) {
-    const x_intersection: Interval | null = first.xspan.toIntersected(second.xspan)
-    const y_intersection: Interval | null = first.yspan.toIntersected(second.yspan)
+    const x_intersection: Interval | null = first.horizontalBox.toIntersected(second.horizontalBox)
+    const y_intersection: Interval | null = first.verticalBox.toIntersected(second.verticalBox)
     return (x_intersection !== null) && (y_intersection !== null)
   }
 }

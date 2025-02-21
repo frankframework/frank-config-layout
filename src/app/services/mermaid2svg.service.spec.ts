@@ -62,6 +62,24 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
         text-overflow: ellipsis;
         font-family: "trebuchet ms";
       }
+
+      .label-text-wrapper {
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-family: "trebuchet ms";
+        font-size: 10px;
+      }
+
+      .label-text-box {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
     </style>
     <!-- A marker to be used as an arrowhead -->
     <marker
@@ -176,13 +194,69 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     <polyline class="line error" points="351,265 244,360" marker-end="url(#arrow)"/>
   </g>
   <g text-anchor="middle" dominant-baseline="middle">
-    <text x="132" y="199">success</text>
-    <text x="212" y="199">failure</text>
-    <text x="120" y="319">success</text>
-    <text x="351" y="199">success</text>
-    <text x="112" y="79">success</text>
-    <text x="176" y="79">success</text>
-    <text x="272" y="79">success</text>
+    <g transform="translate(108, 193)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(188, 193)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            failure
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(96, 313)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(327, 193)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(88, 73)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(152, 73)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(248, 73)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
   </g>
 </svg>`
 
