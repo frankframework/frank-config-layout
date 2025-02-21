@@ -65,17 +65,10 @@
             [ngClass]="editDimensions.intermediateLayerPassedByVerticalLine !== lastPosted.intermediateLayerPassedByVerticalLine ? 'changed' : ''"/></td>
         </tr>
         <tr>
-          <td>Est. edge label char width:</td>
+          <td>Edge label font size:</td>
           <td><input
-            [(ngModel)]="editDimensions.estCharacterWidth" type="number"
-            [ngClass]="editDimensions.estCharacterWidth !== lastPosted.estCharacterWidth ? 'changed' : ''"/>
-          </td>
-        </tr>
-        <tr>
-          <td>Label line height:</td>
-          <td><input
-            [(ngModel)]="editDimensions.estLabelLineHeight" type="number"
-            [ngClass]="editDimensions.estLabelLineHeight !== lastPosted.estLabelLineHeight ? 'changed' : ''"/>
+            [(ngModel)]="editDimensions.edgeLabelFontSize" type="number"
+            [ngClass]="editDimensions.edgeLabelFontSize !== lastPosted.edgeLabelFontSize ? 'changed' : ''"/>
           </td>
         </tr>
         <tr>

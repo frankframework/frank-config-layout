@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+import { characterWidthOfFontSize, characterHeightOfFontSize } from "../util/util";
 import { Edge, Node, OptionalNode, getEdgeKey } from "../model/graph";
 import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
 import { CreationReason, EdgeForEditor, IntermediateNode, NodeForEditor, OriginalNode, PASS_DIRECTION_DOWN } from "../model/horizontalGrouping";
@@ -23,11 +24,13 @@ import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
 import { EdgeLabelDimensions, EdgeLabelLayouter, Box } from "./edge-label-layouter";
 
-export interface Dimensions extends NodeSpacingDimensions, EdgeLabelDimensions {
+export interface Dimensions extends NodeSpacingDimensions {
   nodeBoxWidth: number
   nodeBoxHeight: number
   boxConnectorAreaPerc: number
   intermediateLayerPassedByVerticalLine: boolean
+  edgeLabelFontSize: number
+  preferredVertDistanceFromOrigin: number
 }
   
 export class PlacedNode implements Node {
@@ -172,6 +175,15 @@ export interface EdgeLabel {
   text: string
 }
 
+export function createLayout(layout: NodeLayout, d: Dimensions) {
+  const edgeLabelDimensions: EdgeLabelDimensions = {
+    estCharacterWidth: characterWidthOfFontSize(d.edgeLabelFontSize),
+    estLabelLineHeight: characterHeightOfFontSize(d.edgeLabelFontSize),
+    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin
+  }
+  return new Layout(layout, d, edgeLabelDimensions)
+}
+
 export class Layout {
   readonly width: number
   readonly height: number
@@ -180,7 +192,8 @@ export class Layout {
   private layoutLineSegments: LayoutLineSegment[] = []
   readonly edgeLabels: EdgeLabel[]
 
-  constructor(layout: NodeLayout, d: Dimensions) {
+  // This constructor is used directly in unit tests. It allows to test with nice numbers
+  constructor(layout: NodeLayout, d: Dimensions, readonly edgeLabelDimensions: EdgeLabelDimensions) {
     this.width = layout.width
     this.height = layout.height
     const calc = new Edge2LineCalculation(layout, d)
@@ -197,7 +210,7 @@ export class Layout {
     if (d.intermediateLayerPassedByVerticalLine) {
       this.addVerticalLineSegmentsForIntermediateNodes(calc.getPlacedNodes())
     }
-    this.edgeLabels = this.addEdgeLabels(d)
+    this.edgeLabels = this.addEdgeLabels()
   }
 
   private addVerticalLineSegmentsForIntermediateNodes(nodes: PlacedNode[]) {
@@ -279,16 +292,16 @@ export class Layout {
     return (! linesTouch) && (relateLines(first.line, second.line) === LineRelation.CROSS)
   }
 
-  private addEdgeLabels(dimensions: EdgeLabelDimensions): EdgeLabel[] {
+  private addEdgeLabels(): EdgeLabel[] {
     const firstLineSegments = this.layoutLineSegments
       .filter(s => s.isFirstLineSegment)
       .filter(s => (s.optionalOriginalText !== null) && (s.optionalOriginalText.length >= 1))
     const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(firstLineSegments)
     const result: EdgeLabel[] = []
     for (const group of groups) {
-      const layouter = new EdgeLabelLayouter(dimensions)
+      const layouter = new EdgeLabelLayouter(this.edgeLabelDimensions)
       for (const ls of group) {
-        const widthEstimate = ls.maxLineLength * dimensions.estCharacterWidth
+        const widthEstimate = ls.maxLineLength * this.edgeLabelDimensions.estCharacterWidth
         const box: Box = layouter!.add(ls.line, widthEstimate, ls.numtextLines)
         result.push({
           horizontalBox: box.horizontalBox,

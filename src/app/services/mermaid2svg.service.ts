@@ -15,7 +15,7 @@
 */
 
 import { Inject, Injectable, InjectionToken } from '@angular/core';
-import { Dimensions, Layout } from '../graphics/edge-layout';
+import { Dimensions, createLayout } from '../graphics/edge-layout';
 import { Graph, GraphBase, GraphConnectionsDecorator } from '../model/graph';
 import { categorize } from '../model/error-flow'
 import { getGraphFromMermaid } from '../parsing/mermaid-parser';
@@ -90,7 +90,7 @@ export class Mermaid2svgService {
     lb = minimizeNumCrossings(lb)
     const nodeLayoutBuiler = new NodeLayoutBuilder(lb, graphWithIntermediateNodes, this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
-    const layout = new Layout(nodeLayout, this.dimensions)
+    const layout = createLayout(nodeLayout, this.dimensions)
     return {
       svg: generateSvg(layout),
       numNodes: g.getNodes().length,

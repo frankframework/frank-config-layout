@@ -4,6 +4,7 @@ import { Point, Line } from "./graphics"
 import { NodeSequenceEditorBuilder, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
 import { Layout, Dimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
 import { NodeLayoutBuilder } from "./node-layout"
+import { EdgeLabelDimensions } from "./edge-label-layouter"
 
 interface LabelGroupTestSegmentBase {
   originId: string
@@ -88,7 +89,7 @@ describe('Layout', () => {
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
     const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
-    const layout = new Layout(nodeLayout, dimensions)
+    const layout = new Layout(nodeLayout, dimensions, edgeLabelDimensions)
     expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
     expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
@@ -135,7 +136,7 @@ describe('Layout', () => {
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
     const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
-    const layout = new Layout(nodeLayout, dimensionsIntermediateLayersVertical)
+    const layout = new Layout(nodeLayout, dimensionsIntermediateLayersVertical, edgeLabelDimensions)
     expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
     expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
@@ -182,8 +183,8 @@ const dimensions: Dimensions = {
   // calculation without.
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: false,
-  estCharacterWidth: 9,
-  estLabelLineHeight: 30,
+  // These two are dummy - overridden by edgeLabelDimensions
+  edgeLabelFontSize: 10,
   preferredVertDistanceFromOrigin: 50
 }
 
@@ -200,7 +201,14 @@ const dimensionsIntermediateLayersVertical: Dimensions = {
   // calculation without.
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: true,
+  // These two are dummy - overridden by edgeLabelDimensions
+  edgeLabelFontSize: 10,
+  preferredVertDistanceFromOrigin: 50
+}
+
+const edgeLabelDimensions: EdgeLabelDimensions = {
   estCharacterWidth: 9,
   estLabelLineHeight: 30,
   preferredVertDistanceFromOrigin: 50
 }
+
