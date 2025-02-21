@@ -139,6 +139,7 @@ function getTestDimensions(): Dimensions {
     boxConnectorAreaPerc: 0,
     intermediateLayerPassedByVerticalLine: false,
     edgeLabelFontSize: 10,
-    preferredVertDistanceFromOrigin: 50  
+    preferredVertDistanceFromOrigin: 50,
+    strictlyKeepLabelOutOfBox: false
   }
 }

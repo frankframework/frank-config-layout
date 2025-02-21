@@ -60,6 +60,7 @@ export function getFactoryDimensions(): Dimensions {
     boxConnectorAreaPerc: 50,
     intermediateLayerPassedByVerticalLine: false,
     edgeLabelFontSize: 10,
-    preferredVertDistanceFromOrigin: 30
+    preferredVertDistanceFromOrigin: 30,
+    strictlyKeepLabelOutOfBox: false
   }
 }

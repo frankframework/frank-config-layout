@@ -7,7 +7,8 @@ describe('EdgeLabelLayouter', () => {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
-      preferredVertDistanceFromOrigin: 30
+      preferredVertDistanceFromOrigin: 30,
+      strictlyKeepLabelOutOfBox: false
     }
     const instance = new EdgeLabelLayouter(dimensions)
     // Movers two vertical steps for one horizontal step
@@ -29,7 +30,8 @@ describe('EdgeLabelLayouter', () => {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
-      preferredVertDistanceFromOrigin: 30
+      preferredVertDistanceFromOrigin: 30,
+      strictlyKeepLabelOutOfBox: false
     }
     const instance = new EdgeLabelLayouter(dimensions)
     // Movers two vertical steps for one horizontal step
@@ -54,7 +56,8 @@ describe('EdgeLabelLayouter', () => {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
-      preferredVertDistanceFromOrigin: 30
+      preferredVertDistanceFromOrigin: 30,
+      strictlyKeepLabelOutOfBox: false
     }
     const instance = new EdgeLabelLayouter(dimensions)
     // Movers two vertical steps for one horizontal step
@@ -76,7 +79,8 @@ describe('EdgeLabelLayouter', () => {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
-      preferredVertDistanceFromOrigin: 30
+      preferredVertDistanceFromOrigin: 30,
+      strictlyKeepLabelOutOfBox: false
     }
     const instance = new EdgeLabelLayouter(dimensions)
     // Movers two vertical steps for one horizontal step

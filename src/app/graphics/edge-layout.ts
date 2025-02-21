@@ -31,6 +31,7 @@ export interface Dimensions extends NodeSpacingDimensions {
   intermediateLayerPassedByVerticalLine: boolean
   edgeLabelFontSize: number
   preferredVertDistanceFromOrigin: number
+  strictlyKeepLabelOutOfBox: boolean
 }
   
 export class PlacedNode implements Node {
@@ -179,7 +180,8 @@ export function createLayout(layout: NodeLayout, d: Dimensions) {
   const edgeLabelDimensions: EdgeLabelDimensions = {
     estCharacterWidth: characterWidthOfFontSize(d.edgeLabelFontSize),
     estLabelLineHeight: characterHeightOfFontSize(d.edgeLabelFontSize),
-    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin
+    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
+    strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox
   }
   return new Layout(layout, d, edgeLabelDimensions)
 }
@@ -187,6 +189,7 @@ export function createLayout(layout: NodeLayout, d: Dimensions) {
 export class Layout {
   readonly width: number
   readonly height: number
+  readonly edgeLabelFontSize: number
   private nodes: PlacedNode[] = []
   private idToNode: Map<string, PlacedNode> = new Map<string, PlacedNode>()
   private layoutLineSegments: LayoutLineSegment[] = []
@@ -196,6 +199,7 @@ export class Layout {
   constructor(layout: NodeLayout, d: Dimensions, readonly edgeLabelDimensions: EdgeLabelDimensions) {
     this.width = layout.width
     this.height = layout.height
+    this.edgeLabelFontSize = d.edgeLabelFontSize
     const calc = new Edge2LineCalculation(layout, d)
     this.nodes = [ ... calc.getPlacedNodes() ]
     for (const n of this.nodes) {

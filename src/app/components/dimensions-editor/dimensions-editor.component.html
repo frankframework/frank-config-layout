@@ -78,6 +78,12 @@
             [ngClass]="editDimensions.preferredVertDistanceFromOrigin !== lastPosted.preferredVertDistanceFromOrigin ? 'changed' : ''"/>
           </td>
         </tr>
+        <tr>
+          <td>Strictly keep edge labels out of box:</td>
+          <td><input
+            [(ngModel)]="editDimensions.strictlyKeepLabelOutOfBox" type="checkbox"
+            [ngClass]="editDimensions.strictlyKeepLabelOutOfBox !== lastPosted.strictlyKeepLabelOutOfBox ? 'changed' : ''"/></td>
+        </tr>
       </table>
     </td>
     <td>

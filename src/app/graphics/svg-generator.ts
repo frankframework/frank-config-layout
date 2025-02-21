@@ -19,7 +19,7 @@ import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from "./edge-layout"
 
 export function generateSvg(layout: Layout) {
   return openSvg(layout.width, layout.height)
-    + renderDefs()
+    + renderDefs(layout.edgeLabelFontSize)
     + renderNodes(layout.getNodes().map(n => n as PlacedNode))
     + renderEdges(layout.getLayoutLineSegments().map(e => e as LayoutLineSegment))
     + renderLabels(layout.edgeLabels)
@@ -32,7 +32,7 @@ function openSvg(width: number, height: number) {
 `
 }
 
-function renderDefs() {
+function renderDefs(fontSize: number) {
   return `  <defs>
     <style>
       .rectangle {
@@ -78,7 +78,7 @@ function renderDefs() {
         white-space: nowrap;
         text-overflow: ellipsis;
         font-family: "trebuchet ms";
-        font-size: 10px;
+        font-size: ${fontSize}px;
       }
 
       .label-text-box {

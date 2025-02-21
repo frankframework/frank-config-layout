@@ -183,9 +183,10 @@ const dimensions: Dimensions = {
   // calculation without.
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: false,
-  // These two are dummy - overridden by edgeLabelDimensions
+  // These three are dummy - overridden by edgeLabelDimensions
   edgeLabelFontSize: 10,
-  preferredVertDistanceFromOrigin: 50
+  preferredVertDistanceFromOrigin: 50,
+  strictlyKeepLabelOutOfBox: false,
 }
 
 const dimensionsIntermediateLayersVertical: Dimensions = {
@@ -201,14 +202,16 @@ const dimensionsIntermediateLayersVertical: Dimensions = {
   // calculation without.
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: true,
-  // These two are dummy - overridden by edgeLabelDimensions
+  // These three are dummy - overridden by edgeLabelDimensions
   edgeLabelFontSize: 10,
-  preferredVertDistanceFromOrigin: 50
+  preferredVertDistanceFromOrigin: 50,
+  strictlyKeepLabelOutOfBox: false,
 }
 
 const edgeLabelDimensions: EdgeLabelDimensions = {
   estCharacterWidth: 9,
   estLabelLineHeight: 30,
-  preferredVertDistanceFromOrigin: 50
+  preferredVertDistanceFromOrigin: 50,
+  strictlyKeepLabelOutOfBox: false
 }
 

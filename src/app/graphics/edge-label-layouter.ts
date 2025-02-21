@@ -22,6 +22,7 @@ export interface EdgeLabelDimensions {
   estCharacterWidth: number
   estLabelLineHeight: number
   preferredVertDistanceFromOrigin: number
+  strictlyKeepLabelOutOfBox: boolean
 }
 
 export interface Box {
@@ -51,6 +52,19 @@ export class EdgeLabelLayouter {
       const candidateBox: Box = {
         horizontalBox: Interval.createFromCenterSize(candidateCenter.x, textWidth),
         verticalBox: Interval.createFromCenterSize(candidateCenter.y, numTextLines * this.dimensions.estLabelLineHeight)}
+      if (this.dimensions.strictlyKeepLabelOutOfBox) {
+        // If line goes down, the node box is above the line
+        if (line.startPoint.y <= line.endPoint.y) {
+          if (candidateBox.verticalBox.minValue < line.startPoint.y) {
+            continue
+          }
+        // If line goes up, the node box is below the line
+        } else {
+          if (candidateBox.verticalBox.maxValue > line.startPoint.y) {
+            continue
+          }
+        }
+      }
       let isSpaceOccupied: boolean = false
       for (const existingBox of this.boxes) {
         if (this.boxesIntersect(candidateBox, existingBox)) {
