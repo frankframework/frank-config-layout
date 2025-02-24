@@ -19,10 +19,25 @@ import { Interval } from "../util/interval"
 import { Line, Point } from "./graphics"
 
 export interface EdgeLabelDimensions {
+  edgeLabelFontSize: number
+  preferredVertDistanceFromOrigin: number
+  strictlyKeepLabelOutOfBox: boolean
+}
+
+export interface DerivedEdgeLabelDimensions {
   estCharacterWidth: number
   estLabelLineHeight: number
   preferredVertDistanceFromOrigin: number
   strictlyKeepLabelOutOfBox: boolean
+}
+
+export function getDerivedEdgeLabelDimensions(d: EdgeLabelDimensions) {
+  return {
+    estCharacterWidth: d.edgeLabelFontSize - 3,
+    estLabelLineHeight: d.edgeLabelFontSize + 3,
+    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
+    strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox
+  }
 }
 
 export interface Box {
@@ -35,15 +50,15 @@ const MARGIN = 0
 export class EdgeLabelLayouter {
   private boxes: Box[] = []
 
-  constructor(readonly dimensions: EdgeLabelDimensions) {
+  constructor(readonly derivedDimensions: DerivedEdgeLabelDimensions) {
   }
 
   add(line: Line, textWidth: number, numTextLines: number): Box {
     const vdistSources = new NumbersAroundZero()
     while (true) {
       const vdistSource: number = vdistSources.next()
-      const vdist: number = this.dimensions.preferredVertDistanceFromOrigin
-        + vdistSource * (this.dimensions.estLabelLineHeight + MARGIN)
+      const vdist: number = this.derivedDimensions.preferredVertDistanceFromOrigin
+        + vdistSource * (this.derivedDimensions.estLabelLineHeight + MARGIN)
       // Do not put the label in box from which the edge originates
       if (vdist <= 0) {
         continue
@@ -51,8 +66,8 @@ export class EdgeLabelLayouter {
       const candidateCenter: Point = this.pointAt(vdist, line)
       const candidateBox: Box = {
         horizontalBox: Interval.createFromCenterSize(candidateCenter.x, textWidth),
-        verticalBox: Interval.createFromCenterSize(candidateCenter.y, numTextLines * this.dimensions.estLabelLineHeight)}
-      if (this.dimensions.strictlyKeepLabelOutOfBox) {
+        verticalBox: Interval.createFromCenterSize(candidateCenter.y, numTextLines * this.derivedDimensions.estLabelLineHeight)}
+      if (this.derivedDimensions.strictlyKeepLabelOutOfBox) {
         // If line goes down, the node box is above the line
         if (line.startPoint.y <= line.endPoint.y) {
           if (candidateBox.verticalBox.minValue < line.startPoint.y) {

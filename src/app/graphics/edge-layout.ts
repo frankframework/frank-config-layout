@@ -14,7 +14,6 @@
    limitations under the License.
 */
 
-import { characterWidthOfFontSize, characterHeightOfFontSize } from "../util/util";
 import { Edge, Node, OptionalNode, getEdgeKey } from "../model/graph";
 import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
 import { CreationReason, EdgeForEditor, IntermediateNode, NodeForEditor, OriginalNode, PASS_DIRECTION_DOWN } from "../model/horizontalGrouping";
@@ -22,16 +21,16 @@ import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
-import { EdgeLabelDimensions, EdgeLabelLayouter, Box } from "./edge-label-layouter";
+import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, EdgeLabelDimensions, Box } from "./edge-label-layouter";
 
-export interface Dimensions extends NodeSpacingDimensions {
+export interface Dimensions extends NodeAndEdgeDimensions, EdgeLabelDimensions {
+}
+
+export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   nodeBoxWidth: number
   nodeBoxHeight: number
   boxConnectorAreaPerc: number
   intermediateLayerPassedByVerticalLine: boolean
-  edgeLabelFontSize: number
-  preferredVertDistanceFromOrigin: number
-  strictlyKeepLabelOutOfBox: boolean
 }
   
 export class PlacedNode implements Node {
@@ -45,7 +44,7 @@ export class PlacedNode implements Node {
   readonly intermediateNodePassDirection: number | null
   readonly intermediateNodeOriginalEdge: Edge | null
 
-  constructor(p: Position, d: Dimensions) {
+  constructor(p: Position, d: NodeAndEdgeDimensions) {
     this.id = p.node.getId()
     this.text = p.node.getText()
     this.creationReason = (p.node as NodeForEditor).getCreationReason()
@@ -176,30 +175,18 @@ export interface EdgeLabel {
   text: string
 }
 
-export function createLayout(layout: NodeLayout, d: Dimensions) {
-  const edgeLabelDimensions: EdgeLabelDimensions = {
-    estCharacterWidth: characterWidthOfFontSize(d.edgeLabelFontSize),
-    estLabelLineHeight: characterHeightOfFontSize(d.edgeLabelFontSize),
-    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
-    strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox
-  }
-  return new Layout(layout, d, edgeLabelDimensions)
-}
-
 export class Layout {
   readonly width: number
   readonly height: number
-  readonly edgeLabelFontSize: number
   private nodes: PlacedNode[] = []
   private idToNode: Map<string, PlacedNode> = new Map<string, PlacedNode>()
   private layoutLineSegments: LayoutLineSegment[] = []
   readonly edgeLabels: EdgeLabel[]
 
   // This constructor is used directly in unit tests. It allows to test with nice numbers
-  constructor(layout: NodeLayout, d: Dimensions, readonly edgeLabelDimensions: EdgeLabelDimensions) {
+  constructor(layout: NodeLayout, d: NodeAndEdgeDimensions, readonly derivedEdgeLabelDimensions: DerivedEdgeLabelDimensions) {
     this.width = layout.width
     this.height = layout.height
-    this.edgeLabelFontSize = d.edgeLabelFontSize
     const calc = new Edge2LineCalculation(layout, d)
     this.nodes = [ ... calc.getPlacedNodes() ]
     for (const n of this.nodes) {
@@ -303,9 +290,9 @@ export class Layout {
     const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(firstLineSegments)
     const result: EdgeLabel[] = []
     for (const group of groups) {
-      const layouter = new EdgeLabelLayouter(this.edgeLabelDimensions)
+      const layouter = new EdgeLabelLayouter(this.derivedEdgeLabelDimensions)
       for (const ls of group) {
-        const widthEstimate = ls.maxLineLength * this.edgeLabelDimensions.estCharacterWidth
+        const widthEstimate = ls.maxLineLength * this.derivedEdgeLabelDimensions.estCharacterWidth
         const box: Box = layouter!.add(ls.line, widthEstimate, ls.numtextLines)
         result.push({
           horizontalBox: box.horizontalBox,

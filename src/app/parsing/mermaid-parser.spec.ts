@@ -1,6 +1,5 @@
 import { getGraphFromMermaid } from './mermaid-parser';
 import { ConcreteNode, Node, ConcreteEdge, Edge, GraphConnectionsDecorator, Graph } from '../model/graph'
-import { Dimensions } from '../graphics/edge-layout';
 
 describe('Parse Mermaid', () => {
   it('Simple node definition', () => {

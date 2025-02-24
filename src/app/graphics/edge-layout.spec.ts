@@ -2,9 +2,9 @@ import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
 import { categorize, CategorizedEdge } from "../model/error-flow"
 import { Point, Line } from "./graphics"
 import { NodeSequenceEditorBuilder, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
-import { Layout, Dimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
+import { Layout, NodeAndEdgeDimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
 import { NodeLayoutBuilder } from "./node-layout"
-import { EdgeLabelDimensions } from "./edge-label-layouter"
+import { DerivedEdgeLabelDimensions } from "./edge-label-layouter"
 
 interface LabelGroupTestSegmentBase {
   originId: string
@@ -170,7 +170,7 @@ describe('Layout', () => {
   })
 })
 
-const dimensions: Dimensions = {
+const dimensions: NodeAndEdgeDimensions = {
   layerHeight: 50,
   layerDistance: 120,
   nodeBoxHeight: 40,
@@ -183,13 +183,9 @@ const dimensions: Dimensions = {
   // calculation without.
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: false,
-  // These three are dummy - overridden by edgeLabelDimensions
-  edgeLabelFontSize: 10,
-  preferredVertDistanceFromOrigin: 50,
-  strictlyKeepLabelOutOfBox: false,
 }
 
-const dimensionsIntermediateLayersVertical: Dimensions = {
+const dimensionsIntermediateLayersVertical: NodeAndEdgeDimensions = {
   layerHeight: 50,
   layerDistance: 120,
   nodeBoxHeight: 40,
@@ -201,14 +197,10 @@ const dimensionsIntermediateLayersVertical: Dimensions = {
   // It is complicated enough to understand the
   // calculation without.
   boxConnectorAreaPerc: 0,
-  intermediateLayerPassedByVerticalLine: true,
-  // These three are dummy - overridden by edgeLabelDimensions
-  edgeLabelFontSize: 10,
-  preferredVertDistanceFromOrigin: 50,
-  strictlyKeepLabelOutOfBox: false,
+  intermediateLayerPassedByVerticalLine: true
 }
 
-const edgeLabelDimensions: EdgeLabelDimensions = {
+const edgeLabelDimensions: DerivedEdgeLabelDimensions = {
   estCharacterWidth: 9,
   estLabelLineHeight: 30,
   preferredVertDistanceFromOrigin: 50,

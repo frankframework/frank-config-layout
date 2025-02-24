@@ -17,9 +17,9 @@
 import { CreationReason } from "../model/horizontalGrouping"
 import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from "./edge-layout"
 
-export function generateSvg(layout: Layout) {
+export function generateSvg(layout: Layout, edgeLabelFontSize: number) {
   return openSvg(layout.width, layout.height)
-    + renderDefs(layout.edgeLabelFontSize)
+    + renderDefs(edgeLabelFontSize)
     + renderNodes(layout.getNodes().map(n => n as PlacedNode))
     + renderEdges(layout.getLayoutLineSegments().map(e => e as LayoutLineSegment))
     + renderLabels(layout.edgeLabels)

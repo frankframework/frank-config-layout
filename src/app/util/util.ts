@@ -142,11 +142,3 @@ export class NumbersAroundZero {
     return previous
   }
 }
-
-export function characterWidthOfFontSize(size: number): number {
-  return size - 3
-}
-
-export function characterHeightOfFontSize(size: number): number {
-  return size + 3
-}

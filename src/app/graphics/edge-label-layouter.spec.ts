@@ -1,9 +1,9 @@
 import { Line, Point } from "../graphics/graphics"
-import { EdgeLabelDimensions, EdgeLabelLayouter, Box } from "./edge-label-layouter"
+import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, Box } from "./edge-label-layouter"
 
 describe('EdgeLabelLayouter', () => {
   it('When two labels fit next to each other they appear next to each other, downwards', () => {
-    const dimensions: EdgeLabelDimensions = {
+    const dimensions: DerivedEdgeLabelDimensions = {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
@@ -26,7 +26,7 @@ describe('EdgeLabelLayouter', () => {
   })
 
   it('When two labels do not fit next to each other they appear on different heights, downwards', () => {
-    const dimensions: EdgeLabelDimensions = {
+    const dimensions: DerivedEdgeLabelDimensions = {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
@@ -52,7 +52,7 @@ describe('EdgeLabelLayouter', () => {
   // to test with upward lines.
 
   it('When two labels fit next to each other they appear next to each other, upwards', () => {
-    const dimensions: EdgeLabelDimensions = {
+    const dimensions: DerivedEdgeLabelDimensions = {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
@@ -75,7 +75,7 @@ describe('EdgeLabelLayouter', () => {
   })
 
   it('When two labels do not fit next to each other they appear on different heights, upwards', () => {
-    const dimensions: EdgeLabelDimensions = {
+    const dimensions: DerivedEdgeLabelDimensions = {
       // estCharacterWidth is dummy value
       estCharacterWidth: 0,
       estLabelLineHeight: 10,
