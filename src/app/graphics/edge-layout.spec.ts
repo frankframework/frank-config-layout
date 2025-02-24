@@ -89,7 +89,7 @@ describe('Layout', () => {
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
     const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
-    const layout = new Layout(nodeLayout, dimensions, edgeLabelDimensions)
+    const layout = new Layout(nodeLayout, dimensions, derivedEdgeLabelDimensions)
     expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
     expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
@@ -136,7 +136,7 @@ describe('Layout', () => {
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
     const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
-    const layout = new Layout(nodeLayout, modifyForVerticalLines(dimensions), edgeLabelDimensions)
+    const layout = new Layout(nodeLayout, modifyForVerticalLines(dimensions), derivedEdgeLabelDimensions)
     expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
     expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
@@ -191,7 +191,7 @@ function modifyForVerticalLines(originalDimensions: NodeAndEdgeDimensions): Node
   return result
 }
 
-const edgeLabelDimensions: DerivedEdgeLabelDimensions = {
+const derivedEdgeLabelDimensions: DerivedEdgeLabelDimensions = {
   estCharacterWidth: 9,
   estLabelLineHeight: 30,
   preferredVertDistanceFromOrigin: 50,
