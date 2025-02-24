@@ -1,5 +1,5 @@
 import { getGraphFromMermaid } from '../parsing/mermaid-parser'
-import { Node, Edge, GraphBase } from './graph'
+import { GraphBase } from './graph'
 
 import { categorize, CategorizedNode, CategorizedEdge } from './error-flow'
 

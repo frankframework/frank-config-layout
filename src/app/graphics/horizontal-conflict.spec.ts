@@ -1,4 +1,4 @@
-import { HorizontalConflictResolver, AreaGroup } from "./horizontal-conflict";
+import { HorizontalConflictResolver } from "./horizontal-conflict";
 import { Interval } from "../util/interval";
 
 describe('HorizontalConflictResolver AreaGroup', () => {

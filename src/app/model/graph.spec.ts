@@ -1,4 +1,4 @@
-import { Node, Edge, ConcreteGraphBase, Graph, GraphConnectionsDecorator, ConcreteNode, NodeCaptionChoice, getCaption } from './graph'
+import { Node, ConcreteGraphBase, Graph, GraphConnectionsDecorator, ConcreteNode, NodeCaptionChoice, getCaption } from './graph'
 
 describe('Graph test', () => {
   it('Calculation of outgoing and incoming edges', () => {
