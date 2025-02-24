@@ -183,7 +183,6 @@ export class Layout {
   private layoutLineSegments: LayoutLineSegment[] = []
   readonly edgeLabels: EdgeLabel[]
 
-  // This constructor is used directly in unit tests. It allows to test with nice numbers
   constructor(layout: NodeLayout, d: NodeAndEdgeDimensions, readonly derivedEdgeLabelDimensions: DerivedEdgeLabelDimensions) {
     this.width = layout.width
     this.height = layout.height
