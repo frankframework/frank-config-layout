@@ -45,8 +45,6 @@ export interface Box {
   readonly verticalBox: Interval
 }
 
-const MARGIN = 0
-
 export class EdgeLabelLayouter {
   private boxes: Box[] = []
 
@@ -58,7 +56,7 @@ export class EdgeLabelLayouter {
     while (true) {
       const vdistSource: number = vdistSources.next()
       const vdist: number = this.derivedDimensions.preferredVertDistanceFromOrigin
-        + vdistSource * (this.derivedDimensions.estLabelLineHeight + MARGIN)
+        + vdistSource * (this.derivedDimensions.estLabelLineHeight)
       // Do not put the label in box from which the edge originates
       if (vdist <= 0) {
         continue
