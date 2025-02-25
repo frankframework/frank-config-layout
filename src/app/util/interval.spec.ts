@@ -90,4 +90,13 @@ describe('Interval', () => {
     expect(Interval.createFromMinMax(150, 249).center).toBe(200)
     expect(Interval.createFromCenterSize(200, 100)).toEqual(Interval.createFromMinMax(150, 249))
   })
+
+  it('Interval.contains works as expected', () => {
+    const instance: Interval = Interval.createFromMinMax(3, 5)
+    expect(instance.contains(2)).toEqual(false)
+    expect(instance.contains(3)).toEqual(true)
+    expect(instance.contains(4)).toEqual(true)
+    expect(instance.contains(5)).toEqual(true)
+    expect(instance.contains(6)).toEqual(false)
+  })
 })

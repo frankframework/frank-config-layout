@@ -51,33 +51,29 @@ export class EdgeLabelLayouter {
   constructor(readonly derivedDimensions: DerivedEdgeLabelDimensions) {
   }
 
-  add(line: Line, textWidth: number, numTextLines: number): Box {
+  add(line: Line, numCharactersOnLine: number, numTextLines: number): Box {
     const vdistSources = new NumbersAroundZero()
     while (true) {
       const vdistSource: number = vdistSources.next()
       const vdist: number = this.derivedDimensions.preferredVertDistanceFromOrigin
         + vdistSource * (this.derivedDimensions.estLabelLineHeight)
-      // Do not put the label in box from which the edge originates
       if (vdist <= 0) {
+        // The vertical center of the label would be in the box from which the line originates.
+        // Next vdistSource.
         continue
       }
       const candidateCenter: Point = this.pointAt(vdist, line)
       const candidateBox: Box = {
-        horizontalBox: Interval.createFromCenterSize(candidateCenter.x, textWidth),
+        horizontalBox: Interval.createFromCenterSize(candidateCenter.x, numCharactersOnLine * this.derivedDimensions.estCharacterWidth),
         verticalBox: Interval.createFromCenterSize(candidateCenter.y, numTextLines * this.derivedDimensions.estLabelLineHeight)}
       if (this.derivedDimensions.strictlyKeepLabelOutOfBox) {
-        // If line goes down, the node box is above the line
-        if (line.startPoint.y <= line.endPoint.y) {
-          if (candidateBox.verticalBox.minValue < line.startPoint.y) {
-            continue
-          }
-        // If line goes up, the node box is below the line
-        } else {
-          if (candidateBox.verticalBox.maxValue > line.startPoint.y) {
-            continue
-          }
+        if (candidateBox.verticalBox.contains(line.startPoint.y)) {
+          // The label would intersect with the box from which the line originates.
+          // Next vdistSource.
+          continue
         }
       }
+      // The label is accepted as not to interfere with the box, now check it does not intersect other labels.
       let isSpaceOccupied: boolean = false
       for (const existingBox of this.boxes) {
         if (this.boxesIntersect(candidateBox, existingBox)) {
@@ -86,6 +82,8 @@ export class EdgeLabelLayouter {
         }
       }
       if (isSpaceOccupied) {
+        // the label would intersect other labels.
+        // Next vdistSource.
         continue
       }
       this.boxes.push(candidateBox)

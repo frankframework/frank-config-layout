@@ -76,4 +76,14 @@ export class Interval {
       return new Interval(minValue, maxValue)
     }
   }
+
+  contains(n: number): boolean {
+    if (n < this.minValue) {
+      return false
+    }
+    if (n > this.maxValue) {
+      return false
+    }
+    return true
+  }
 }

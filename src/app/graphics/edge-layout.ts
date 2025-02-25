@@ -291,8 +291,7 @@ export class Layout {
     for (const group of groups) {
       const layouter = new EdgeLabelLayouter(this.derivedEdgeLabelDimensions)
       for (const ls of group) {
-        const widthEstimate = ls.maxLineLength * this.derivedEdgeLabelDimensions.estCharacterWidth
-        const box: Box = layouter!.add(ls.line, widthEstimate, ls.numtextLines)
+        const box: Box = layouter!.add(ls.line, ls.maxLineLength, ls.numtextLines)
         result.push({
           horizontalBox: box.horizontalBox,
           verticalBox: box.verticalBox,
