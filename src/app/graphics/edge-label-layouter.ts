@@ -19,37 +19,61 @@ import { Interval } from "../util/interval"
 import { Line, Point } from "./graphics"
 
 export interface EdgeLabelDimensions {
-  estCharacterWidth: number
-  estLabelHeight: number
+  edgeLabelFontSize: number
   preferredVertDistanceFromOrigin: number
+  strictlyKeepLabelOutOfBox: boolean
 }
 
-interface Box {
-  xspan: Interval
-  yspan: Interval
+export interface DerivedEdgeLabelDimensions {
+  estCharacterWidth: number
+  estLabelLineHeight: number
+  preferredVertDistanceFromOrigin: number
+  strictlyKeepLabelOutOfBox: boolean
 }
 
-const MARGIN = 2
+export function getDerivedEdgeLabelDimensions(d: EdgeLabelDimensions) {
+  return {
+    estCharacterWidth: d.edgeLabelFontSize - 3,
+    estLabelLineHeight: d.edgeLabelFontSize + 3,
+    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
+    strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox
+  }
+}
+
+export interface Box {
+  readonly horizontalBox: Interval
+  readonly verticalBox: Interval
+}
 
 export class EdgeLabelLayouter {
   private boxes: Box[] = []
 
-  constructor(readonly dimensions: EdgeLabelDimensions) {
+  constructor(readonly derivedDimensions: DerivedEdgeLabelDimensions) {
   }
 
-  add(line: Line, textWidth: number): Point {
+  add(line: Line, numCharactersOnLine: number, numTextLines: number): Box {
     const vdistSources = new NumbersAroundZero()
     while (true) {
       const vdistSource: number = vdistSources.next()
-      const vdist: number = this.dimensions.preferredVertDistanceFromOrigin + vdistSource * (this.dimensions.estLabelHeight + MARGIN)
-      // Do not put the label in box from which the edge originates
+      const vdist: number = this.derivedDimensions.preferredVertDistanceFromOrigin
+        + vdistSource * (this.derivedDimensions.estLabelLineHeight)
       if (vdist <= 0) {
+        // The vertical center of the label would be in the box from which the line originates.
+        // Next vdistSource.
         continue
       }
-      const candidate: Point = this.pointAt(vdist, line)
+      const candidateCenter: Point = this.pointAt(vdist, line)
       const candidateBox: Box = {
-        xspan: Interval.createFromCenterSize(candidate.x, textWidth),
-        yspan: Interval.createFromCenterSize(candidate.y, this.dimensions.estLabelHeight)}
+        horizontalBox: Interval.createFromCenterSize(candidateCenter.x, numCharactersOnLine * this.derivedDimensions.estCharacterWidth),
+        verticalBox: Interval.createFromCenterSize(candidateCenter.y, numTextLines * this.derivedDimensions.estLabelLineHeight)}
+      if (this.derivedDimensions.strictlyKeepLabelOutOfBox) {
+        if (candidateBox.verticalBox.contains(line.startPoint.y)) {
+          // The label would intersect with the box from which the line originates.
+          // Next vdistSource.
+          continue
+        }
+      }
+      // The label is accepted as not to interfere with the box, now check it does not intersect other labels.
       let isSpaceOccupied: boolean = false
       for (const existingBox of this.boxes) {
         if (this.boxesIntersect(candidateBox, existingBox)) {
@@ -58,10 +82,12 @@ export class EdgeLabelLayouter {
         }
       }
       if (isSpaceOccupied) {
+        // the label would intersect other labels.
+        // Next vdistSource.
         continue
       }
       this.boxes.push(candidateBox)
-      return candidate
+      return candidateBox
     }
   }
 
@@ -84,8 +110,8 @@ export class EdgeLabelLayouter {
   }
 
   private boxesIntersect(first: Box, second: Box) {
-    const x_intersection: Interval | null = first.xspan.toIntersected(second.xspan)
-    const y_intersection: Interval | null = first.yspan.toIntersected(second.yspan)
+    const x_intersection: Interval | null = first.horizontalBox.toIntersected(second.horizontalBox)
+    const y_intersection: Interval | null = first.verticalBox.toIntersected(second.verticalBox)
     return (x_intersection !== null) && (y_intersection !== null)
   }
 }

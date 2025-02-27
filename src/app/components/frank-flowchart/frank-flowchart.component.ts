@@ -44,6 +44,7 @@ export interface Drawing {
   rectangles: Rectangle[]
   lines: Line[]
   edgeLabels: EdgeLabel[]
+  edgeLabelFontSize: number
 }
 
 export interface Rectangle {
@@ -76,6 +77,7 @@ export function getEmptyDrawing(): Drawing {
     height: 0,
     rectangles: [],
     lines: [],
-    edgeLabels: []
+    edgeLabels: [],
+    edgeLabelFontSize: 0
   }
 }

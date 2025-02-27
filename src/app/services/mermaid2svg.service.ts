@@ -25,6 +25,7 @@ import { NodeLayoutBuilder } from '../graphics/node-layout';
 import { generateSvg } from '../graphics/svg-generator';
 import { AsynchronousCache } from '../util/asynchronousCache';
 import { sha256 } from '../util/hash';
+import { getDerivedEdgeLabelDimensions } from '../graphics/edge-label-layouter';
 
 export const Mermaid2SvgDimensions = new InjectionToken("Mermaid2SvgDimensions")
 
@@ -90,9 +91,9 @@ export class Mermaid2svgService {
     lb = minimizeNumCrossings(lb)
     const nodeLayoutBuiler = new NodeLayoutBuilder(lb, graphWithIntermediateNodes, this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
-    const layout = new Layout(nodeLayout, this.dimensions)
+    const layout = new Layout(nodeLayout, this.dimensions, getDerivedEdgeLabelDimensions(this.dimensions))
     return {
-      svg: generateSvg(layout),
+      svg: generateSvg(layout, this.dimensions.edgeLabelFontSize),
       numNodes: g.getNodes().length,
       numEdges: g.getEdges().length,
       numNodeVisitsDuringLayerCalculation: numNodeVisits

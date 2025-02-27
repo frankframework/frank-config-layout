@@ -90,3 +90,20 @@ g {
     opacity: 0.3;
   }
 }
+
+.label-text-wrapper {
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: "trebuchet ms";
+}
+
+.label-text-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}

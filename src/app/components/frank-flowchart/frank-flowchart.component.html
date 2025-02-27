@@ -26,12 +26,16 @@
         id="rectangle.id"
         rx="5">
       </rect>
-      <text
-        [attr.x]="rectangle.centerX"
-        [attr.y]="rectangle.centerY"
-        text-anchor="middle" dominant-baseline="middle" class="nodeText">
-        {{rectangle.text}}
-      </text>
+      <foreignObject
+        [attr.x]="rectangle.x"
+        [attr.y]="rectangle.y"
+        [attr.width]="rectangle.width"
+        [attr.height]="rectangle.height">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+          <div class="rect-text-box" [innerHTML]="rectangle.text">
+          </div>
+        </div>
+      </foreignObject>
       <rect class="rect-hover-padding"
         [attr.x]="rectangle.x - 5"
         [attr.y]="rectangle.y - 5"
@@ -51,10 +55,17 @@
         attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
         [class.selected]="line.selected"/>
     </g>
-    <text *ngFor="let label of drawing.edgeLabels"
-      attr.x="{{ label.centerX }}"
-      attr.y="{{ label.centerY }}"
-      text-anchor="middle"
-      dominant-baseline="middle">{{ label.text }}</text>
+    <g *ngFor="let label of drawing.edgeLabels"
+      attr.transform="translate({{label.horizontalBox.minValue}}, {{label.verticalBox.minValue}})">
+      <foreignObject 
+        attr.width="{{label.horizontalBox.size}}"
+        attr.height="{{label.verticalBox.size}}">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper"
+          [ngStyle]="{'font-size': drawing.edgeLabelFontSize + 'px'}">
+          <div class="label-text-box" [innerHTML]="label.text">
+          </div>
+        </div>
+      </foreignObject>
+    </g>
   </svg>
 </div>

@@ -21,9 +21,12 @@ import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
-import { EdgeLabelDimensions, EdgeLabelLayouter } from "./edge-label-layouter";
+import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, EdgeLabelDimensions, Box } from "./edge-label-layouter";
 
-export interface Dimensions extends NodeSpacingDimensions, EdgeLabelDimensions {
+export interface Dimensions extends NodeAndEdgeDimensions, EdgeLabelDimensions {
+}
+
+export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   nodeBoxWidth: number
   nodeBoxHeight: number
   boxConnectorAreaPerc: number
@@ -41,7 +44,7 @@ export class PlacedNode implements Node {
   readonly intermediateNodePassDirection: number | null
   readonly intermediateNodeOriginalEdge: Edge | null
 
-  constructor(p: Position, d: Dimensions) {
+  constructor(p: Position, d: NodeAndEdgeDimensions) {
     this.id = p.node.getId()
     this.text = p.node.getText()
     this.creationReason = (p.node as NodeForEditor).getCreationReason()
@@ -121,6 +124,9 @@ export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: Pl
   const originalEdge = edge.original as CategorizedEdge
   const isError = originalEdge.isError
   const optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
+  const numtextLines = originalEdge.text === undefined ? 0 : originalEdge.getNumLines()
+  const textLines = originalEdge.getTextLines()
+  const maxLineLength = originalEdge.getMaxLineLength()
   let minLayer = 0
   let maxLayer = 0
   if (fromNode.layerNumber < toNode.layerNumber) {
@@ -135,6 +141,9 @@ export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: Pl
     originId: fromNode.getId(),
     line,
     optionalOriginalText,
+    numtextLines,
+    textLines,
+    maxLineLength,
     isError,
     isFirstLineSegment: isFirstSegment,
     isLastLineSegment: isLastSegment,
@@ -149,6 +158,9 @@ export interface LayoutLineSegment {
   readonly originId: string,
   readonly line: Line,
   readonly optionalOriginalText: string | null,
+  readonly numtextLines: number,
+  readonly textLines: string[] | null,
+  readonly maxLineLength: number
   readonly isError: boolean,
   readonly isFirstLineSegment: boolean,
   readonly isLastLineSegment: boolean,
@@ -158,8 +170,8 @@ export interface LayoutLineSegment {
 }
 
 export interface EdgeLabel {
-  centerX: number,
-  centerY: number,
+  horizontalBox: Interval,
+  verticalBox: Interval,
   text: string
 }
 
@@ -171,7 +183,7 @@ export class Layout {
   private layoutLineSegments: LayoutLineSegment[] = []
   readonly edgeLabels: EdgeLabel[]
 
-  constructor(layout: NodeLayout, d: Dimensions) {
+  constructor(layout: NodeLayout, d: NodeAndEdgeDimensions, readonly derivedEdgeLabelDimensions: DerivedEdgeLabelDimensions) {
     this.width = layout.width
     this.height = layout.height
     const calc = new Edge2LineCalculation(layout, d)
@@ -188,7 +200,7 @@ export class Layout {
     if (d.intermediateLayerPassedByVerticalLine) {
       this.addVerticalLineSegmentsForIntermediateNodes(calc.getPlacedNodes())
     }
-    this.edgeLabels = this.addEdgeLabels(d)
+    this.edgeLabels = this.addEdgeLabels()
   }
 
   private addVerticalLineSegmentsForIntermediateNodes(nodes: PlacedNode[]) {
@@ -211,6 +223,9 @@ export class Layout {
         originId: n.getId(),
         line,
         optionalOriginalText,
+        numtextLines: 0,
+        textLines: null,
+        maxLineLength: 0,
         isError,
         isFirstLineSegment: false,
         isLastLineSegment: false,
@@ -267,21 +282,21 @@ export class Layout {
     return (! linesTouch) && (relateLines(first.line, second.line) === LineRelation.CROSS)
   }
 
-  private addEdgeLabels(dimensions: EdgeLabelDimensions): EdgeLabel[] {
+  private addEdgeLabels(): EdgeLabel[] {
     const firstLineSegments = this.layoutLineSegments
       .filter(s => s.isFirstLineSegment)
       .filter(s => (s.optionalOriginalText !== null) && (s.optionalOriginalText.length >= 1))
     const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(firstLineSegments)
     const result: EdgeLabel[] = []
     for (const group of groups) {
-      const layouter = new EdgeLabelLayouter(dimensions)
+      const layouter = new EdgeLabelLayouter(this.derivedEdgeLabelDimensions)
       for (const ls of group) {
-        const widthEstimate = (ls.optionalOriginalText!).length * dimensions.estCharacterWidth
-        const point: Point = layouter!.add(ls.line, widthEstimate)
+        const box: Box = layouter!.add(ls.line, ls.maxLineLength, ls.numtextLines)
         result.push({
-          centerX: point.x,
-          centerY: point.y,
-          text: ls.optionalOriginalText!
+          horizontalBox: box.horizontalBox,
+          verticalBox: box.verticalBox,
+          // This ensures that the lines are trimmed
+          text: ls.textLines!.join("<br/>")
         })
       }
     }

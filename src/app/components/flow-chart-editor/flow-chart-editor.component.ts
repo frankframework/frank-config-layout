@@ -23,7 +23,8 @@ import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequen
 import { NodeSequenceEditor } from '../../model/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
-import { Layout, PlacedNode, Dimensions, EdgeLabel } from '../../graphics/edge-layout';
+import { getDerivedEdgeLabelDimensions } from '../../graphics/edge-label-layouter';
+import { Layout, PlacedNode, Dimensions } from '../../graphics/edge-layout';
 import { getFactoryDimensions } from '../dimensions-editor/dimensions-editor.component';
 import { Subject } from 'rxjs';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
@@ -172,7 +173,8 @@ export class FlowChartEditorComponent {
       height: layout.height,
       rectangles,
       lines,
-      edgeLabels: layout.edgeLabels
+      edgeLabels: layout.edgeLabels,
+      edgeLabelFontSize: this.dimensions.edgeLabelFontSize
     }
   }
 
@@ -180,7 +182,7 @@ export class FlowChartEditorComponent {
     const builder = new NodeLayoutBuilder(
       model.getShownNodesLayoutBase(), model.getGraph(), inDimensions)
     const nodeLayout = builder.run()
-    return new Layout(nodeLayout, inDimensions)
+    return new Layout(nodeLayout, inDimensions, getDerivedEdgeLabelDimensions(inDimensions))
   }
 
   onNewDimensions(d: Dimensions) {

@@ -2,8 +2,9 @@ import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
 import { categorize, CategorizedEdge } from "../model/error-flow"
 import { Point, Line } from "./graphics"
 import { NodeSequenceEditorBuilder, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
-import { Layout, Dimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
+import { Layout, NodeAndEdgeDimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
 import { NodeLayoutBuilder } from "./node-layout"
+import { DerivedEdgeLabelDimensions } from "./edge-label-layouter"
 
 interface LabelGroupTestSegmentBase {
   originId: string
@@ -26,6 +27,9 @@ function lsForGroup(t: LabelGroupTestSegmentBase): LayoutLineSegment {
     maxLayerNumber: 1,
     minLayerNumber: 0,
     optionalOriginalText: "aap",
+    numtextLines: 1,
+    textLines: ["aap"],
+    maxLineLength: 3,
     originId: t.originId,
     passDirection: t.direction
   }
@@ -85,7 +89,7 @@ describe('Layout', () => {
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
     const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
-    const layout = new Layout(nodeLayout, dimensions)
+    const layout = new Layout(nodeLayout, dimensions, derivedEdgeLabelDimensions)
     expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
     expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
@@ -132,7 +136,7 @@ describe('Layout', () => {
     const builder = new NodeSequenceEditorBuilder(m, g)
     const model = builder.build()
     const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
-    const layout = new Layout(nodeLayout, dimensionsIntermediateLayersVertical)
+    const layout = new Layout(nodeLayout, modifyForVerticalLines(dimensions), derivedEdgeLabelDimensions)
     expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
     expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
@@ -166,7 +170,7 @@ describe('Layout', () => {
   })
 })
 
-const dimensions: Dimensions = {
+const dimensions: NodeAndEdgeDimensions = {
   layerHeight: 50,
   layerDistance: 120,
   nodeBoxHeight: 40,
@@ -179,25 +183,18 @@ const dimensions: Dimensions = {
   // calculation without.
   boxConnectorAreaPerc: 0,
   intermediateLayerPassedByVerticalLine: false,
-  estCharacterWidth: 9,
-  estLabelHeight: 30,
-  preferredVertDistanceFromOrigin: 50
 }
 
-const dimensionsIntermediateLayersVertical: Dimensions = {
-  layerHeight: 50,
-  layerDistance: 120,
-  nodeBoxHeight: 40,
-  intermediateWidth: 60,
-  nodeWidth: 120,
-  omittedPlaceholderWidth: 90,
-  nodeBoxWidth: 110,
-  // Do not include spreading edge connection points here.
-  // It is complicated enough to understand the
-  // calculation without.
-  boxConnectorAreaPerc: 0,
-  intermediateLayerPassedByVerticalLine: true,
-  estCharacterWidth: 9,
-  estLabelHeight: 30,
-  preferredVertDistanceFromOrigin: 50
+function modifyForVerticalLines(originalDimensions: NodeAndEdgeDimensions): NodeAndEdgeDimensions {
+  const result: NodeAndEdgeDimensions = { ... originalDimensions}
+  result.intermediateLayerPassedByVerticalLine = true
+  return result
 }
+
+const derivedEdgeLabelDimensions: DerivedEdgeLabelDimensions = {
+  estCharacterWidth: 9,
+  estLabelLineHeight: 30,
+  preferredVertDistanceFromOrigin: 50,
+  strictlyKeepLabelOutOfBox: false
+}
+

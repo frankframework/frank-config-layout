@@ -65,17 +65,10 @@
             [ngClass]="editDimensions.intermediateLayerPassedByVerticalLine !== lastPosted.intermediateLayerPassedByVerticalLine ? 'changed' : ''"/></td>
         </tr>
         <tr>
-          <td>Est. edge label char width:</td>
+          <td>Edge label font size:</td>
           <td><input
-            [(ngModel)]="editDimensions.estCharacterWidth" type="number"
-            [ngClass]="editDimensions.estCharacterWidth !== lastPosted.estCharacterWidth ? 'changed' : ''"/>
-          </td>
-        </tr>
-        <tr>
-          <td>Est. edge label height:</td>
-          <td><input
-            [(ngModel)]="editDimensions.estLabelHeight" type="number"
-            [ngClass]="editDimensions.estLabelHeight !== lastPosted.estLabelHeight ? 'changed' : ''"/>
+            [(ngModel)]="editDimensions.edgeLabelFontSize" type="number"
+            [ngClass]="editDimensions.edgeLabelFontSize !== lastPosted.edgeLabelFontSize ? 'changed' : ''"/>
           </td>
         </tr>
         <tr>
@@ -84,6 +77,12 @@
             [(ngModel)]="editDimensions.preferredVertDistanceFromOrigin" type="number"
             [ngClass]="editDimensions.preferredVertDistanceFromOrigin !== lastPosted.preferredVertDistanceFromOrigin ? 'changed' : ''"/>
           </td>
+        </tr>
+        <tr>
+          <td>Strictly keep edge labels out of box:</td>
+          <td><input
+            [(ngModel)]="editDimensions.strictlyKeepLabelOutOfBox" type="checkbox"
+            [ngClass]="editDimensions.strictlyKeepLabelOutOfBox !== lastPosted.strictlyKeepLabelOutOfBox ? 'changed' : ''"/></td>
         </tr>
       </table>
     </td>

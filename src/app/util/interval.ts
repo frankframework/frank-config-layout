@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024-2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -75,5 +75,15 @@ export class Interval {
     } else {
       return new Interval(minValue, maxValue)
     }
+  }
+
+  contains(n: number): boolean {
+    if (n < this.minValue) {
+      return false
+    }
+    if (n > this.maxValue) {
+      return false
+    }
+    return true
   }
 }

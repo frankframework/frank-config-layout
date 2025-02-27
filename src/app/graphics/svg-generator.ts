@@ -17,9 +17,9 @@
 import { CreationReason } from "../model/horizontalGrouping"
 import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from "./edge-layout"
 
-export function generateSvg(layout: Layout) {
+export function generateSvg(layout: Layout, edgeLabelFontSize: number) {
   return openSvg(layout.width, layout.height)
-    + renderDefs()
+    + renderDefs(edgeLabelFontSize)
     + renderNodes(layout.getNodes().map(n => n as PlacedNode))
     + renderEdges(layout.getLayoutLineSegments().map(e => e as LayoutLineSegment))
     + renderLabels(layout.edgeLabels)
@@ -32,7 +32,7 @@ function openSvg(width: number, height: number) {
 `
 }
 
-function renderDefs() {
+function renderDefs(fontSize: number) {
   return `  <defs>
     <style>
       .rectangle {
@@ -70,6 +70,24 @@ function renderDefs() {
         white-space: nowrap;
         text-overflow: ellipsis;
         font-family: "trebuchet ms";
+      }
+
+      .label-text-wrapper {
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-family: "trebuchet ms";
+        font-size: ${fontSize}px;
+      }
+
+      .label-text-box {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
       }
     </style>
     <!-- A marker to be used as an arrowhead -->
@@ -159,7 +177,15 @@ function renderLabels(labels: EdgeLabel[]): string {
 }
 
 function renderLabel(label: EdgeLabel): string {
-  return `    <text x="${label.centerX}" y="${label.centerY}">${label.text}</text>
+  return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
+      <foreignObject style="width:${label.horizontalBox.size}px; height:${label.verticalBox.size}px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            ${label.text}
+          </div>
+        </div>
+      </foreignObject>
+    </g>
 `
 }
 

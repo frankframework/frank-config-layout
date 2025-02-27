@@ -17,7 +17,7 @@
 import { Edge } from "../model/graph";
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
-import { Dimensions, PlacedNode } from "./edge-layout";
+import { NodeAndEdgeDimensions, PlacedNode } from "./edge-layout";
 import { Line, Point } from "./graphics";
 import { NodeLayout } from "./node-layout";
 
@@ -29,7 +29,7 @@ export class Edge2LineCalculation {
 
   constructor(
     nodeLayout: NodeLayout,
-    d: Dimensions
+    d: NodeAndEdgeDimensions
   ) {
     this.createNodes(nodeLayout, d)
     nodeLayout.edges
@@ -44,7 +44,7 @@ export class Edge2LineCalculation {
     )))
   }
 
-  private createNodes(nodeLayout: NodeLayout, d: Dimensions) {
+  private createNodes(nodeLayout: NodeLayout, d: NodeAndEdgeDimensions) {
     nodeLayout.positions.forEach(p => {
       const placedNode = new PlacedNode(p, d)
       this.placedNodes.push(placedNode)
@@ -70,7 +70,7 @@ export class Edge2LineCalculation {
     }
   }
 
-  private initNode(n: ConnectedPlacedNode, d: Dimensions) {
+  private initNode(n: ConnectedPlacedNode, d: NodeAndEdgeDimensions) {
     n.sortConnectedEdges(d)
   }
 
@@ -121,7 +121,7 @@ class ConnectedPlacedNode {
     this.connectorsBottom.push(connector)
   }
 
-  sortConnectedEdges(d: Dimensions) {
+  sortConnectedEdges(d: NodeAndEdgeDimensions) {
     // Comparators differ by the sort order when x is equal.
     // In that case the directions are different for the two
     // endpoints, but the sort order should be compatible.

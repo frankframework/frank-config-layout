@@ -1,5 +1,5 @@
 import { getGraphFromMermaid } from '../parsing/mermaid-parser'
-import { Node, Edge, GraphBase } from './graph'
+import { GraphBase } from './graph'
 
 import { categorize, CategorizedNode, CategorizedEdge } from './error-flow'
 
@@ -66,6 +66,7 @@ N1 --> |exception| N2
     checkErrorNode(c, 'N1', false)
     checkErrorNode(c, 'N2', false)
     checkErrorEdge(c, 'N1-N2', true)
+    expect( (c.getEdgeByKey('N1-N2') as CategorizedEdge).getNumLines()).toEqual(1)
   })
 
   function checkErrorNode(b: GraphBase, nodeId: string, expectError: boolean) {
@@ -75,5 +76,18 @@ N1 --> |exception| N2
   function checkErrorEdge(b: GraphBase, edgeKey: string, expectError: boolean) {
     expect( (b.getEdgeByKey(edgeKey) as CategorizedEdge).isError).toEqual(expectError)
   }
-})
 
+  it('When edge text has multiple lines, then the number of lines is calculated correctly', () => {
+    const input = `
+N1(""):::normal
+N2(""):::normal
+N1 --> |success<br/>  exception  | N2`
+    const b = getGraphFromMermaid(input)
+    const c: GraphBase = categorize(b)
+    const instance = c.getEdgeByKey('N1-N2') as CategorizedEdge
+    expect(instance.getNumLines()).toEqual(2)
+    expect(instance.getTextLines()).toEqual(["success", "exception"])
+    // The second line is trimmed, length of word "exception"
+    expect(instance.getMaxLineLength()).toEqual(9)
+  })
+})
