@@ -81,7 +81,7 @@ export async function mermaid2svgStatistics(mermaid: string): Promise<SvgResult>
  * the intended outputs of the library.
  */
 
-interface Text {
+export interface Text {
   readonly html: string
   readonly lines: string[]
   readonly numLines: number
