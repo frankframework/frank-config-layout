@@ -15,7 +15,7 @@
 */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
-import { Dimensions } from '../../graphics/edge-layout';
+import { Dimensions } from '../../public.api';
 
 @Component({
   selector: 'app-dimensions-editor',

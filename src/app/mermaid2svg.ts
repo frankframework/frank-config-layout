@@ -14,31 +14,21 @@
    limitations under the License.
 */
 
-import { Inject, Injectable, InjectionToken } from '@angular/core';
-import { Dimensions, Layout } from '../graphics/edge-layout';
-import { Graph, GraphBase, GraphConnectionsDecorator } from '../model/graph';
-import { categorize } from '../model/error-flow'
-import { getGraphFromMermaid } from '../parsing/mermaid-parser';
-import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from '../model/horizontalGrouping';
-import { LayoutBase, minimizeNumCrossings } from '../model/layoutBase'
-import { NodeLayoutBuilder } from '../graphics/node-layout';
-import { generateSvg } from '../graphics/svg-generator';
-import { AsynchronousCache } from '../util/asynchronousCache';
-import { sha256 } from '../util/hash';
-import { getDerivedEdgeLabelDimensions } from '../graphics/edge-label-layouter';
+import { Layout } from './graphics/edge-layout';
+import { Graph, GraphBase, GraphConnectionsDecorator } from './model/graph';
+import { categorize } from './model/error-flow'
+import { getGraphFromMermaid } from './parsing/mermaid-parser';
+import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from './model/horizontalGrouping';
+import { LayoutBase, minimizeNumCrossings } from './model/layoutBase'
+import { NodeLayoutBuilder } from './graphics/node-layout';
+import { generateSvg } from './graphics/svg-generator';
+import { AsynchronousCache } from './util/asynchronousCache';
+import { sha256 } from './util/hash';
+import { getDerivedEdgeLabelDimensions } from './graphics/edge-label-layouter';
+import { SvgResult, Dimensions } from './public.api'
 
-export const Mermaid2SvgDimensions = new InjectionToken("Mermaid2SvgDimensions")
-
-export interface Statistics {
-  svg: string,
-  numNodes: number,
-  numEdges: number,
-  numNodeVisitsDuringLayerCalculation: number
-}
-
-@Injectable()
 export class Mermaid2svgService {
-  private cache = new AsynchronousCache<Statistics>()
+  private cache = new AsynchronousCache<SvgResult>()
 
   private _numSvgCalculations = 0
   get numSvgCalculations() {
@@ -49,13 +39,13 @@ export class Mermaid2svgService {
     return [ ... this.cache.getSortedKeys() ]
   }
 
-  constructor(@Inject(Mermaid2SvgDimensions) private dimensions: Dimensions) {}
+  constructor(private dimensions: Dimensions) {}
 
   async mermaid2svg(mermaid: string): Promise<string> {
     return (await this.mermaid2svgStatistics(mermaid)).svg
   }
 
-  async mermaid2svgStatistics(mermaid: string): Promise<Statistics> {
+  async mermaid2svgStatistics(mermaid: string): Promise<SvgResult> {
     let hash: string
     try {
       hash = await sha256(mermaid)
@@ -66,7 +56,7 @@ export class Mermaid2svgService {
     return await this.cache.get(hash, () => this.mermaid2svgStatisticsImpl(mermaid))
   }
 
-  private async mermaid2svgStatisticsImpl(mermaid: string): Promise<Statistics> {
+  private async mermaid2svgStatisticsImpl(mermaid: string): Promise<SvgResult> {
     ++this._numSvgCalculations
     const b: GraphBase = getGraphFromMermaid(mermaid)
     const c = categorize(b)

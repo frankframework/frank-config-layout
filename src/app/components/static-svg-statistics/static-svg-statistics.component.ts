@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024, 2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 */
 
 import { ChangeDetectionStrategy, Component, Input, NgZone } from '@angular/core';
-import { Mermaid2svgService, Statistics } from '../../services/mermaid2svg.service';
 import { OnInit } from '@angular/core';
+import { SvgResult, mermaid2svgStatistics } from '../../public.api'
 
 @Component({
   selector: 'app-static-svg-statistics',
@@ -30,7 +30,6 @@ export class StaticSvgStatisticsComponent implements OnInit {
   numVisitsDuringLayerCalculation: string|null = null
 
   constructor(
-    private mermaid2svg: Mermaid2svgService,
     private ngZone: NgZone
   ) {
     this.reset()
@@ -58,14 +57,14 @@ export class StaticSvgStatisticsComponent implements OnInit {
     if ( (this._mermaid === null) || (this._mermaid.length === 0) ) {
       return
     }
-    this.mermaid2svg.mermaid2svgStatistics(this._mermaid!).then((statistics) => {
+    mermaid2svgStatistics(this._mermaid!).then((statistics) => {
       this.updateStatistics(statistics)
     }).catch(() => {
       this.reset()
     })
   }
 
-  private updateStatistics(statistics: Statistics) {
+  private updateStatistics(statistics: SvgResult) {
     this.ngZone.run(() => {
       this.numNodes = `${statistics.numNodes}`
       this.numEdges = `${statistics.numEdges}`

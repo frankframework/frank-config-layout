@@ -4,7 +4,7 @@ import { categorize, CategorizedEdge } from '../model/error-flow'
 import { NodeSequenceEditorBuilder, NodeForEditor, CreationReason, calculateLayerNumbersFirstOccuringPath, LayerNumberAlgorithm } from '../model/horizontalGrouping';
 import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
 import { FlowChartEditorComponent } from '../components/flow-chart-editor/flow-chart-editor.component';
-import { Dimensions } from '../graphics/edge-layout';
+import { Dimensions } from '../public.api';
 
 describe('Integration', () => {
   it('Read Mermaid text and create NodeSequenceEditor', () => {

@@ -23,9 +23,6 @@ import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
 import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, EdgeLabelDimensions, Box } from "./edge-label-layouter";
 
-export interface Dimensions extends NodeAndEdgeDimensions, EdgeLabelDimensions {
-}
-
 export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   nodeBoxWidth: number
   nodeBoxHeight: number
