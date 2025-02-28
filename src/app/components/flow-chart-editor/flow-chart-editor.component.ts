@@ -21,14 +21,14 @@ import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } f
 import { categorize } from '../../model/error-flow'
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
 import { NodeSequenceEditor } from '../../model/nodeSequenceEditor';
-import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
+import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
 import { getDerivedEdgeLabelDimensions } from '../../graphics/edge-label-layouter';
 import { Layout, PlacedNode } from '../../graphics/edge-layout';
-import { getFactoryDimensions } from '../dimensions-editor/dimensions-editor.component';
 import { Subject } from 'rxjs';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
 import { Dimensions } from '../../public.api'
+import { getFactoryDimensions } from '../../public.api';
 
 export interface NodeSequenceEditorOrError {
   model: NodeSequenceEditor | null

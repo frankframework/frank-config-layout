@@ -1,9 +1,9 @@
 import { getRange } from "../util/util"
-import { ConcreteGraphBase, GraphConnectionsDecorator } from "./graph"
-import { Node } from "./graph"
-import { LayoutBase } from "./layoutBase"
-import { NodeSequenceEditorBuilder } from "./horizontalGrouping"
-import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
+import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
+import { Node } from "../model/graph"
+import { LayoutBase } from "../model/layoutBase"
+import { NodeSequenceEditorBuilder } from "../model/horizontalGrouping"
+import { NodeSequenceEditor, UpdateResponse } from "../model/nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
 
 describe('NodeOrEdgeSelection', () => {

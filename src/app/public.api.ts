@@ -37,6 +37,23 @@ export function initMermaid2Svg(d: Dimensions) {
   service = new Mermaid2svgService(d)
 }
 
+export function getFactoryDimensions(): Dimensions {
+  return {
+    layerHeight: 50,
+    layerDistance: 120,
+    nodeBoxHeight: 50,
+    intermediateWidth: 60,
+    nodeWidth: 175,
+    omittedPlaceholderWidth: 90,
+    nodeBoxWidth: 160,
+    boxConnectorAreaPerc: 50,
+    intermediateLayerPassedByVerticalLine: false,
+    edgeLabelFontSize: 10,
+    preferredVertDistanceFromOrigin: 30,
+    strictlyKeepLabelOutOfBox: false
+  }
+}
+
 export function isMermaid2SvgInitialized(): boolean {
   return service !== null
 }

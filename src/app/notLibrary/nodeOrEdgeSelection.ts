@@ -14,8 +14,8 @@
    limitations under the License.
 */
 
-import { Edge, OptionalNode, OptionalEdge, getEdgeKey } from "./graph"
-import { NodeSequenceEditor } from "./nodeSequenceEditor"
+import { Edge, OptionalNode, OptionalEdge, getEdgeKey } from "../model/graph"
+import { NodeSequenceEditor } from "../model/nodeSequenceEditor"
 
 // If a node has been selected, all its incoming and outgoing
 // edges should also be highlighted.

@@ -18,7 +18,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnI
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
 import { LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning } from '../../model/layoutBase'
 import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../model/nodeSequenceEditor';
-import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
+import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
 import { getRange } from '../../util/util';
 import { NodeCaptionChoice, NodeOrEdge, getCaption } from '../../model/graph';
 import { Observable, Subscription } from 'rxjs';

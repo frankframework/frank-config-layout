@@ -29,8 +29,7 @@ import { routes } from "./app.routes";
 import { SvgZoomPanDirective } from './directives/svg-zoom-pan.directive'
 import { CalculatedStaticSvgComponent } from "./components/calculated-static-svg/calculated-static-svg.component";
 import { StaticSvgStatisticsComponent } from "./components/static-svg-statistics/static-svg-statistics.component";
-import { getFactoryDimensions } from "./components/dimensions-editor/dimensions-editor.component";
-import { initMermaid2Svg } from "./public.api";
+import { initMermaid2Svg, getFactoryDimensions } from "./public.api";
 
 @NgModule({
   declarations: [
