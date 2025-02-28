@@ -1,6 +1,6 @@
 import { ConcreteGraphBase, Graph, GraphConnectionsDecorator } from "../model/graph"
 import { NodeSequenceEditorBuilder } from "../model/horizontalGrouping"
-import { NodeSequenceEditor } from "../model/nodeSequenceEditor"
+import { NodeSequenceEditor } from "../notLibrary/nodeSequenceEditor"
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-layout"
 
 describe('NodeLayoutBuilder', () => {

@@ -21,6 +21,10 @@ import { Mermaid2svgService } from './mermaid2svg'
 export interface Dimensions extends NodeAndEdgeDimensions, EdgeLabelDimensions {
 }
 
+/*
+ * These are the real outputs of this library
+ */
+
 export interface SvgResult {
   svg: string,
   numNodes: number,
@@ -70,4 +74,30 @@ export async function mermaid2svgStatistics(mermaid: string): Promise<SvgResult>
     throw new Error('Mermaid2Svg was not initialized')
   }
   return (await service.mermaid2svgStatistics(mermaid))
+}
+
+/*
+ * These are needed for the playground, but they are not
+ * the intended outputs of the library.
+ */
+
+interface Text {
+  readonly html: string
+  readonly lines: string[]
+  readonly numLines: number
+  readonly maxLineLength: number
+}
+
+interface Node {
+  readonly id: string
+  readonly text: string
+  readonly layer: number
+  readonly isIntermediate: boolean
+}
+
+interface Edge {
+  readonly from: Node
+  readonly to: Node
+  readonly key: string
+  readonly text?: Text
 }

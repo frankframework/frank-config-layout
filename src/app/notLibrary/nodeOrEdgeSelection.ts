@@ -15,7 +15,7 @@
 */
 
 import { Edge, OptionalNode, OptionalEdge, getEdgeKey } from "../model/graph"
-import { NodeSequenceEditor } from "../model/nodeSequenceEditor"
+import { NodeSequenceEditor } from "./nodeSequenceEditor"
 
 // If a node has been selected, all its incoming and outgoing
 // edges should also be highlighted.

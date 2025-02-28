@@ -2,7 +2,7 @@ import { getGraphFromMermaid } from './mermaid-parser';
 import { GraphBase, Graph, GraphConnectionsDecorator } from '../model/graph'
 import { categorize, CategorizedEdge } from '../model/error-flow'
 import { NodeSequenceEditorBuilder, NodeForEditor, CreationReason, calculateLayerNumbersFirstOccuringPath, LayerNumberAlgorithm } from '../model/horizontalGrouping';
-import { NodeSequenceEditor } from '../model/nodeSequenceEditor';
+import { NodeSequenceEditor } from '../notLibrary/nodeSequenceEditor';
 import { FlowChartEditorComponent } from '../components/flow-chart-editor/flow-chart-editor.component';
 import { Dimensions } from '../public.api';
 

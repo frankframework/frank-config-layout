@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
-import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from '../../model/nodeSequenceEditor';
+import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
 
 import { ConcreteGraphBase, GraphConnectionsDecorator } from '../../model/graph';
 import { Subject } from 'rxjs';

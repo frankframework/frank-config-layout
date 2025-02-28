@@ -15,7 +15,7 @@
 */
 
 import { Node, Graph, GraphBase, Edge, ConcreteGraphBase, GraphConnectionsDecorator, getEdgeKey } from './graph'
-import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from './nodeSequenceEditor'
+import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from '../notLibrary/nodeSequenceEditor'
 import { getRange } from '../util/util'
 
 export enum CreationReason {

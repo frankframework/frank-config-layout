@@ -20,7 +20,7 @@ import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
 import { categorize } from '../../model/error-flow'
 import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
-import { NodeSequenceEditor } from '../../model/nodeSequenceEditor';
+import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
 import { getDerivedEdgeLabelDimensions } from '../../graphics/edge-label-layouter';

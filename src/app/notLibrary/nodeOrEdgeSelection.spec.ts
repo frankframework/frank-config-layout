@@ -3,7 +3,7 @@ import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
 import { Node } from "../model/graph"
 import { LayoutBase } from "../model/layoutBase"
 import { NodeSequenceEditorBuilder } from "../model/horizontalGrouping"
-import { NodeSequenceEditor, UpdateResponse } from "../model/nodeSequenceEditor"
+import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
 
 describe('NodeOrEdgeSelection', () => {

@@ -1,5 +1,5 @@
 import { NodeSequenceEditor, ConcreteNodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
-import { ConcreteNode, Node, ConcreteEdge, Edge, ConcreteGraphBase, GraphBase, GraphConnectionsDecorator, Graph  } from "./graph"
+import { ConcreteNode, Node, ConcreteEdge, Edge, ConcreteGraphBase, GraphBase, GraphConnectionsDecorator, Graph  } from "../model/graph"
 
 function getInstanceToCheckOrdering(): ConcreteNodeSequenceEditor {
   const g = new ConcreteGraphBase()
