@@ -7,7 +7,6 @@ const dimeisions: Dimensions = {
   nodeBoxHeight: 50,
   intermediateWidth: 60,
   nodeWidth: 175,
-  omittedPlaceholderWidth: 90,
   nodeBoxWidth: 160,
   boxConnectorAreaPerc: 50,
   intermediateLayerPassedByVerticalLine: false,

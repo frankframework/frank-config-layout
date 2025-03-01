@@ -79,7 +79,6 @@ function getTestDimensions(): NodeSpacingDimensions {
   return {
     nodeWidth: 120,
     intermediateWidth: 60,
-    omittedPlaceholderWidth: 90,
     layerHeight: 40,
     layerDistance: 120
   }

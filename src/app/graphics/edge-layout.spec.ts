@@ -188,7 +188,6 @@ const dimensions: NodeAndEdgeDimensions = {
   nodeBoxHeight: 40,
   intermediateWidth: 60,
   nodeWidth: 120,
-  omittedPlaceholderWidth: 90,
   nodeBoxWidth: 110,
   // Do not include spreading edge connection points here.
   // It is complicated enough to understand the

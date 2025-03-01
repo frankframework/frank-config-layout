@@ -17,7 +17,6 @@
 import { createText } from '../model/text'
 import { Graph } from '../model/generic-graph'
 import { Text } from '../public.api'
-import { create } from 'domain'
 
 export interface MermaidNode {
   id: string

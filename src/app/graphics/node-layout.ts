@@ -23,7 +23,6 @@ import { HorizontalConflictResolver } from "./horizontal-conflict";
 export interface NodeSpacingDimensions {
   nodeWidth: number
   intermediateWidth: number
-  omittedPlaceholderWidth: number
   layerHeight: number
   layerDistance: number
 }
