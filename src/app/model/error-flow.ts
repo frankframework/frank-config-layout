@@ -14,7 +14,9 @@
    limitations under the License.
 */
 
-import { Node, Edge, getEdgeKey, GraphBase, ConcreteGraphBase, ConcreteNode, ConcreteEdge } from './graph'
+import { Text } from '../public.api'
+import { Graph } from './generic-graph'
+import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser'
 
 const NODE_ERROR_CLASS = 'errorOutline'
 
@@ -30,92 +32,52 @@ const ERROR_FORWARD_NAMES = [
   'outputParserError',
   'outputFailure'];
 
-export class CategorizedNode implements Node {
-  constructor(private delegate: Node, readonly isError: boolean) {}
-
-  getId(): string {
-    return this.delegate.getId()
-  }
-
-  getText(): string {
-    return this.delegate.getText()
-  }
+export interface OriginalNode {
+  id: string
+  text: string
+  isError: boolean
 }
 
-export class CategorizedEdge implements Edge {
-  private textLines: string[] | null
-
-  constructor(private from: CategorizedNode, private to: CategorizedNode, readonly text: string | undefined, readonly isError: boolean) {
-    if (text === undefined) {
-      this.textLines = null
-    } else {
-      this.textLines = text.split('<br/>').map(s => s.trim())
-    }
-  }
-
-  getFrom(): Node {
-    return this.from
-  }
-
-  getTo(): Node {
-    return this.to
-  }
-
-  getKey(): string {
-    return getEdgeKey(this.getFrom(), this.getTo())
-  }
-
-  getNumLines(): number {
-    return this.textLines === null ? 0 : this.textLines.length
-  }
-
-  getMaxLineLength(): number {
-    if (this.textLines === null) {
-      return 0
-    } else {
-      return Math.max( ... this.textLines.map(s => s.length))
-    }
-  }
-
-  getTextLines(): string[] | null {
-    if (this.textLines === null) {
-      return null
-    } else {
-      return [ ... this.textLines ]
-    }
-  }
+export interface OriginalEdge {
+  from: OriginalNode
+  to: OriginalNode
+  text: Text
+  isError: boolean
 }
 
-export function categorize(b: GraphBase): GraphBase {
-  const result = new ConcreteGraphBase()
-  b.getNodes().forEach(n => {
-    const c = categorizeNode(n as ConcreteNode)
-    result.addExistingNode(c)
-  })
-  b.getEdges().forEach(e => {
-    const from: CategorizedNode = result.getNodeById(e.getFrom().getId())! as CategorizedNode
-    const to: CategorizedNode = result.getNodeById(e.getTo().getId())! as CategorizedNode
-    const text = (e as ConcreteEdge).text
-    result.addEdge(categorizeEdge(from, to, text))
-  })
+export type OriginalGraph = Graph<OriginalNode, OriginalEdge>
+
+export function findErrorFlow(b: MermaidGraph): OriginalGraph {
+  const result = new Graph<OriginalNode, OriginalEdge>()
+  for (const n of b.nodes) {
+    result.addNode(transformNode(n))
+  }
+  for (const e of b.edges) {
+    const from: OriginalNode = result.getNodeById(e.from.id)
+    const to: OriginalNode = result.getNodeById(e.to.id)
+    result.addEdge(transformEdge(from, to, e.text))
+  }
   return result
 }
 
-function categorizeNode(n: ConcreteNode): CategorizedNode {
+function transformNode(n: MermaidNode): OriginalNode {
   if (n.style === NODE_ERROR_CLASS) {
-    return new CategorizedNode(n, true)
+    return { id: n.id, text: n.text, isError: true }
   } else {
-    return new CategorizedNode(n, false)
+    return { id: n.id, text: n.text, isError: false }
   }
 }
 
-function categorizeEdge(from: CategorizedNode, to: CategorizedNode, edgeText?: string): CategorizedEdge {
+function transformEdge(from: OriginalNode, to: OriginalNode, text: Text): OriginalEdge {
   if (from.isError) {
-    return new CategorizedEdge(from, to, edgeText, true)
+    return { from, to, text, isError: true}
   }
-  if (! edgeText) {
-    return new CategorizedEdge(from, to, edgeText, false)
+  if (text.numLines === 0) {
+    return { from, to, text, isError: false}
   } else {
-    return new CategorizedEdge(from, to, edgeText, ERROR_FORWARD_NAMES.includes(edgeText))
+    const isError: boolean = text.lines
+      .map(line => ERROR_FORWARD_NAMES.includes(line))
+      .every(lineIsError => lineIsError === true)
+    return {from, to, text, isError}
   }
 }

@@ -29,7 +29,11 @@ export interface NodeOrEdge<T extends WithId, U extends Connection<T>> {
 }
 
 export function getKey<T extends WithId>(c: Connection<T>): string {
-  return c.from.id + '-' + c.to.id
+  return keyFor(c.from.id, c.to.id)
+}
+
+function keyFor(idFrom: string, idTo: string): string {
+  return idFrom + '-' + idTo
 }
 
 /*
@@ -65,10 +69,6 @@ export class Graph<T extends WithId, U extends Connection<T>> {
     this._nodesById.set(node.id, node)
   }
   
-  get nodes(): readonly T[] {
-    return this._nodes
-  }
-
   addEdge(edge: U) {
     this.checkEdgeRefersToExistingNodes(edge)
     const key: string = getKey(edge)
@@ -88,7 +88,11 @@ export class Graph<T extends WithId, U extends Connection<T>> {
       throw new Error(`Illegal edge with key ${key} because referred to node is not in this graph`)
     }
   }
-  
+
+  get nodes(): readonly T[] {
+    return this._nodes
+  }
+
   getNodeById(id: string): T {
     if (! this._nodesById.has(id)) {
       throw new Error(`Graph does not have a node with id: ${id}`)
@@ -96,7 +100,7 @@ export class Graph<T extends WithId, U extends Connection<T>> {
     return this._nodesById.get(id)!
   }
 
-  getEdges(): readonly U[] {
+  get edges(): readonly U[] {
     return this._edges
   }
 
@@ -105,6 +109,12 @@ export class Graph<T extends WithId, U extends Connection<T>> {
       throw new Error(`Graph does not have an edge with key: ${key}`)
     }
     return this._edgesByKey.get(key)!
+  }
+
+  // TODO: Unit test this.
+  searchEdge(idFrom: string, idTo: string): U | undefined {
+    const key = keyFor(idFrom, idTo)
+    return this._edgesByKey.get(key)
   }
 
   parseNodeOrEdgeId(id: string): NodeOrEdge<T, U> {

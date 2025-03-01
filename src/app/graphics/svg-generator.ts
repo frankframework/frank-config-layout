@@ -14,13 +14,12 @@
    limitations under the License.
 */
 
-import { CreationReason } from "../model/horizontalGrouping"
 import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from "./edge-layout"
 
 export function generateSvg(layout: Layout, edgeLabelFontSize: number) {
   return openSvg(layout.width, layout.height)
     + renderDefs(edgeLabelFontSize)
-    + renderNodes(layout.getNodes().map(n => n as PlacedNode))
+    + renderNodes(layout.nodes.map(n => n as PlacedNode))
     + renderEdges(layout.getLayoutLineSegments().map(e => e as LayoutLineSegment))
     + renderLabels(layout.edgeLabels)
     + closeSvg()
@@ -106,11 +105,11 @@ function renderDefs(fontSize: number) {
 }
 
 function renderNodes(nodes: readonly PlacedNode[]): string {
-  return nodes.filter(n => n.creationReason === CreationReason.ORIGINAL).map(n => renderOriginalNode(n)).join('')
+  return nodes.filter(n => ! n.isIntermediate).map(n => renderOriginalNode(n)).join('')
 }
 
 function renderOriginalNode(n: PlacedNode): string {
-  return `  <g class="${getNodeGroupClass(n.getId())}" transform="translate(${n.horizontalBox.minValue}, ${n.verticalBox.minValue})">
+  return `  <g class="${getNodeGroupClass(n.id)}" transform="translate(${n.horizontalBox.minValue}, ${n.verticalBox.minValue})">
     <rect class="${getRectangleClass(n)}"
       width="${n.horizontalBox.size}"
       height="${n.verticalBox.size}"

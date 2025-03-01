@@ -1,9 +1,11 @@
-import { ConcreteGraphBase, GraphConnectionsDecorator } from "../model/graph"
-import { categorize, CategorizedEdge } from "../model/error-flow"
+import { createText } from '../model/text'
+import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath, assignHorizontalLayerNumbers } from '../model/horizontalGrouping'
+import { OriginalNode, OriginalEdge, OriginalGraph } from '../model/error-flow'
+import { Graph, getKey } from '../model/generic-graph'
+import { LayoutBase } from '../model/layoutBase'
 import { Point, Line } from "./graphics"
-import { NodeSequenceEditorBuilder, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath } from "../model/horizontalGrouping"
+import { NodeLayoutBuilder, NodeLayout } from './node-layout'
 import { Layout, NodeAndEdgeDimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
-import { NodeLayoutBuilder } from "./node-layout"
 import { DerivedEdgeLabelDimensions } from "./edge-label-layouter"
 
 interface LabelGroupTestSegmentBase {
@@ -26,10 +28,7 @@ function lsForGroup(t: LabelGroupTestSegmentBase): LayoutLineSegment {
     line,
     maxLayerNumber: 1,
     minLayerNumber: 0,
-    optionalOriginalText: "aap",
-    numtextLines: 1,
-    textLines: ["aap"],
-    maxLineLength: 3,
+    text: createText('aap'),
     originId: t.originId,
     passDirection: t.direction
   }
@@ -71,33 +70,50 @@ describe('Grouping LayoutLineSegment-s for labels', () => {
   })
 })
 
+function addNode(id: string, text: string, g: OriginalGraph) {
+  g.addNode({
+    id,
+    text,
+    // Dummy value
+    isError: false
+  })
+}
+
+function connect(idFrom: string, idTo: string, g: OriginalGraph) {
+  g.addEdge({
+    from: g.getNodeById(idFrom),
+    to: g.getNodeById(idTo),
+    // Dummy values
+    text: createText(undefined),
+    isError: false
+  })
+}
+
 describe('Layout', () => {
   it('Test with intermediate nodes', () => {
-    const b = new ConcreteGraphBase()
-    b.addNode('Start', 'Text of Start', '')
-    b.addNode('N1', 'Text of N1', '')
-    b.addNode('N2', 'Text of N2', '')
-    b.addNode('End', 'Text of End', '')
-    b.connect(b.getNodeById('Start')!, b.getNodeById('N1')!)
-    b.connect(b.getNodeById('Start')!, b.getNodeById('N2')!)
-    b.connect(b.getNodeById('N1')!, b.getNodeById('End')!)
-    b.connect(b.getNodeById('N2')!, b.getNodeById('End')!)
-    b.connect(b.getNodeById('N1')!, b.getNodeById('N2')!)
-    const c = categorize(b)
-    const g = new GraphConnectionsDecorator(c)
+    const g = new Graph<OriginalNode, OriginalEdge>()
+    addNode('Start', 'Text of Start', g)
+    addNode('N1', 'Text of N1', g)
+    addNode('N2', 'Text of N2', g)
+    addNode('End', 'Text of End', g)
+    connect('Start', 'N1', g)
+    connect('Start', 'N2', g)
+    connect('N1', 'End', g)
+    connect('N2', 'End', g)
+    connect('N1', 'N2', g)
     const m = calculateLayerNumbersFirstOccuringPath(g)
-    const builder = new NodeSequenceEditorBuilder(m, g)
-    const model = builder.build()
-    const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
+    const gl = assignHorizontalLayerNumbers(g, m)
+    const lb = LayoutBase.create(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'], gl, 4)
+    const nodeLayout = new NodeLayoutBuilder(lb, gl, dimensions).run()
     const layout = new Layout(nodeLayout, dimensions, derivedEdgeLabelDimensions)
-    expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
+    expect(layout.nodes.map(n => n.id)).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
-    expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
+    expect(layout.nodes.map(n => (n as PlacedNode).layer)).toEqual([0, 1, 1, 2, 2, 3])
     // Layer 2 centered around median 105, size is 180.
-    expect(layout.getNodes().map(n => (n as PlacedNode).centerX)).toEqual([105, 60, 150, 75, 165, 120])
-    expect(layout.getNodes().map(n => (n as PlacedNode).centerY)).toEqual([25, 145, 145, 265, 265, 385])
-    expect(layout.getNodes().map(n => (n as PlacedNode).left)).toEqual([50, 5, 150, 20, 165, 65])
-    expect(layout.getNodes().map(n => (n as PlacedNode).top)).toEqual([5, 125, 145, 245, 265, 365])
+    expect(layout.nodes.map(n => (n as PlacedNode).centerX)).toEqual([105, 60, 150, 75, 165, 120])
+    expect(layout.nodes.map(n => (n as PlacedNode).centerY)).toEqual([25, 145, 145, 265, 265, 385])
+    expect(layout.nodes.map(n => (n as PlacedNode).left)).toEqual([50, 5, 150, 20, 165, 65])
+    expect(layout.nodes.map(n => (n as PlacedNode).top)).toEqual([5, 125, 145, 245, 265, 365])
     expect(layout.getLayoutLineSegments().map(lls => lls.key)).toEqual(
       ['Start-N1', 'Start-intermediate1', 'intermediate1-N2', 'N1-intermediate2', 'intermediate2-End', 'N2-End', 'N1-N2']
     )
@@ -117,34 +133,30 @@ describe('Layout', () => {
   })
 
   it('When layers passed through by vertical line segments, then have according line segments', () => {
-    const b = new ConcreteGraphBase()
-    b.addNode('Start', 'Text of Start', '')
-    b.addNode('N1', 'Text of N1', '')
-    b.addNode('N2', 'Text of N2', '')
-    b.addNode('End', 'Text of End', '')
-    b.connect(b.getNodeById('Start')!, b.getNodeById('N1')!)
-    b.connect(b.getNodeById('Start')!, b.getNodeById('N2')!)
-    b.connect(b.getNodeById('N1')!, b.getNodeById('End')!)
-    b.connect(b.getNodeById('N2')!, b.getNodeById('End')!)
-    b.connect(b.getNodeById('N1')!, b.getNodeById('N2')!)
-    const c = categorize(b)
-    const anEdge = c.getEdgeByKey('Start-N1')
-    expect(anEdge!.getKey()).toEqual('Start-N1')
-    expect( (anEdge as CategorizedEdge).isError).toEqual(false)
-    const g = new GraphConnectionsDecorator(c)
+    const g = new Graph<OriginalNode, OriginalEdge>()
+    addNode('Start', 'Text of Start', g)
+    addNode('N1', 'Text of N1', g)
+    addNode('N2', 'Text of N2', g)
+    addNode('End', 'Text of End', g)
+    connect('Start', 'N1', g)
+    connect('Start', 'N2', g)
+    connect('N1', 'End', g)
+    connect('N2', 'End', g)
+    connect('N1', 'N2', g)
+    const modifiedDimensions = modifyForVerticalLines(dimensions)
     const m = calculateLayerNumbersFirstOccuringPath(g)
-    const builder = new NodeSequenceEditorBuilder(m, g)
-    const model = builder.build()
-    const nodeLayout = new NodeLayoutBuilder(model.getShownNodesLayoutBase(), model.getGraph(), dimensions).run()
-    const layout = new Layout(nodeLayout, modifyForVerticalLines(dimensions), derivedEdgeLabelDimensions)
-    expect(layout.getNodes().map(n => n.getId())).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
+    const gl = assignHorizontalLayerNumbers(g, m)
+    const lb = LayoutBase.create(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'], gl, 4)
+    const nodeLayout = new NodeLayoutBuilder(lb, gl, modifiedDimensions).run()
+    const layout = new Layout(nodeLayout, modifiedDimensions, derivedEdgeLabelDimensions)
+    expect(layout.nodes.map(n => n.id)).toEqual(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'])
     // Start --> N2 needs intermediate1, N1 --> End needs intermediate2
-    expect(layout.getNodes().map(n => (n as PlacedNode).layerNumber)).toEqual([0, 1, 1, 2, 2, 3])
+    expect(layout.nodes.map(n => (n as PlacedNode).layer)).toEqual([0, 1, 1, 2, 2, 3])
     // Layer 2 centered around median 105, size is 180.
-    expect(layout.getNodes().map(n => (n as PlacedNode).centerX)).toEqual([105, 60, 150, 75, 165, 120])
-    expect(layout.getNodes().map(n => (n as PlacedNode).centerY)).toEqual([25, 145, 145, 265, 265, 385])
-    expect(layout.getNodes().map(n => (n as PlacedNode).left)).toEqual([50, 5, 150, 20, 165, 65])
-    expect(layout.getNodes().map(n => (n as PlacedNode).top)).toEqual([5, 125, 125, 245, 245, 365])
+    expect(layout.nodes.map(n => (n as PlacedNode).centerX)).toEqual([105, 60, 150, 75, 165, 120])
+    expect(layout.nodes.map(n => (n as PlacedNode).centerY)).toEqual([25, 145, 145, 265, 265, 385])
+    expect(layout.nodes.map(n => (n as PlacedNode).left)).toEqual([50, 5, 150, 20, 165, 65])
+    expect(layout.nodes.map(n => (n as PlacedNode).top)).toEqual([5, 125, 125, 245, 245, 365])
     expect(layout.getLayoutLineSegments().map(lls => lls.key)).toEqual(
       ['Start-N1', 'Start-intermediate1', 'intermediate1-N2', 'N1-intermediate2', 'intermediate2-End', 'N2-End', 'N1-N2',
         'pass-intermediate1', 'pass-intermediate2'

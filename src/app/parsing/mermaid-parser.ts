@@ -14,24 +14,42 @@
    limitations under the License.
 */
 
-import { ConcreteGraphBase, GraphBase } from '../model/graph'
+import { createText } from '../model/text'
+import { Graph } from '../model/generic-graph'
+import { Text } from '../public.api'
+import { create } from 'domain'
 
-export function getGraphFromMermaid(str: string): GraphBase {
-  const result = new ConcreteGraphBase()
+export interface MermaidNode {
+  id: string
+  text: string
+  style: string
+}
+
+export interface MermaidEdge {
+  from: MermaidNode
+  to: MermaidNode
+  text: Text
+}
+
+export type MermaidGraph = Graph<MermaidNode, MermaidEdge>
+
+export function getGraphFromMermaid(str: string): MermaidGraph {
+  const result = new Graph<MermaidNode, MermaidEdge>()
   const lines: string[] = str.split(/\r?\n/).map(line => line.trim());
   const nodeLines: string[] = lines.filter(line => line.search(/^[a-zA-Z0-9-]+\(/) === 0);
   const forwardLines: string[] = lines.filter(line => !(line.startsWith('classDef') || line.startsWith('linkStyle')) && line.search(/^[a-zA-Z0-9-]+ /) !== -1);
-  nodeLines.forEach((line) => {
-    const id = line.substring(0, line.indexOf('('))
-    const text = line.substring(line.indexOf('(') + 2, line.lastIndexOf(')') - 1)
-    const style = line.substring(line.lastIndexOf(':::') + 3)
-    result.addNode(id, text, style)
-  })
-  forwardLines.forEach((line) => {
-    const fromId = line.substring(0, line.indexOf(' '))
-    const toId = line.substring(line.lastIndexOf(' ') + 1);
-    const firstPipeIndex = line.indexOf('|');
-    const text = firstPipeIndex < 0 ? undefined : line.substring(firstPipeIndex + 1, line.lastIndexOf('|'))
+  for (const nodeLine of nodeLines) {
+    const id = nodeLine.substring(0, nodeLine.indexOf('('))
+    const text = nodeLine.substring(nodeLine.indexOf('(') + 2, nodeLine.lastIndexOf(')') - 1)
+    const style = nodeLine.substring(nodeLine.lastIndexOf(':::') + 3)
+    result.addNode({id, text, style})
+  }
+  for (const forwardLine of forwardLines) {
+    const fromId = forwardLine.substring(0, forwardLine.indexOf(' '))
+    const toId = forwardLine.substring(forwardLine.lastIndexOf(' ') + 1);
+    const firstPipeIndex = forwardLine.indexOf('|');
+    const rawText = firstPipeIndex < 0 ? undefined : forwardLine.substring(firstPipeIndex + 1, forwardLine.lastIndexOf('|'))
+    const text: Text = createText(rawText)
     if (result.getNodeById(fromId) === undefined) {
       throw new Error(`Intended edge references unknown from node [${fromId}]`)
     }
@@ -40,7 +58,8 @@ export function getGraphFromMermaid(str: string): GraphBase {
       throw new Error(`Intended edge references unknown to node [${toId}]`)
     }
     const to = result.getNodeById(toId)!
-    result.connect(from, to, text)
-  })
+
+    result.addEdge({from, to, text})
+  }
   return result
 }

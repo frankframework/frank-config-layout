@@ -1,20 +1,31 @@
-import { ConcreteNode, Node, ConcreteGraphBase, GraphConnectionsDecorator } from '../model/graph'
-import { calculateLayerNumbers, NodeSequenceEditorBuilder, NodeForEditor, OriginalNode, IntermediateNode, CreationReason, EdgeForEditor, LayerNumberAlgorithm, calculateLayerNumbersFirstOccuringPath, calculateLayerNumbersLongestPath, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP} from './horizontalGrouping'
+import { createText } from './text'
+import { OriginalNode, OriginalEdge, OriginalGraph } from './error-flow'
+import { Graph, getKey } from './generic-graph'
+import { calculateLayerNumbers, assignHorizontalLayerNumbers, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP,
+  calculateLayerNumbersLongestPath, calculateLayerNumbersFirstOccuringPath, GraphForLayers,
+  EdgeImpl, NodeImpl
+} from './horizontalGrouping'
 import { getRange } from '../util/util'
+import { LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH } from '../public.api'
 
-function newNode(id: string): Node {
-  return new ConcreteNode(0, id, '', '')
+function newNode(id: string): OriginalNode {
+  return { id, text: '', isError: false }
 }
 
-function connect(idFrom: string, idTo: string, g: ConcreteGraphBase) {
-  g.connect(g.getNodeById(idFrom)!, g.getNodeById(idTo)!)
+function connect(idFrom: string, idTo: string, g: OriginalGraph) {
+  g.addEdge({
+    from: g.getNodeById(idFrom),
+    to: g.getNodeById(idTo),
+    text: createText(undefined),
+    isError: false
+  })
 }
 
 describe('Calculating layer numbers', () => {
   it('Should call the correct method based on the algorithm enum', () => {
-    const g = new GraphConnectionsDecorator(getComplexGraph())
-    const result1 = calculateLayerNumbers(g, LayerNumberAlgorithm.FIRST_OCCURING_PATH)
-    const result2 = calculateLayerNumbers(g, LayerNumberAlgorithm.LONGEST_PATH)
+    const g = getComplexGraph()
+    const result1 = calculateLayerNumbers(g, LAYERS_FIRST_OCCURING_PATH)
+    const result2 = calculateLayerNumbers(g, LAYERS_LONGEST_PATH)
     const entries1: Record<string, number> = {}
     const entries2: Record<string, number> = {}
     result1.forEach((value, key) => entries1[key] = value)
@@ -26,7 +37,7 @@ describe('Calculating layer numbers', () => {
 
   describe('Longest path algorithm', () => {
     it('Two disconnected nodes can appear on same layer', () => {
-      const g = new GraphConnectionsDecorator(getSimpleGraph())
+      const g = getSimpleGraph()
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.size).toBe(3)
       expect(result.get('Start')).toBe(0)
@@ -35,10 +46,9 @@ describe('Calculating layer numbers', () => {
     });
   
     it('Node cannot appear on same layer as node that points to it', () => {
-      const b = getSimpleGraph()
-      b.addExistingNode(newNode('End'))
-      connect('N1', 'End', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleGraph()
+      g.addNode(newNode('End'))
+      connect('N1', 'End', g)
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.size).toBe(4)
       expect(result.get('Start')).toBe(0)
@@ -48,8 +58,7 @@ describe('Calculating layer numbers', () => {
     })
   
     it('If multiple nodes have no predecessors, all are on layer 0', () => {
-      const b = getSimplePlusDisjointEdge()
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimplePlusDisjointEdge()
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.size).toBe(5)
       expect(result.get('Start')).toBe(0)
@@ -60,54 +69,49 @@ describe('Calculating layer numbers', () => {
     })
   
     it('A cycle is ignored because no root node is found on the cycle', () => {
-      const b = getSimplePlusDisjointEdge()
-      connect('X1', 'X0', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimplePlusDisjointEdge()
+      connect('X1', 'X0', g)
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.size).toBe(3)
       expect([ ... result.keys()].sort()).toEqual(['N1', 'N2', 'Start'])
     })
   
     it('Edge order does not matter for order of layer assignment when there is no infinite loop (1)', () => {
-      const b = getSimpleNodesForGraph()
-      connect('Start', 'N1', b)
-      connect('Start', 'N2', b)
-      connect('N1', 'N2', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleNodesForGraph()
+      connect('Start', 'N1', g)
+      connect('Start', 'N2', g)
+      connect('N1', 'N2', g)
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.get('N1')).toBe(1)
       expect(result.get('N2')).toBe(2)
     })
   
     it('Edge order does not matter for order of layer assignment when there is no infinite loop (2)', () => {
-      const b = getSimpleNodesForGraph()
-      connect('Start', 'N2', b)
-      connect('Start', 'N1', b)
-      connect('N1', 'N2', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleNodesForGraph()
+      connect('Start', 'N2', g)
+      connect('Start', 'N1', g)
+      connect('N1', 'N2', g)
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.get('N1')).toBe(1)
       expect(result.get('N2')).toBe(2)
     })
 
     it('Edge order does matter for order of layer assignment when there is an infinite loop (1)', () => {
-      const b = getSimpleNodesForGraph()
-      connect('Start', 'N1', b)
-      connect('Start', 'N2', b)
-      connect('N1', 'N2', b)
-      connect('N2', 'N1', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleNodesForGraph()
+      connect('Start', 'N1', g)
+      connect('Start', 'N2', g)
+      connect('N1', 'N2', g)
+      connect('N2', 'N1', g)
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.get('N1')).toBe(1)
       expect(result.get('N2')).toBe(2)
     })
     it('Edge order does matter for order of layer assignment when there is an infinite loop (2)', () => {
-      const b = getSimpleNodesForGraph()
-      connect('Start', 'N2', b)
-      connect('Start', 'N1', b)
-      connect('N1', 'N2', b)
-      connect('N2', 'N1', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleNodesForGraph()
+      connect('Start', 'N2', g)
+      connect('Start', 'N1', g)
+      connect('N1', 'N2', g)
+      connect('N2', 'N1', g)
       const result = calculateLayerNumbersLongestPath(g, () => {})
       expect(result.get('N1')).toBe(2)
       expect(result.get('N2')).toBe(1)
@@ -116,7 +120,7 @@ describe('Calculating layer numbers', () => {
 
   describe('First occuring path algorithm', () => {
     it('Two disconnected nodes can appear on same layer', () => {
-      const g = new GraphConnectionsDecorator(getSimpleGraph())
+      const g = getSimpleGraph()
       const result = calculateLayerNumbersFirstOccuringPath(g)
       expect(result.size).toBe(3)
       expect(result.get('Start')).toBe(0)
@@ -125,10 +129,9 @@ describe('Calculating layer numbers', () => {
     });
   
     it('Node cannot appear on same layer as node that points to it', () => {
-      const b = getSimpleGraph()
-      b.addExistingNode(newNode('End'))
-      connect('N1', 'End', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleGraph()
+      g.addNode(newNode('End'))
+      connect('N1', 'End', g)
       const result = calculateLayerNumbersFirstOccuringPath(g)
       expect(result.size).toBe(4)
       expect(result.get('Start')).toBe(0)
@@ -138,8 +141,7 @@ describe('Calculating layer numbers', () => {
     })
   
     it('If multiple nodes have no predecessors, all are on layer 0', () => {
-      const b = getSimplePlusDisjointEdge()
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimplePlusDisjointEdge()
       const result = calculateLayerNumbersFirstOccuringPath(g)
       expect(result.size).toBe(5)
       expect(result.get('Start')).toBe(0)
@@ -150,266 +152,224 @@ describe('Calculating layer numbers', () => {
     })
   
     it('A cycle is ignored because no root node is found on the cycle', () => {
-      const b = getSimplePlusDisjointEdge()
-      connect('X1', 'X0', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimplePlusDisjointEdge()
+      connect('X1', 'X0', g)
       const result = calculateLayerNumbersFirstOccuringPath(g)
       expect(result.size).toBe(3)
       expect([ ... result.keys()].sort()).toEqual(['N1', 'N2', 'Start'])
     })
   
     it('Edge order controls order of layer assignment (1)', () => {
-      const b = getSimpleNodesForGraph()
-      connect('Start', 'N1', b)
-      connect('Start', 'N2', b)
-      connect('N1', 'N2', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleNodesForGraph()
+      connect('Start', 'N1', g)
+      connect('Start', 'N2', g)
+      connect('N1', 'N2', g)
       const result = calculateLayerNumbersFirstOccuringPath(g)
       expect(result.get('N1')).toBe(1)
       expect(result.get('N2')).toBe(2)
     })
   
     it('Edge order controls order of layer assignment (2)', () => {
-      const b = getSimpleNodesForGraph()
-      connect('Start', 'N2', b)
-      connect('Start', 'N1', b)
-      connect('N1', 'N2', b)
-      const g = new GraphConnectionsDecorator(b)
+      const g = getSimpleNodesForGraph()
+      connect('Start', 'N2', g)
+      connect('Start', 'N1', g)
+      connect('N1', 'N2', g)
       const result = calculateLayerNumbersFirstOccuringPath(g)
       expect(result.get('N2')).toBe(1)
       expect(result.get('N1')).toBe(2)
     })
   })
 
-  function getSimpleNodesForGraph() {
-    const b = new ConcreteGraphBase()
-    b.addExistingNode(newNode('Start'))
-    b.addExistingNode(newNode('N1'))
-    b.addExistingNode(newNode('N2'))
-    return b
+  function getSimpleNodesForGraph(): OriginalGraph {
+    const g = new Graph<OriginalNode, OriginalEdge>()
+    g.addNode(newNode('Start'))
+    g.addNode(newNode('N1'))
+    g.addNode(newNode('N2'))
+    return g
   }
 
-  function getNodesForComplexGraph() {
-    const b = new ConcreteGraphBase()
-    b.addExistingNode(newNode('Start'))
-    b.addExistingNode(newNode('N1'))
-    b.addExistingNode(newNode('N2'))
-    b.addExistingNode(newNode('N3'))
-    b.addExistingNode(newNode('end'))
-    return b
+  function getNodesForComplexGraph(): OriginalGraph {
+    const g = new Graph<OriginalNode, OriginalEdge>()
+    g.addNode(newNode('Start'))
+    g.addNode(newNode('N1'))
+    g.addNode(newNode('N2'))
+    g.addNode(newNode('N3'))
+    g.addNode(newNode('end'))
+    return g
   }
 
-  function getSimpleGraph(): ConcreteGraphBase {
-    const b = getSimpleNodesForGraph()
-    connect('Start', 'N1', b)
-    connect('Start', 'N2', b)
-    return b
+  function getSimpleGraph(): OriginalGraph {
+    const g = getSimpleNodesForGraph()
+    connect('Start', 'N1', g)
+    connect('Start', 'N2', g)
+    return g
   }
 
-  function getComplexGraph(): ConcreteGraphBase {
-    const b = getNodesForComplexGraph()
-    connect('Start', 'N3', b)
-    connect('Start', 'N1', b)
-    connect('N1', 'N2', b)
-    connect('N2', 'N3', b)
-    connect('N3', 'end', b)
-    return b
+  function getComplexGraph(): OriginalGraph {
+    const g = getNodesForComplexGraph()
+    connect('Start', 'N3', g)
+    connect('Start', 'N1', g)
+    connect('N1', 'N2', g)
+    connect('N2', 'N3', g)
+    connect('N3', 'end', g)
+    return g
   }
 
-  function getSimplePlusDisjointEdge(): ConcreteGraphBase {
-    const b = getSimpleGraph()
-    b.addExistingNode(newNode('X0'))
-    b.addExistingNode(newNode('X1'))
-    connect('X0', 'X1', b)
-    return b
+  function getSimplePlusDisjointEdge(): OriginalGraph {
+    const g = getSimpleGraph()
+    g.addNode(newNode('X0'))
+    g.addNode(newNode('X1'))
+    connect('X0', 'X1', g)
+    return g
   }
 })
 
 describe('NodeSequenceEditorBuilder', () => {
   it('Downward lines', () => {
-    const instance = getInstanceDownwardLinks()
-    expect(instance.graph.getNodes().map(n => n.getId()))
+    const instance: GraphForLayers = getInstanceDownwardLinks()
+    expect(instance.nodes.map(n => n.id))
       .toEqual(['N0', 'N1', 'N2', 'N3', 'intermediate1', 'intermediate2', 'intermediate3'])
     // Edges with intermediates are N0 --> N2 and N0 --> N3
-    expect(instance.graph.getNodes().map(n => instance.nodeIdToLayer.get(n.getId())))
+    expect(instance.nodes.map(n => n.layer))
       .toEqual([0, 1, 2, 3, 1, 1, 2])
-    expect(instance.graph.getNodes()
-      .map(n => n as NodeForEditor)
-      .map(n => n.getCreationReason()))
-      .toEqual([CreationReason.ORIGINAL, CreationReason.ORIGINAL, CreationReason.ORIGINAL, CreationReason.ORIGINAL,
-        CreationReason.INTERMEDIATE, CreationReason.INTERMEDIATE, CreationReason.INTERMEDIATE])
-    // Check that we have access to the original node, relevant for styling or text
-    expect(getRange(0, 4).map(i => instance.graph.getNodes()[i])
-      .map(n => n as OriginalNode)
-      .map(n => n.original.getId()))
-      .toEqual(['N0', 'N1', 'N2', 'N3'])
-    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_DOWN)
-    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).originalEdge.getKey()).toEqual('N0-N2')
-    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_DOWN)
-    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).originalEdge.getKey()).toEqual('N0-N3')
-    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_DOWN)
-    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).originalEdge.getKey()).toEqual('N0-N3')
-    let edge: EdgeForEditor = instance.graph.getEdges()[0] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('N0')
-    expect(edge.getTo().getId()).toBe('N1')
-    expect(edge.creationReason).toBe(CreationReason.ORIGINAL)
-    expect(edge.original.getFrom().getId()).toBe('N0')
-    expect(edge.original.getTo().getId()).toBe('N1')
+    expect(instance.nodes
+      .map(n => n.isIntermediate))
+      .toEqual([false, false, false, false, true, true, true])
+    expect( (instance.getNodeById('intermediate1')).passDirection).toEqual(PASS_DIRECTION_DOWN)
+    expect( (instance.getNodeById('intermediate2')).passDirection).toEqual(PASS_DIRECTION_DOWN)
+    expect( (instance.getNodeById('intermediate3')).passDirection).toEqual(PASS_DIRECTION_DOWN)
+    let edge: EdgeImpl = instance.edges[0]
+    expect(edge.from.id).toBe('N0')
+    expect(edge.to.id).toBe('N1')
+    expect(edge.isIntermediate).toBe(false)
     expect(edge.isFirstSegment).toEqual(true)
     expect(edge.isLastSegment).toEqual(true)
-    edge = instance.graph.getEdges()[1] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('N0')
-    expect(edge.getTo().getId()).toBe('intermediate1')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N0')
-    expect(edge.original.getTo().getId()).toBe('N2')
+    edge = instance.edges[1]
+    expect(edge.from.id).toBe('N0')
+    expect(edge.to.id).toBe('intermediate1')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(true)
     expect(edge.isLastSegment).toEqual(false)
-    edge = instance.graph.getEdges()[2] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('intermediate1')
-    expect(edge.getTo().getId()).toBe('N2')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N0')
-    expect(edge.original.getTo().getId()).toBe('N2')
+    edge = instance.edges[2]
+    expect(edge.from.id).toBe('intermediate1')
+    expect(edge.to.id).toBe('N2')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(false)
     expect(edge.isLastSegment).toEqual(true)
-    edge = instance.graph.getEdges()[3] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('N0')
-    expect(edge.getTo().getId()).toBe('intermediate2')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N0')
-    expect(edge.original.getTo().getId()).toBe('N3')
+    edge = instance.edges[3]
+    expect(edge.from.id).toBe('N0')
+    expect(edge.to.id).toBe('intermediate2')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(true)
     expect(edge.isLastSegment).toEqual(false)
-    edge = instance.graph.getEdges()[4] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('intermediate2')
-    expect(edge.getTo().getId()).toBe('intermediate3')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N0')
-    expect(edge.original.getTo().getId()).toBe('N3')
+    edge = instance.edges[4]
+    expect(edge.from.id).toBe('intermediate2')
+    expect(edge.to.id).toBe('intermediate3')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(false)
     expect(edge.isLastSegment).toEqual(false)
-    edge = instance.graph.getEdges()[5] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('intermediate3')
-    expect(edge.getTo().getId()).toBe('N3')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N0')
-    expect(edge.original.getTo().getId()).toBe('N3')
-    expect(instance.graph.getEdges().length).toBe(6)
+    edge = instance.edges[5]
+    expect(edge.from.id).toBe('intermediate3')
+    expect(edge.to.id).toBe('N3')
+    expect(edge.isIntermediate).toBe(true)
+    expect(instance.edges.length).toBe(6)
     expect(edge.isFirstSegment).toEqual(false)
     expect(edge.isLastSegment).toEqual(true)
     // All edges go down
-    for (const edge of instance.graph.getEdges()) {
-      expect( (edge as EdgeForEditor).passDirection).toEqual(PASS_DIRECTION_DOWN)
+    for (const edge of instance.edges) {
+      expect(edge.passDirection).toEqual(PASS_DIRECTION_DOWN)
     }
   })
 
-  function getInstanceDownwardLinks(): NodeSequenceEditorBuilder {
-    const b = new ConcreteGraphBase()
-    b.addExistingNode(newNode('N0'))
-    b.addExistingNode(newNode('N1'))
-    b.addExistingNode(newNode('N2'))
-    b.addExistingNode(newNode('N3'))
-    connect('N0', 'N1', b)
-    connect('N0', 'N2', b) // produces intermediate1
-    connect('N0', 'N3', b) // produces intermediate2 and intermediate3
+  function getInstanceDownwardLinks(): GraphForLayers {
+    const g = new Graph<OriginalNode, OriginalEdge>()
+    g.addNode(newNode('N0'))
+    g.addNode(newNode('N1'))
+    g.addNode(newNode('N2'))
+    g.addNode(newNode('N3'))
+    connect('N0', 'N1', g)
+    connect('N0', 'N2', g) // produces intermediate1
+    connect('N0', 'N3', g) // produces intermediate2 and intermediate3
     const m: Map<string, number> = new Map([
       ['N0', 0],
       ['N1', 1],
       ['N2', 2],
       ['N3', 3]
     ])
-    return new NodeSequenceEditorBuilder(m, b)
+    return assignHorizontalLayerNumbers(g, m)
   }
 
   it('Upward lines', () => {
-    const instance = getInstanceUpwardLinks()
-    expect(instance.graph.getNodes().map(n => n.getId()))
+    const instance: GraphForLayers = getInstanceUpwardLinks()
+    expect(instance.nodes.map(n => n.id))
       .toEqual(['N0A', 'N0B', 'N1', 'N2', 'N3', 'intermediate1', 'intermediate2', 'intermediate3'])
-    expect(instance.graph.getNodes().map(n => instance.nodeIdToLayer.get(n.getId())))
+    expect(instance.nodes.map(n => n.layer))
       .toEqual([0, 0, 1, 2, 3, 1, 2, 1])
-    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_UP)
-    expect( (instance.graph.getNodeById('intermediate1') as IntermediateNode).originalEdge.getKey()).toEqual('N2-N0A')
-    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_UP)
-    expect( (instance.graph.getNodeById('intermediate2') as IntermediateNode).originalEdge.getKey()).toEqual('N3-N0A')
-    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).getPassDirection()).toEqual(PASS_DIRECTION_UP)
-    expect( (instance.graph.getNodeById('intermediate3') as IntermediateNode).originalEdge.getKey()).toEqual('N3-N0A')
-    let edge = instance.graph.getEdges()[0] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('N0A')
-    expect(edge.getTo().getId()).toBe('N0B')
-    expect(edge.creationReason).toBe(CreationReason.ORIGINAL)
-    expect(edge.original.getFrom().getId()).toBe('N0A')
-    expect(edge.original.getTo().getId()).toBe('N0B')
+    expect( (instance.getNodeById('intermediate1')).passDirection).toEqual(PASS_DIRECTION_UP)
+    expect( (instance.getNodeById('intermediate2')).passDirection).toEqual(PASS_DIRECTION_UP)
+    expect( (instance.getNodeById('intermediate3')).passDirection).toEqual(PASS_DIRECTION_UP)
+    let edge = instance.edges[0]
+    expect(edge.from.id).toBe('N0A')
+    expect(edge.to.id).toBe('N0B')
+    expect(edge.isIntermediate).toBe(false)
     expect(edge.isFirstSegment).toEqual(true)
     expect(edge.isLastSegment).toEqual(true)
-    edge = instance.graph.getEdges()[1] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('N1')
-    expect(edge.getTo().getId()).toBe('N0A')
-    expect(edge.creationReason).toBe(CreationReason.ORIGINAL)
-    expect(edge.original.getFrom().getId()).toBe('N1')
-    expect(edge.original.getTo().getId()).toBe('N0A')
+    edge = instance.edges[1]
+    expect(edge.from.id).toBe('N1')
+    expect(edge.to.id).toBe('N0A')
+    expect(edge.isIntermediate).toBe(false)
     expect(edge.isFirstSegment).toEqual(true)
     expect(edge.isLastSegment).toEqual(true)
-    edge = instance.graph.getEdges()[2] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('N2')
-    expect(edge.getTo().getId()).toBe('intermediate1')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N2')
-    expect(edge.original.getTo().getId()).toBe('N0A')
+    edge = instance.edges[2]
+    expect(edge.from.id).toBe('N2')
+    expect(edge.to.id).toBe('intermediate1')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(true)
     expect(edge.isLastSegment).toEqual(false)
-    edge = instance.graph.getEdges()[3] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('intermediate1')
-    expect(edge.getTo().getId()).toBe('N0A')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N2')
-    expect(edge.original.getTo().getId()).toBe('N0A')
+    edge = instance.edges[3]
+    expect(edge.from.id).toBe('intermediate1')
+    expect(edge.to.id).toBe('N0A')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(false)
     expect(edge.isLastSegment).toEqual(true)
-    edge = instance.graph.getEdges()[4] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('N3')
-    expect(edge.getTo().getId()).toBe('intermediate2')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N3')
-    expect(edge.original.getTo().getId()).toBe('N0A')
+    edge = instance.edges[4]
+    expect(edge.from.id).toBe('N3')
+    expect(edge.to.id).toBe('intermediate2')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(true)
     expect(edge.isLastSegment).toEqual(false)
-    edge = instance.graph.getEdges()[5] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('intermediate2')
-    expect(edge.getTo().getId()).toBe('intermediate3')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N3')
-    expect(edge.original.getTo().getId()).toBe('N0A')
+    edge = instance.edges[5]
+    expect(edge.from.id).toBe('intermediate2')
+    expect(edge.to.id).toBe('intermediate3')
+    expect(edge.isIntermediate).toBe(true)
     expect(edge.isFirstSegment).toEqual(false)
     expect(edge.isLastSegment).toEqual(false)
-    edge = instance.graph.getEdges()[6] as EdgeForEditor
-    expect(edge.getFrom().getId()).toBe('intermediate3')
-    expect(edge.getTo().getId()).toBe('N0A')
-    expect(edge.creationReason).toBe(CreationReason.INTERMEDIATE)
-    expect(edge.original.getFrom().getId()).toBe('N3')
-    expect(edge.original.getTo().getId()).toBe('N0A')
-    expect(instance.graph.getEdges().length).toBe(7)
+    edge = instance.edges[6]
+    expect(edge.from.id).toBe('intermediate3')
+    expect(edge.to.id).toBe('N0A')
+    expect(edge.isIntermediate).toBe(true)
+    expect(instance.edges.length).toBe(7)
     expect(edge.isFirstSegment).toEqual(false)
     expect(edge.isLastSegment).toEqual(true)
     // All edges go up
-    for (const edge of instance.graph.getEdges()) {
-      if (edge.getKey() !== "N0A-N0B") {
-        expect( (edge as EdgeForEditor).passDirection).toEqual(PASS_DIRECTION_UP)
+    for (const edge of instance.edges) {
+      if (getKey(edge) !== "N0A-N0B") {
+        expect(edge.passDirection).toEqual(PASS_DIRECTION_UP)
       }
     }
   })
 
-  function getInstanceUpwardLinks(): NodeSequenceEditorBuilder {
-    const b = new ConcreteGraphBase()
-    b.addExistingNode(newNode('N0A'))
-    b.addExistingNode(newNode('N0B'))
-    b.addExistingNode(newNode('N1'))
-    b.addExistingNode(newNode('N2'))
-    b.addExistingNode(newNode('N3'))
-    connect('N0A', 'N0B', b)
-    connect('N1', 'N0A', b)
-    connect('N2', 'N0A', b)
-    connect('N3', 'N0A', b)
+  function getInstanceUpwardLinks(): GraphForLayers {
+    const g = new Graph<OriginalNode, OriginalEdge>()
+    g.addNode(newNode('N0A'))
+    g.addNode(newNode('N0B'))
+    g.addNode(newNode('N1'))
+    g.addNode(newNode('N2'))
+    g.addNode(newNode('N3'))
+    connect('N0A', 'N0B', g)
+    connect('N1', 'N0A', g)
+    connect('N2', 'N0A', g)
+    connect('N3', 'N0A', g)
     const m: Map<string, number> = new Map([
       ['N0A', 0],
       ['N0B', 0],
@@ -417,13 +377,6 @@ describe('NodeSequenceEditorBuilder', () => {
       ['N2', 2],
       ['N3', 3]
     ])
-    return new NodeSequenceEditorBuilder(m, b)
+    return assignHorizontalLayerNumbers(g, m)
   }
 })
-  /*
-
-    Test NodeSequenceEditorBuilder:
-    - Original edge on same layer.
-    - Intermediate edge up two layers.
-    - Intermediate edge that passes three layers up.
-  */

@@ -1,7 +1,6 @@
+import { getKey } from './generic-graph'
 import { getGraphFromMermaid } from '../parsing/mermaid-parser'
-import { GraphBase } from './graph'
-
-import { categorize, CategorizedNode, CategorizedEdge } from './error-flow'
+import { findErrorFlow, OriginalGraph } from './error-flow'
 
 describe('Distinguish error flow', () => {
   it('No error flow', () => {
@@ -11,10 +10,10 @@ N2(""):::normal
 N1 --> |success| N2
 `
     const b = getGraphFromMermaid(input)
-    const c: GraphBase = categorize(b)
-    expect(c.getNodes().length).toEqual(2)
-    expect(c.getNodes().map(n => n.getId())).toEqual(['N1', 'N2'])
-    expect(c.getEdges().map(e => e.getKey())).toEqual(['N1-N2'])
+    const c: OriginalGraph = findErrorFlow(b)
+    expect(c.nodes.length).toEqual(2)
+    expect(c.nodes.map(n => n.id)).toEqual(['N1', 'N2'])
+    expect(c.edges.map(e => getKey(e))).toEqual(['N1-N2'])
     checkErrorNode(c, 'N1', false)
     checkErrorNode(c, 'N2', false)
     checkErrorEdge(c, 'N1-N2', false)
@@ -27,10 +26,10 @@ N2(""):::normal
 N1 --> N2
 `
     const b = getGraphFromMermaid(input)
-    const c: GraphBase = categorize(b)
-    expect(c.getNodes().length).toEqual(2)
-    expect(c.getNodes().map(n => n.getId())).toEqual(['N1', 'N2'])
-    expect(c.getEdges().map(e => e.getKey())).toEqual(['N1-N2'])
+    const c: OriginalGraph = findErrorFlow(b)
+    expect(c.nodes.length).toEqual(2)
+    expect(c.nodes.map(n => n.id)).toEqual(['N1', 'N2'])
+    expect(c.edges.map(e => getKey(e))).toEqual(['N1-N2'])
     checkErrorNode(c, 'N1', false)
     checkErrorNode(c, 'N2', false)
     checkErrorEdge(c, 'N1-N2', false)
@@ -43,10 +42,10 @@ N2(""):::normal
 N1 --> |success| N2
 `
     const b = getGraphFromMermaid(input)
-    const c: GraphBase = categorize(b)
-    expect(c.getNodes().length).toEqual(2)
-    expect(c.getNodes().map(n => n.getId())).toEqual(['N1', 'N2'])
-    expect(c.getEdges().map(e => e.getKey())).toEqual(['N1-N2'])
+    const c: OriginalGraph = findErrorFlow(b)
+    expect(c.nodes.length).toEqual(2)
+    expect(c.nodes.map(n => n.id)).toEqual(['N1', 'N2'])
+    expect(c.edges.map(e => getKey(e))).toEqual(['N1-N2'])
     checkErrorNode(c, 'N1', true)
     checkErrorNode(c, 'N2', false)
     checkErrorEdge(c, 'N1-N2', true)
@@ -59,22 +58,22 @@ N2(""):::normal
 N1 --> |exception| N2
 `
     const b = getGraphFromMermaid(input)
-    const c: GraphBase = categorize(b)
-    expect(c.getNodes().length).toEqual(2)
-    expect(c.getNodes().map(n => n.getId())).toEqual(['N1', 'N2'])
-    expect(c.getEdges().map(e => e.getKey())).toEqual(['N1-N2'])
+    const c: OriginalGraph = findErrorFlow(b)
+    expect(c.nodes.length).toEqual(2)
+    expect(c.nodes.map(n => n.id)).toEqual(['N1', 'N2'])
+    expect(c.edges.map(e => getKey(e))).toEqual(['N1-N2'])
     checkErrorNode(c, 'N1', false)
     checkErrorNode(c, 'N2', false)
     checkErrorEdge(c, 'N1-N2', true)
-    expect( (c.getEdgeByKey('N1-N2') as CategorizedEdge).getNumLines()).toEqual(1)
+    expect( (c.getEdgeByKey('N1-N2')).text.numLines).toEqual(1)
   })
 
-  function checkErrorNode(b: GraphBase, nodeId: string, expectError: boolean) {
-    expect( (b.getNodeById(nodeId) as CategorizedNode).isError).toEqual(expectError)
+  function checkErrorNode(b: OriginalGraph, nodeId: string, expectError: boolean) {
+    expect( (b.getNodeById(nodeId)).isError).toEqual(expectError)
   }
 
-  function checkErrorEdge(b: GraphBase, edgeKey: string, expectError: boolean) {
-    expect( (b.getEdgeByKey(edgeKey) as CategorizedEdge).isError).toEqual(expectError)
+  function checkErrorEdge(b: OriginalGraph, edgeKey: string, expectError: boolean) {
+    expect( (b.getEdgeByKey(edgeKey)).isError).toEqual(expectError)
   }
 
   it('When edge text has multiple lines, then the number of lines is calculated correctly', () => {
@@ -83,11 +82,11 @@ N1(""):::normal
 N2(""):::normal
 N1 --> |success<br/>  exception  | N2`
     const b = getGraphFromMermaid(input)
-    const c: GraphBase = categorize(b)
-    const instance = c.getEdgeByKey('N1-N2') as CategorizedEdge
-    expect(instance.getNumLines()).toEqual(2)
-    expect(instance.getTextLines()).toEqual(["success", "exception"])
+    const c: OriginalGraph = findErrorFlow(b)
+    const instance = c.getEdgeByKey('N1-N2')
+    expect(instance.text.numLines).toEqual(2)
+    expect(instance.text.lines).toEqual(["success", "exception"])
     // The second line is trimmed, length of word "exception"
-    expect(instance.getMaxLineLength()).toEqual(9)
+    expect(instance.text.maxLineLength).toEqual(9)
   })
 })

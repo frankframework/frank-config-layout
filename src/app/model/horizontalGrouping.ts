@@ -14,184 +14,122 @@
    limitations under the License.
 */
 
-import { Node, Graph, GraphBase, Edge, ConcreteGraphBase, GraphConnectionsDecorator, getEdgeKey } from './graph'
-import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from '../notLibrary/nodeSequenceEditor'
 import { getRange } from '../util/util'
+import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow'
+import { Graph } from './generic-graph'
+import { Node, Edge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH } from '../public.api'
 
-export enum CreationReason {
-  ORIGINAL = 'original',
-  INTERMEDIATE = 'intermediate'
+export interface NodeImpl extends Node {
+  readonly passDirection?: number
 }
 
-export interface NodeForEditor extends Node {
-  getCreationReason(): CreationReason
-}
-
-export class OriginalNode implements NodeForEditor {
-  constructor(
-    readonly original: Node
-  ) {}
-
-  getId() {
-    return this.original.getId()
-  }
-
-  getText() {
-    return this.original.getText()
-  }
-
-  getCreationReason(): CreationReason {
-    return CreationReason.ORIGINAL
-  }
+export interface EdgeImpl extends Edge<NodeImpl> {
+  readonly isFirstSegment: boolean,
+  readonly isLastSegment: boolean,
+  readonly passDirection: number
 }
 
 export const PASS_DIRECTION_DOWN = 0
 export const PASS_DIRECTION_UP = 1
 
-export class IntermediateNode implements NodeForEditor {
-  constructor(
-    private id: string, private passDirection: number, readonly originalEdge: Edge
-  ) {}
+export type GraphForLayers = Graph<NodeImpl, EdgeImpl>
 
-  getId() {
-    return this.id
+export function assignHorizontalLayerNumbers(original: OriginalGraph, nodeIdToLayer: Map<string, number>): GraphForLayers {
+  let intermediateNodeSeq: number = 1
+  let orderedOmittedNodes = original.nodes
+    .filter(n => ! nodeIdToLayer.has(n.id))
+  if (orderedOmittedNodes.length >= 1) {
+    const idsOmittedNodes = orderedOmittedNodes.map(n => n.id).join(', ')
+    throw new Error(`Not all nodes could be grouped into horizontal layers: ${idsOmittedNodes}`)
   }
-
-  getText() {
-    return this.id
+  let result = new Graph<NodeImpl, EdgeImpl>()
+  for (const n of original.nodes.filter(n => nodeIdToLayer.has(n.id))) {
+    result.addNode({
+      id: n.id,
+      text: n.text,
+      isError: n.isError,
+      layer: nodeIdToLayer.get(n.id)!,
+      isIntermediate: false,
+      passDirection: undefined
+    })
   }
-
-  getCreationReason() {
-    return CreationReason.INTERMEDIATE
+  for (const edge of original.edges
+    .filter(e => nodeIdToLayer.has(e.from.id))
+    .filter(e => nodeIdToLayer.has(e.to.id))) {
+    intermediateNodeSeq = handleEdge(edge, nodeIdToLayer, result, intermediateNodeSeq)
   }
-
-  getPassDirection() {
-    return this.passDirection
-  }
+  return result
 }
 
-// Holds an original edge in which the from and to nodes
-// are replaced by NodeForEditor instances, to include
-// CreationReason ORIGINAL. Or holds a connection
-// with intermediate nodes, CreationReason INTERMEDIATE.
-//
-// For an intermediate edge,
-// use original.getFrom().getId() and original.getTo().getId()
-// to look up the original nodes for which this intermediate
-// edge was created. Do not use the nodes original.getFrom() and
-// original.getTo() directly because that would mix up
-// original nodes and nodes with creation information included.
-//
-// In any case, use the original
-// field to find styling information about the edge.
-// Styling information for the connected nodes is still
-// available without using the original field, because
-// the connected nodes are instances of NodeForEditor
-//
-export class EdgeForEditor implements Edge {
-  constructor(
-    readonly creationReason: CreationReason,
-    readonly original: Edge,
-    readonly from: NodeForEditor,
-    readonly to: NodeForEditor,
-    readonly isFirstSegment: boolean,
-    readonly isLastSegment: boolean,
-    readonly passDirection: number
-  ) {}
-
-  getFrom(): Node {
-    return this.from
-  }
-
-  getTo(): Node {
-    return this.to
-  }
-
-  getKey(): string {
-    return getEdgeKey(this.from, this.to)
-  }
-}
-
-export class NodeSequenceEditorBuilder {
-  readonly graph: GraphBase
-  readonly orderedOmittedNodes: Node[]
-  private nextSeqIntermediateNode: number = 1
-
-  constructor(
-    readonly nodeIdToLayer: Map<string, number>,
-    originalGraph: GraphBase)
-  {
-    this.orderedOmittedNodes = originalGraph.getNodes()
-      .filter(n => ! nodeIdToLayer.has(n.getId()))
-    this.graph = new ConcreteGraphBase()
-    originalGraph.getNodes()
-      .filter(n => nodeIdToLayer.has(n.getId()))
-      .map(n => new OriginalNode(n))
-      .forEach(n => (this.graph as ConcreteGraphBase).addExistingNode(n))
-    originalGraph.getEdges()
-      .filter(edge => nodeIdToLayer.has(edge.getFrom().getId()))
-      .filter(edge => nodeIdToLayer.has(edge.getTo().getId()))
-      .forEach(edge => this.handleEdge(edge))
-  }
-
-  handleEdge(edge: Edge): void {
-    const layerFrom: number = this.nodeIdToLayer.get(edge.getFrom().getId())!
-    const layerTo: number = this.nodeIdToLayer.get(edge.getTo().getId())!
-    const passDirection = layerFrom <= layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP
-    if (Math.abs(layerTo - layerFrom) <= 1) {
-      // We do not throw an error for edges within the same layer.
-      // Maybe a future layering algorithm will allow this.
-      // It is not the duty of this function to test the layer
-      // assignment algorithm.
-      (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
-        CreationReason.ORIGINAL,
-        edge,
-        this.graph.getNodeById(edge.getFrom().getId()) as NodeForEditor,
-        this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor,
-        true, true, passDirection
-      ))
-    } else {
-      const intermediateLayers: number[] = getIntermediateLayers(layerFrom, layerTo)
-      const intermediateNodes: NodeForEditor[] = intermediateLayers.map(layer => new IntermediateNode(
-        `intermediate${this.nextSeqIntermediateNode++}`, passDirection, edge
-      ));
-      intermediateNodes.forEach( (n, i) => (this.graph as ConcreteGraphBase).addExistingNode(n));
-      (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
-        CreationReason.INTERMEDIATE,
-        edge,
-        this.graph.getNodeById(edge.getFrom().getId())! as NodeForEditor,
-        intermediateNodes[0],
-        true,
-        false,
+function handleEdge(edge: OriginalEdge, nodeIdToLayer: Map<string, number>, result: GraphForLayers, intermediateNodeSeq: number): number {
+  const layerFrom: number = nodeIdToLayer.get(edge.from.id)!
+  const layerTo: number = nodeIdToLayer.get(edge.to.id)!
+  const passDirection = layerFrom <= layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP
+  if (Math.abs(layerTo - layerFrom) <= 1) {
+    // We do not throw an error for edges within the same layer.
+    // Maybe a future layering algorithm will allow this.
+    // It is not the duty of this function to test the layer
+    // assignment algorithm.
+    result.addEdge({
+      from: result.getNodeById(edge.from.id),
+      to: result.getNodeById(edge.to.id),
+      text: edge.text,
+      // TODO: Test this.
+      isError: edge.isError,
+      isFirstSegment: true,
+      isLastSegment: true,
+      isIntermediate: false,
+      passDirection
+    })
+  } else {
+    const intermediateNodes: NodeImpl[] = getIntermediateLayers(layerFrom, layerTo).map(layer => {
+      return {
+        id: `intermediate${intermediateNodeSeq++}`,
+        text: '',
+        // TODO: Test this.
+        isError: edge.isError,
+        layer,
+        isIntermediate: true,
         passDirection
-      ))
-      for(let i = 1; i < intermediateNodes.length; ++i) {
-        (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
-          CreationReason.INTERMEDIATE,
-          edge,
-          intermediateNodes[i-1],
-          intermediateNodes[i],
-          false,
-          false,
-          passDirection
-        ))
       }
-      (this.graph as ConcreteGraphBase).addEdge(new EdgeForEditor(
-        CreationReason.INTERMEDIATE,
-        edge,
-        intermediateNodes[intermediateNodes.length - 1],
-        this.graph.getNodeById(edge.getTo().getId()) as NodeForEditor,
-        false,
-        true,
-        passDirection
-      ))
-      intermediateNodes.forEach((n, index) => this.nodeIdToLayer.set(n.getId(), intermediateLayers[index]))
+    })
+    for (const intermediateNode of intermediateNodes) {
+      result.addNode(intermediateNode)
     }
+    result.addEdge({
+      from: result.getNodeById(edge.from.id),
+      to: intermediateNodes[0],
+      text: edge.text,
+      isError: edge.isError,
+      isFirstSegment: true,
+      isLastSegment: false,
+      isIntermediate: true,
+      passDirection
+    })
+    for(let i = 1; i < intermediateNodes.length; ++i) {
+      result.addEdge({
+        from: intermediateNodes[i-1],
+        to: intermediateNodes[i],
+        text: edge.text,
+        isError: edge.isError,
+        isFirstSegment: false,
+        isLastSegment: false,
+        isIntermediate: true,
+        passDirection
+      })
+    }
+    result.addEdge({
+      from: intermediateNodes[intermediateNodes.length - 1],
+      to: result.getNodeById(edge.to.id),
+      text: edge.text,
+      isError: edge.isError,
+      isFirstSegment: false,
+      isLastSegment: true,
+      isIntermediate: true,
+      passDirection
+    })
   }
-
-  build(): NodeSequenceEditor {
-    return new ConcreteNodeSequenceEditor(new GraphConnectionsDecorator(this.graph), this.nodeIdToLayer)
-  }
+  return intermediateNodeSeq
 }
 
 function getIntermediateLayers(layerFrom: number, layerTo: number): number[] {
@@ -207,72 +145,67 @@ function getIntermediateLayers(layerFrom: number, layerTo: number): number[] {
   return result
 }
 
-export enum LayerNumberAlgorithm {
-  FIRST_OCCURING_PATH = '0',
-  LONGEST_PATH = '1'
-}
-
-export function calculateLayerNumbers(graph: GraphConnectionsDecorator, algorithm: LayerNumberAlgorithm): Map<string, number> {
-  switch(algorithm) {
-    case LayerNumberAlgorithm.FIRST_OCCURING_PATH:
-      return calculateLayerNumbersFirstOccuringPath(graph);
-    case LayerNumberAlgorithm.LONGEST_PATH:
-      return calculateLayerNumbersLongestPath(graph, () => {});
+export function calculateLayerNumbers(graph: OriginalGraph, algorithm: number): Map<string, number> {
+  if (algorithm === LAYERS_FIRST_OCCURING_PATH) {
+    return calculateLayerNumbersFirstOccuringPath(graph);
+  } else if (algorithm === LAYERS_LONGEST_PATH) {
+    return calculateLayerNumbersLongestPath(graph, () => {});
   }
+  throw new Error(`Invalid layer algorithm ${algorithm}`)
 }
 
-export function calculateLayerNumbersFirstOccuringPath(graph: Graph): Map<string, number> {
+export function calculateLayerNumbersFirstOccuringPath(graph: OriginalGraph): Map<string, number> {
   let layerMap: Map<string, number> = new Map()
-  let queue: Node[] = graph.getNodes().filter(n => graph.getOrderedEdgesLeadingTo(n).length === 0)
+  let queue: OriginalNode[] = graph.nodes.filter(n => graph.getOrderedEdgesLeadingTo(n).length === 0)
   while (queue.length > 0) {
     // No node on the queue has a layer number
-    const current: Node = queue.shift()!
+    const current: OriginalNode = queue.shift()!
     const incomingEdges = graph.getOrderedEdgesLeadingTo(current)
     if (incomingEdges.length === 0) {
-      layerMap.set(current.getId(), 0)
+      layerMap.set(current.id, 0)
     } else {
       // Cannot be empty. A non-root node can only have
       // been added if there once was a current with an
       // edge leading to it.
       const precedingLayers: number[] = incomingEdges
-        .map(edge => edge.getFrom())
-        .filter(predecessor => layerMap.has(predecessor.getId()))
-        .map(predecessor => layerMap.get(predecessor.getId())!)
+        .map(edge => edge.from)
+        .filter(predecessor => layerMap.has(predecessor.id))
+        .map(predecessor => layerMap.get(predecessor.id)!)
       let layerNumberCandidate = Math.max( ... precedingLayers) + 1
       const layersOfPlacedSuccessors: number[] = graph.getOrderedEdgesStartingFrom(current)
-        .map(edge => edge.getTo())
-        .filter(successor => layerMap.has(successor.getId()))
-        .map(successor => layerMap.get(successor.getId())!)
+        .map(edge => edge.to)
+        .filter(successor => layerMap.has(successor.id))
+        .map(successor => layerMap.get(successor.id)!)
       const forbiddenByPlacedSuccessors: Set<number> = new Set(layersOfPlacedSuccessors)
       while (forbiddenByPlacedSuccessors.has(layerNumberCandidate)) {
         ++layerNumberCandidate
       }
-      layerMap.set(current.getId(), layerNumberCandidate)
+      layerMap.set(current.id, layerNumberCandidate)
     }
     // current has a layer number but it is off the queue.
     // Still no node on the queue has a layer number
     graph.getOrderedEdgesStartingFrom(current)
-      .map(edge => edge.getTo())
-      .filter(node => ! layerMap.has(node.getId()))
+      .map(edge => edge.to)
+      .filter(node => ! layerMap.has(node.id))
       .forEach(node => queue.push(node));
   }
   return layerMap
 }
 
-export function calculateLayerNumbersLongestPath(graph: Graph, onNodeVisited: () => void): Map<string, number> {
+export function calculateLayerNumbersLongestPath(graph: OriginalGraph, onNodeVisited: () => void): Map<string, number> {
   let layerMap: Map<string, number> = new Map()
-  const startNodes: Node[] = graph.getNodes().filter(n => graph.getOrderedEdgesLeadingTo(n).length === 0);
-  const recursiveWalkThrough = (currentNode: Node, layerIndex: number, visitedNodes: string[]) => {
+  const startNodes: OriginalNode[] = graph.nodes.filter(n => graph.getOrderedEdgesLeadingTo(n).length === 0);
+  const recursiveWalkThrough = (currentNode: OriginalNode, layerIndex: number, visitedNodes: string[]) => {
     onNodeVisited()
-    const currentNodeId: string = currentNode.getId();
+    const currentNodeId: string = currentNode.id;
     const registeredLayer = layerMap.get(currentNodeId);
     if (registeredLayer === undefined || registeredLayer < layerIndex) {
       layerMap.set(currentNodeId, layerIndex);
-      const edgesFrom: readonly Edge[] = graph.getOrderedEdgesStartingFrom(currentNode);
-      const successors = edgesFrom.map(edge => edge.getTo());
+      const edgesFrom: readonly OriginalEdge[] = graph.getOrderedEdgesStartingFrom(currentNode);
+      const successors = edgesFrom.map(edge => edge.to);
       const newVisitedNodes = [...visitedNodes, currentNodeId];
       // Filter out nodes that have previously been visited in this path to prevent loops;
-      successors.filter(successor => !newVisitedNodes.includes(successor.getId())).forEach(successor => recursiveWalkThrough(successor, layerIndex + 1, newVisitedNodes))
+      successors.filter(successor => !newVisitedNodes.includes(successor.id)).forEach(successor => recursiveWalkThrough(successor, layerIndex + 1, newVisitedNodes))
     }
   }
   startNodes.forEach(startNode => recursiveWalkThrough(startNode, 0, []));

@@ -14,11 +14,9 @@
    limitations under the License.
 */
 
-import { Graph, Edge } from "../model/graph";
-import { CreationReason, NodeForEditor } from "../model/horizontalGrouping";
+import { NodeImpl, EdgeImpl, GraphForLayers } from '../model/horizontalGrouping'
 import { LayoutBase } from "../model/layoutBase";
 import { Interval } from "../util/interval";
-import { Node } from "../model/graph";
 import { getRange } from "../util/util";
 import { HorizontalConflictResolver } from "./horizontal-conflict";
 
@@ -35,11 +33,11 @@ export interface NodeLayout {
   readonly height: number
   readonly positions: Position[]
   readonly positionMap: Map<string, Position>
-  readonly edges: Edge[]
+  readonly edges: EdgeImpl[]
 }
 
 export interface Position {
-  readonly node: Node
+  readonly node: NodeImpl
   readonly layerNumber: number
   x: number | null
   y: number | null
@@ -58,7 +56,7 @@ export class NodeLayoutBuilder {
 
   constructor(
     private lb: LayoutBase,
-    private graph: Graph,
+    private graph: GraphForLayers,
     private dimensions: NodeSpacingDimensions
   ) {}
 
@@ -69,13 +67,13 @@ export class NodeLayoutBuilder {
     const width = this.setXCoordinates()
     const positions: Position[] = this.layers.flatMap(layer => layer.positions)
     const positionMap: Map<string, Position> = new Map()
-    positions.forEach(p => positionMap.set(p.node.getId(), p))
+    positions.forEach(p => positionMap.set(p.node.id, p))
     return {
       width, height: this.dimensions.layerDistance * this.lb.numLayers,
       positions, positionMap,
-      edges: [ ... this.graph.getEdges() ]
-        .filter(edge => positionMap.has(edge.getFrom().getId()))
-        .filter(edge => positionMap.has(edge.getTo().getId()))
+      edges: [ ... this.graph.edges ]
+        .filter(edge => positionMap.has(edge.from.id))
+        .filter(edge => positionMap.has(edge.to.id))
     }
   }
 
@@ -83,18 +81,18 @@ export class NodeLayoutBuilder {
     const positions: Position[] = []
     const idToPosition: Map<string, Position> = new Map()
     let cursor = 0
-    const nodes: Node[] = this.lb.getIdsOfLayer(layerNumber).map(id => this.graph.getNodeById(id)!)
+    const nodes: NodeImpl[] = this.lb.getIdsOfLayer(layerNumber).map(id => this.graph.getNodeById(id))
     for (let node of nodes) {
       const position = this.createPosition(node, cursor, layerNumber)
       positions.push(position)
-      idToPosition.set(position.node.getId(), position)
+      idToPosition.set(position.node.id, position)
       cursor += this.widthOf(node)
     }
     const initialWidth = cursor
     return {positions, idToPosition, initialWidth, layerNumber}
   }
 
-  private createPosition(node: Node, startX: number, layerNumber: number): Position {
+  private createPosition(node: NodeImpl, startX: number, layerNumber: number): Position {
     const defaultX = Interval.createFromMinSize(startX, this.widthOf(node)).center
     return {
       node,
@@ -160,13 +158,12 @@ export class NodeLayoutBuilder {
   }
 
   getPredsFromLayer(position: Position, sourceLayer: Layer): number[] {
-    const predPositionIndexes: number[] =  this.lb.getConnections(position.node.getId(), sourceLayer.layerNumber)
+    const predPositionIndexes: number[] =  this.lb.getConnections(position.node.id, sourceLayer.layerNumber)
     return predPositionIndexes.map(i => sourceLayer.positions[i]!.x!)
  }
 
-  widthOf(n: Node) {
-    const cast = n! as NodeForEditor
-    if (cast.getCreationReason() === CreationReason.INTERMEDIATE) {
+  widthOf(n: NodeImpl) {
+    if (n.isIntermediate) {
       return this.dimensions.intermediateWidth
     } else {
       return this.dimensions.nodeWidth

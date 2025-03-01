@@ -15,10 +15,7 @@
 */
 
 import { Layout } from './graphics/edge-layout';
-import { Graph, GraphBase, GraphConnectionsDecorator } from './model/graph';
-import { categorize } from './model/error-flow'
-import { getGraphFromMermaid } from './parsing/mermaid-parser';
-import { NodeSequenceEditorBuilder, calculateLayerNumbersLongestPath } from './model/horizontalGrouping';
+import { getGraphFromMermaid, MermaidGraph } from './parsing/mermaid-parser';
 import { LayoutBase, minimizeNumCrossings } from './model/layoutBase'
 import { NodeLayoutBuilder } from './graphics/node-layout';
 import { generateSvg } from './graphics/svg-generator';
@@ -26,6 +23,8 @@ import { AsynchronousCache } from './util/asynchronousCache';
 import { sha256 } from './util/hash';
 import { getDerivedEdgeLabelDimensions } from './graphics/edge-label-layouter';
 import { SvgResult, Dimensions } from './public.api'
+import { findErrorFlow, OriginalGraph } from './model/error-flow';
+import { assignHorizontalLayerNumbers, calculateLayerNumbersLongestPath, GraphForLayers } from './model/horizontalGrouping';
 
 export class Mermaid2svgService {
   private cache = new AsynchronousCache<SvgResult>()
@@ -58,34 +57,26 @@ export class Mermaid2svgService {
 
   private async mermaid2svgStatisticsImpl(mermaid: string): Promise<SvgResult> {
     ++this._numSvgCalculations
-    const b: GraphBase = getGraphFromMermaid(mermaid)
-    const c = categorize(b)
-    const g: Graph = new GraphConnectionsDecorator(c)
+    const b: MermaidGraph = getGraphFromMermaid(mermaid)
+    const g: OriginalGraph = findErrorFlow(b)
     let numNodeVisits = 0
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits)
-    const editorBuilder: NodeSequenceEditorBuilder = new NodeSequenceEditorBuilder(nodeIdToLayer, g)
-    if (editorBuilder.orderedOmittedNodes.length >= 1) {
-      throw new Error(`Probably the start node was part of a cycle; could not assign layer numers to [${editorBuilder.orderedOmittedNodes.map(n => n.getId())}]`)
-    }
+    const gl: GraphForLayers = assignHorizontalLayerNumbers(g, nodeIdToLayer)
     let lb: LayoutBase
-    const numLayers = Math.max( ... editorBuilder.nodeIdToLayer.values()) + 1
-    const graphWithIntermediateNodes = new GraphConnectionsDecorator(editorBuilder.graph)
+    const numLayers = Math.max( ... gl.nodes.map(n => n.layer)) + 1
     try {
-      lb = LayoutBase.create(editorBuilder.graph.getNodes().map(n => n.getId()!),
-        graphWithIntermediateNodes,
-        editorBuilder.nodeIdToLayer,
-        numLayers)
+      lb = LayoutBase.create(gl.nodes.map(n => n.id), gl, numLayers)
     } catch(e) {
       throw e
     }
     lb = minimizeNumCrossings(lb)
-    const nodeLayoutBuiler = new NodeLayoutBuilder(lb, graphWithIntermediateNodes, this.dimensions)
+    const nodeLayoutBuiler = new NodeLayoutBuilder(lb, gl, this.dimensions)
     const nodeLayout = nodeLayoutBuiler.run()
     const layout = new Layout(nodeLayout, this.dimensions, getDerivedEdgeLabelDimensions(this.dimensions))
     return {
       svg: generateSvg(layout, this.dimensions.edgeLabelFontSize),
-      numNodes: g.getNodes().length,
-      numEdges: g.getEdges().length,
+      numNodes: g.nodes.length,
+      numEdges: g.edges.length,
       numNodeVisitsDuringLayerCalculation: numNodeVisits
     }
   }

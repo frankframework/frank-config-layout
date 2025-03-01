@@ -14,8 +14,9 @@
    limitations under the License.
 */
 
-import { Edge, OptionalNode, OptionalEdge, getEdgeKey } from "../model/graph"
 import { NodeSequenceEditor } from "./nodeSequenceEditor"
+import { getKey } from '../model/generic-graph'
+import { Node, Edge, OptionalNode, OptionalEdge } from '../public.api'
 
 // If a node has been selected, all its incoming and outgoing
 // edges should also be highlighted.
@@ -65,12 +66,12 @@ export class NodeOrEdgeSelection {
   }
 
   selectEdgeKey(key: string, model: NodeSequenceEditor) {
-    const edge: Edge | undefined = model.getEdgeByKey(key)
+    const edge: Edge<Node> | undefined = model.getGraph().getEdgeByKey(key)
     if (edge === undefined) {
       return
     }
-    const indexFrom = model.optionalPositionOfNode(edge.getFrom().getId())
-    const indexTo = model.optionalPositionOfNode(edge.getTo().getId())
+    const indexFrom = model.optionalPositionOfNode(edge.from.id)
+    const indexTo = model.optionalPositionOfNode(edge.to.id)
     if ( (indexFrom !== null) && (indexTo !== null)) {
       this.selectCell(indexFrom, indexTo, model)
     }
@@ -160,7 +161,7 @@ class NodeOrEdgeSelectionStatePosition implements NodeOrEdgeSelectionState {
 
   isNodeHighlightedInDrawing(id: string, model: NodeSequenceEditor): boolean {
     const optionalSelectedNode = model.getSequence()[this.position]
-    return (optionalSelectedNode !== null) && (id === optionalSelectedNode.getId())
+    return (optionalSelectedNode !== null) && (id === optionalSelectedNode.id)
   }
 
   isEdgeHighlightedInDrawing(key: string, model: NodeSequenceEditor): boolean {
@@ -168,11 +169,11 @@ class NodeOrEdgeSelectionStatePosition implements NodeOrEdgeSelectionState {
     if (optionalSelectedNode === null) {
       return false
     }
-    const id = optionalSelectedNode.getId()
+    const id = optionalSelectedNode.id
     const edgeKeysOnSelectedNode: string[] =
       [model.getUnorderedEdgesStartingFrom(id), model.getUnorderedEdgesLeadingTo(id)]
       .flat()
-      .map(edge => edge.getKey())
+      .map(edge => getKey(edge))
     if (edgeKeysOnSelectedNode.indexOf(key) >= 0) {
       return true
     }
@@ -194,20 +195,18 @@ class NodeOrEdgeSelectionStateCell implements NodeOrEdgeSelectionState {
     private indexTo: number
   ) {}
 
-  private getModelData(model: NodeSequenceEditor):
-      {optionalFromNode: OptionalNode, optionalToNode: OptionalNode, optionalSelectedEdge: OptionalEdge}
+  private getModelData(model: NodeSequenceEditor): ModelData
   {
     const optionalFromNode = model.getSequence()[this.indexFrom]
     const optionalToNode = model.getSequence()[this.indexTo]
     let optionalSelectedEdge: OptionalEdge
     if ( (optionalFromNode !== null) && (optionalToNode !== null)) {
-      const key: string = getEdgeKey(optionalFromNode, optionalToNode)
-      const raw: Edge | undefined = model.getEdgeByKey(key)
-      optionalSelectedEdge = raw === undefined ? null : raw
+      const raw = model.getGraph().searchEdge(optionalFromNode.id, optionalToNode.id)
+      const optionalSelectedEdge: OptionalEdge = raw === undefined ? null : raw;
+      return {optionalFromNode, optionalToNode, optionalSelectedEdge}
     } else {
-      optionalSelectedEdge = null
+      return {optionalFromNode, optionalToNode, optionalSelectedEdge: null}
     }
-    return {optionalFromNode, optionalToNode, optionalSelectedEdge}
   }
 
   followPermutation(permutation: number[], model: NodeSequenceEditor) {
@@ -233,13 +232,13 @@ class NodeOrEdgeSelectionStateCell implements NodeOrEdgeSelectionState {
   }
 
   private isIdMatchesOptionalNode(id: string, n: OptionalNode): boolean {
-    return (n !== null) && (id === n.getId())
+    return (n !== null) && (id === n.id)
   }
 
   isEdgeHighlightedInDrawing(key: string, model: NodeSequenceEditor): boolean {
     const modelData = this.getModelData(model)
     return (modelData.optionalSelectedEdge !== null)
-      && (key === modelData.optionalSelectedEdge.getKey())
+      && (key === getKey(modelData.optionalSelectedEdge))
   }
 
   isSelectPositionUndoes(index: number): boolean {
@@ -249,4 +248,10 @@ class NodeOrEdgeSelectionStateCell implements NodeOrEdgeSelectionState {
   isSelectCellUndoes(indexFrom: number, indexTo: number): boolean {
     return (indexFrom === this.indexFrom) && (indexTo === this.indexTo)
   }
+}
+
+interface ModelData {
+  optionalFromNode: OptionalNode,
+  optionalToNode: OptionalNode,
+  optionalSelectedEdge: OptionalEdge
 }

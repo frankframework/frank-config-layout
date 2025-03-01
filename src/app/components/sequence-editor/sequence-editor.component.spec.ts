@@ -2,8 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
 import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
-
-import { ConcreteGraphBase, GraphConnectionsDecorator } from '../../model/graph';
+import { createText } from '../../model/text'
+import { Graph } from '../../model/generic-graph'
+import { Node, Edge } from '../../public.api'
 import { Subject } from 'rxjs';
 
 describe('SequenceEditorComponent', () => {
@@ -27,28 +28,34 @@ describe('SequenceEditorComponent', () => {
   });
 
   it('Should create correct View', () => {
-    const b: ConcreteGraphBase = new ConcreteGraphBase()
-    b.addNode('Start', '', '')
-    b.addNode('N1', '', '')
-    b.addNode('N2', '', '')
-    b.addNode('End', '', '')
-    b.connect(b.getNodeById('Start')!, b.getNodeById('N1')!)
-    b.connect(b.getNodeById('Start')!, b.getNodeById('N2')!)
-    b.connect(b.getNodeById('N1')!, b.getNodeById('End')!)
-    b.connect(b.getNodeById('N2')!, b.getNodeById('End')!)
-    const m: Map<string, number> = new Map([
-      ['Start', 0],
-      ['N1', 1],
-      ['N2', 1],
-      ['End', 2]
-    ])
-    const model: NodeSequenceEditor = new ConcreteNodeSequenceEditor(new GraphConnectionsDecorator(b), m)
+    const g = new Graph<Node, Edge<Node>>()
+    addNode('Start', 0, g)
+    addNode('N1', 1, g)
+    addNode('N2', 1, g)
+    addNode('End', 2, g)
+    connect('Start', 'N1', g)
+    connect('Start', 'N2', g)
+    connect('N1', 'End', g)
+    connect('N2', 'End', g)
+    const model: NodeSequenceEditor = new ConcreteNodeSequenceEditor(g)
     model.omitNodeFrom(1)
     component.model = model
     const actual: ManualView = component.getManualView()
     const expected = getTheManualView()
     expect(actual).toEqual(expected)
   })
+
+  function addNode(id: string, layer: number, g: Graph<Node, Edge<Node>>) {
+    g.addNode({
+      id, layer, isError: false, isIntermediate: false, text: ''
+    })
+  }
+
+  function connect(idFrom: string, idTo: string, g: Graph<Node, Edge<Node>>) {
+    g.addEdge({
+      from: g.getNodeById(idFrom), to: g.getNodeById(idTo), isError: false, isIntermediate: false, text: createText(undefined)
+    })
+  }
 
   function getTheManualView(): ManualView {
     return {

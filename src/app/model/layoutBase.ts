@@ -14,8 +14,9 @@
    limitations under the License.
 */
 
-import { Graph } from './graph'
+import { Graph } from './generic-graph'
 import { LayerCalculationNode, LayerCalculation } from '../util/layerCalculation'
+import { Node, Edge } from '../public.api'
 
 // On ordering of nodes in nodes and edges in vertically-stacked layers.
 // These are numbered from top to bottom. Within each layer, the nodes are
@@ -30,17 +31,21 @@ import { LayerCalculationNode, LayerCalculation } from '../util/layerCalculation
 //
 
 export class LayoutBase {
-  static create(sequence: string[], g: Graph, nodeIdToLayer: Map<string, number>, numLayers: number): LayoutBase {
-    const nodesByLayer: string[][] = orderNodesByLabelButPreserveOrderWithinEachLayer(sequence, g, nodeIdToLayer, numLayers)
+  static create(sequence: string[], g: Graph<Node, Edge<Node>>, numLayers: number): LayoutBase {
+    let nodeIdToLayer: Map<string, number> = new Map()
+    for (const node of g.nodes) {
+      nodeIdToLayer.set(node.id, node.layer)
+    }
+    const nodesByLayer: string[][] = orderNodesByLabelButPreserveOrderWithinEachLayer(sequence, g, numLayers)
     const connectedIds: Map<string, Set<string>> = new Map()
     for (const id of sequence) {
       connectedIds.set(id, new Set())
     }
-    for (const edge of g.getEdges()) {
-      if (connectedIds.has(edge.getFrom().getId()) &&
-          connectedIds.has(edge.getTo().getId())) {
-        connectedIds.get(edge.getFrom().getId())!.add(edge.getTo().getId())
-        connectedIds.get(edge.getTo().getId())!.add(edge.getFrom().getId())
+    for (const edge of g.edges) {
+      if (connectedIds.has(edge.from.id) &&
+          connectedIds.has(edge.to.id)) {
+        connectedIds.get(edge.from.id)!.add(edge.to.id)
+        connectedIds.get(edge.to.id)!.add(edge.from.id)
       }
     }
     return new LayoutBase(nodesByLayer, connectedIds, nodeIdToLayer, numLayers)
@@ -99,7 +104,7 @@ export class LayoutBase {
 }
 
 function orderNodesByLabelButPreserveOrderWithinEachLayer(
-  sequence: string[], g: Graph, nodeIdToLayer: Map<string, number>, numLayers: number)
+  sequence: string[], g: Graph<Node, Edge<Node>>, numLayers: number)
   : string[][]
 {
   let nodesByLayer: string[][] = []
@@ -111,7 +116,7 @@ function orderNodesByLabelButPreserveOrderWithinEachLayer(
     nodesByLayer.push([])
   }
   for (const id of sequence) {
-    const layer: number = nodeIdToLayer.get(id)!
+    const layer: number = g.getNodeById(id).layer
     nodesByLayer[layer].push(id)
   }
   return nodesByLayer

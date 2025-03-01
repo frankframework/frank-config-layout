@@ -14,21 +14,16 @@
    limitations under the License.
 */
 
-import { Text } from '../public.api'
+import { Node, Edge } from '../public.api'
 
-export function createText(originalHtml: string | undefined): Text {
-  let lines: string[] = []
-  if ( (originalHtml !== undefined) && (originalHtml.length >= 1) ) {
-    lines = originalHtml.split('<br/>').map(s => s.trim())
-  }
-  let maxLineLength = 0
-  if (lines.length >= 1) {
-    maxLineLength = Math.max( ... lines.map(s => s.length))
-  }
-  return {
-    html: lines.join("<br/>"),
-    lines,
-    maxLineLength, 
-    numLines: lines.length
+export enum NodeCaptionChoice {
+  ID = "id",
+  TEXT = "text"
+}
+
+export function getCaption(n: Node, choice: NodeCaptionChoice): string {
+  switch (choice) {
+	case NodeCaptionChoice.ID: return n.id
+	case NodeCaptionChoice.TEXT: return n.text
   }
 }
