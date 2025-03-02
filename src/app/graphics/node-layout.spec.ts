@@ -1,4 +1,4 @@
-import { Graph, getKey } from '../model/generic-graph'
+import { Graph, getKey } from '../model/graph'
 import { NodeImpl, EdgeImpl, GraphForLayers, PASS_DIRECTION_DOWN, assignHorizontalLayerNumbers } from '../model/horizontalGrouping'
 import { LayoutBase } from '../model/layoutBase'
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-layout"

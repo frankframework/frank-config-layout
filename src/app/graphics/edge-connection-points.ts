@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { getKey } from '../model/generic-graph'
+import { getKey } from '../model/graph'
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
 import { EdgeImpl } from '../model/horizontalGrouping'

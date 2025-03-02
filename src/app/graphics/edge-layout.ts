@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { getKey } from '../model/generic-graph'
+import { getKey } from '../model/graph'
 import { NodeImpl, EdgeImpl, GraphForLayers, PASS_DIRECTION_DOWN } from '../model/horizontalGrouping'
 import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";

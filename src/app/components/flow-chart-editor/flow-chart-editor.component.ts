@@ -24,7 +24,7 @@ import { getDerivedEdgeLabelDimensions } from '../../graphics/edge-label-layoute
 import { Layout, PlacedNode } from '../../graphics/edge-layout';
 import { Subject } from 'rxjs';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
-import { Connection, Graph, WithId } from '../../model/generic-graph';
+import { Connection, Graph, WithId } from '../../model/graph';
 import { LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH } from '../../public.api';
 import { Dimensions, getFactoryDimensions, Node, Edge } from '../../public.api'
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';

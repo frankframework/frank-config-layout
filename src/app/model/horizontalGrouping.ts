@@ -16,7 +16,7 @@
 
 import { getRange } from '../util/util'
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow'
-import { Graph } from './generic-graph'
+import { Graph } from './graph'
 import { Node, Edge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH } from '../public.api'
 
 export interface NodeImpl extends Node {

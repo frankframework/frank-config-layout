@@ -1,5 +1,5 @@
 import { createText } from './text'
-import { Graph } from './generic-graph'
+import { Graph } from './graph'
 import { GraphForLayers, NodeImpl, EdgeImpl, PASS_DIRECTION_DOWN } from './horizontalGrouping'
 import { LayoutBase, getNumCrossings, alignFromLayer, NumCrossingsJudgement} from './layoutBase'
 

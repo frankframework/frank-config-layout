@@ -15,7 +15,7 @@
 */
 
 import { Text } from '../public.api'
-import { Graph } from './generic-graph'
+import { Graph } from './graph'
 import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser'
 
 const NODE_ERROR_CLASS = 'errorOutline'

@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Graph } from './generic-graph'
+import { Graph } from './graph'
 import { LayerCalculationNode, LayerCalculation } from '../util/layerCalculation'
 import { Node, Edge } from '../public.api'
 

@@ -1,4 +1,4 @@
-import { Graph } from '../model/generic-graph'
+import { Graph } from '../model/graph'
 import { getRange } from "../util/util"
 import { LayoutBase } from "../model/layoutBase"
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"

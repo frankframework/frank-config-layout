@@ -1,6 +1,6 @@
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
 import { createText } from "../model/text";
-import { Graph } from '../model/generic-graph'
+import { Graph } from '../model/graph'
 import { Node, Edge } from '../public.api'
 
 function getInstanceToCheckOrdering(): NodeSequenceEditor {

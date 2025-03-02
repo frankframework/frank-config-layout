@@ -15,7 +15,7 @@
 */
 
 import { NodeSequenceEditor } from "./nodeSequenceEditor"
-import { getKey } from '../model/generic-graph'
+import { getKey } from '../model/graph'
 import { Node, Edge, OptionalNode, OptionalEdge } from '../public.api'
 
 // If a node has been selected, all its incoming and outgoing

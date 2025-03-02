@@ -1,4 +1,4 @@
-import { getKey } from './generic-graph'
+import { getKey } from './graph'
 import { getGraphFromMermaid } from '../parsing/mermaid-parser'
 import { findErrorFlow, OriginalGraph } from './error-flow'
 

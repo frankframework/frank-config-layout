@@ -25,7 +25,7 @@ import { getRange, rotateToSwapItems, permutationFrom } from '../util/util'
 import { LayoutBase } from '../model/layoutBase'
 import { Node, Edge, OptionalNode, OptionalEdge } from '../public.api'
 // This is not OK
-import { Graph } from '../model/generic-graph'
+import { Graph } from '../model/graph'
 
 export enum UpdateResponse {
   ACCEPTED = "accepted",

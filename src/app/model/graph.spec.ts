@@ -1,4 +1,4 @@
-import { WithId, Connection, Graph, getKey } from './generic-graph'
+import { WithId, Connection, Graph, getKey } from './graph'
 
 describe('Generic graph', () => {
   it('When a graph is created, the nodes and the edges are related correctly', () => {

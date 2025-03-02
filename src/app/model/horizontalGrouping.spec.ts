@@ -1,6 +1,6 @@
 import { createText } from './text'
 import { OriginalNode, OriginalEdge, OriginalGraph } from './error-flow'
-import { Graph, getKey } from './generic-graph'
+import { Graph, getKey } from './graph'
 import { calculateLayerNumbers, assignHorizontalLayerNumbers, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP,
   calculateLayerNumbersLongestPath, calculateLayerNumbersFirstOccuringPath, GraphForLayers,
   EdgeImpl, NodeImpl

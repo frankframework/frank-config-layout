@@ -22,8 +22,8 @@ import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
 import { getRange } from '../../util/util';
 import { Observable, Subscription } from 'rxjs';
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
-import { NodeOrEdge } from '../../model/generic-graph';
-import { getKey } from '../../model/generic-graph'
+import { NodeOrEdge } from '../../model/graph';
+import { getKey } from '../../model/graph'
 import { Node, Edge } from '../../public.api'
 
 interface Tab {
