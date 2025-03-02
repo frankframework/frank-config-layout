@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,5 +14,16 @@
    limitations under the License.
 */
 
-export { Mermaid2svgService, Mermaid2SvgDimensions, Statistics } from './src/app/services/mermaid2svg.service'
-export { Dimensions } from './src/app/graphics/edge-layout'
+import { NodeForLayers } from '../public.api'
+
+export enum NodeCaptionChoice {
+  ID = "id",
+  TEXT = "text"
+}
+
+export function getCaption(n: NodeForLayers, choice: NodeCaptionChoice): string {
+  switch (choice) {
+	case NodeCaptionChoice.ID: return n.id
+	case NodeCaptionChoice.TEXT: return n.text
+  }
+}

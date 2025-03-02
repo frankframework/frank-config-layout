@@ -14,9 +14,10 @@
    limitations under the License.
 */
 
-import { Edge } from "../model/graph";
+import { getKey } from '../model/graph'
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
+import { EdgeForLayers } from '../model/horizontalGrouping'
 import { NodeAndEdgeDimensions, PlacedNode } from "./edge-layout";
 import { Line, Point } from "./graphics";
 import { NodeLayout } from "./node-layout";
@@ -24,7 +25,7 @@ import { NodeLayout } from "./node-layout";
 export class Edge2LineCalculation {
   private placedNodes: PlacedNode[] = []
   private nodeMap: Map<string, ConnectedPlacedNode> = new Map()
-  private edges: Edge[] = []
+  private edges: EdgeForLayers[] = []
   private edge2lineMap: Map<string, Line> = new Map()
 
   constructor(
@@ -38,9 +39,9 @@ export class Edge2LineCalculation {
         this.connectEdge(edge)
       });
     [... this.nodeMap.values()].forEach(n => this.initNode(n, d))
-    this.edges.forEach(edge => this.edge2lineMap.set(edge.getKey(), new Line(
-      this.nodeMap.get(edge.getFrom().getId())!.getPointFor(edge),
-      this.nodeMap.get(edge.getTo().getId())!.getPointFor(edge)
+    this.edges.forEach(edge => this.edge2lineMap.set(getKey(edge), new Line(
+      this.nodeMap.get(edge.from.id)!.getPointFor(edge),
+      this.nodeMap.get(edge.to.id)!.getPointFor(edge)
     )))
   }
 
@@ -48,15 +49,15 @@ export class Edge2LineCalculation {
     nodeLayout.positions.forEach(p => {
       const placedNode = new PlacedNode(p, d)
       this.placedNodes.push(placedNode)
-      this.nodeMap.set(p.node.getId(), new ConnectedPlacedNode(placedNode))
+      this.nodeMap.set(p.node.id, new ConnectedPlacedNode(placedNode))
     })
   }
 
-  private connectEdge(edge: Edge) {
-    const nodeFrom = this.nodeMap.get(edge.getFrom().getId())!
-    const nodeTo = this.nodeMap.get(edge.getTo().getId())!
-    const layerFrom: number = nodeFrom.node.layerNumber
-    const layerTo: number = nodeTo.node.layerNumber
+  private connectEdge(edge: EdgeForLayers) {
+    const nodeFrom = this.nodeMap.get(edge.from.id)!
+    const nodeTo = this.nodeMap.get(edge.to.id)!
+    const layerFrom: number = nodeFrom.node.layer
+    const layerTo: number = nodeTo.node.layer
     if (layerFrom < layerTo) {
       // nodeFrom is higher
       nodeFrom.connectEdgeToBottom(edge, nodeTo.node.centerTop.x)
@@ -66,7 +67,7 @@ export class Edge2LineCalculation {
       nodeFrom.connectEdgeToTop(edge, nodeTo.node.centerBottom.x)
       nodeTo.connectEdgeToBottom(edge, nodeFrom.node.centerTop.x)
     } else {
-      throw new Error(`Horizontal line not allowed for edge ${edge.getKey()}`)
+      throw new Error(`Horizontal line not allowed for edge ${getKey(edge)}`)
     }
   }
 
@@ -78,8 +79,8 @@ export class Edge2LineCalculation {
     return this.edges
   }
 
-  edge2line(edge: Edge): Line {
-    return this.edge2lineMap.get(edge.getKey())!
+  edge2line(edge: EdgeForLayers): Line {
+    return this.edge2lineMap.get(getKey(edge))!
   }
 
   getPlacedNodes(): PlacedNode[] {
@@ -97,27 +98,27 @@ class ConnectedPlacedNode {
     readonly node: PlacedNode
   ) {}
 
-  connectEdgeToTop(edge: Edge, xOtherSide: number) {
+  connectEdgeToTop(edge: EdgeForLayers, xOtherSide: number) {
     const connector: Connector = new Connector(this.getDirection(edge), xOtherSide)
-    this.edge2connectorTop.set(edge.getKey(), connector)
+    this.edge2connectorTop.set(getKey(edge), connector)
     this.connectorsTop.push(connector)
   }
 
-  private getDirection(edge: Edge) {
+  private getDirection(edge: EdgeForLayers) {
     let direction: RelativeDirection
-    if (edge.getFrom().getId() === this.node.getId()) {
+    if (edge.from.id === this.node.id) {
       direction = RelativeDirection.OUT
-    } else if(edge.getTo().getId() === this.node.getId()) {
+    } else if(edge.to.id === this.node.id) {
       direction = RelativeDirection.IN
     } else {
-      throw new Error(`Cannot connect edge ${edge.getKey()} to node ${this.node.getId()} because it is not the from or to`)
+      throw new Error(`Cannot connect edge ${getKey(edge)} to node ${this.node.id} because it is not the from or to`)
     }
     return direction
   }
 
-  connectEdgeToBottom(edge: Edge, xOtherSide: number) {
+  connectEdgeToBottom(edge: EdgeForLayers, xOtherSide: number) {
     const connector: Connector = new Connector(this.getDirection(edge), xOtherSide)
-    this.edge2connectorBottom.set(edge.getKey(), connector)
+    this.edge2connectorBottom.set(getKey(edge), connector)
     this.connectorsBottom.push(connector)
   }
 
@@ -133,17 +134,17 @@ class ConnectedPlacedNode {
     xbottom.forEach((coord, index) => this.connectorsBottom[index].x = coord)
   }
 
-  getPointFor(edge: Edge): Point {
-    if (this.edge2connectorTop.has(edge.getKey())) {
-      const connector = this.edge2connectorTop.get(edge.getKey())!
+  getPointFor(edge: EdgeForLayers): Point {
+    if (this.edge2connectorTop.has(getKey(edge))) {
+      const connector = this.edge2connectorTop.get(getKey(edge))!
       const y = this.node.centerTop.y
       return new Point(connector.x, y)
-    } else if(this.edge2connectorBottom.has(edge.getKey())) {
-      const connector = this.edge2connectorBottom.get(edge.getKey())!
+    } else if(this.edge2connectorBottom.has(getKey(edge))) {
+      const connector = this.edge2connectorBottom.get(getKey(edge))!
       const y = this.node.centerBottom.y
       return new Point(connector.x, y)
     } else {
-      throw new Error(`Cannot get point for edge ${edge.getKey()} because it was not registered`)
+      throw new Error(`Cannot get point for edge ${getKey(edge)} because it was not registered`)
     }
   }
 }

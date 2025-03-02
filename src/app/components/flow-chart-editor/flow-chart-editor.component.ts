@@ -15,27 +15,29 @@
 */
 
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
-import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
-import { GraphBase, GraphConnectionsDecorator, NodeCaptionChoice, getCaption } from '../../model/graph';
-import { categorize } from '../../model/error-flow'
-import { calculateLayerNumbers, CreationReason, LayerNumberAlgorithm, NodeSequenceEditorBuilder } from '../../model/horizontalGrouping';
-import { NodeSequenceEditor } from '../../model/nodeSequenceEditor';
-import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
-import { NodeLayoutBuilder } from '../../graphics/node-layout';
-import { getDerivedEdgeLabelDimensions } from '../../graphics/edge-label-layouter';
-import { Layout, PlacedNode, Dimensions } from '../../graphics/edge-layout';
-import { getFactoryDimensions } from '../dimensions-editor/dimensions-editor.component';
 import { Subject } from 'rxjs';
+import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
+import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
+import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
+import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
+import { getGraphFromMermaid,
+  findErrorFlow, OriginalGraph,
+  LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
+  introduceIntermediateNodesAndEdges, calculateLayerNumbers, GraphForLayers,
+  Dimensions, getFactoryDimensions,
+  NodeLayoutBuilder,
+  getDerivedEdgeLabelDimensions,
+  Layout, PlacedNode
+} from '../../public.api';
 
 export interface NodeSequenceEditorOrError {
   model: NodeSequenceEditor | null
   error: string | null
 }
 
-export interface GraphConnectionsDecoratorOrError {
-  graph: GraphConnectionsDecorator | null
+export interface OriginalGraphOrError {
+  graph: OriginalGraph | null
   error: string | null
 }
 
@@ -49,9 +51,9 @@ export class FlowChartEditorComponent {
   readonly SHOW_IMAGE = CalculatedStaticSvgComponent.SHOW_IMAGE
   readonly SHOW_TEXT = CalculatedStaticSvgComponent.SHOW_TEXT
 
-  readonly layerNumberAlgorithms: {key: LayerNumberAlgorithm, value: string}[] = [
-    {key: LayerNumberAlgorithm.FIRST_OCCURING_PATH, value: 'first occuring path'},
-    {key: LayerNumberAlgorithm.LONGEST_PATH, value: 'longest path'}
+  readonly layerNumberAlgorithms: {key: number, value: string}[] = [
+    {key: LAYERS_FIRST_OCCURING_PATH, value: 'first occuring path'},
+    {key: LAYERS_LONGEST_PATH, value: 'longest path'}
   ];
 
   mermaidText: string = ''
@@ -90,16 +92,16 @@ export class FlowChartEditorComponent {
     this.itemClickedSubject?.next(itemClicked)
   }
 
-  loadMermaid(algorithm: LayerNumberAlgorithm) {
-    const graphOrError: GraphConnectionsDecoratorOrError = this.mermaid2graph(this.mermaidText)
+  loadMermaid(algorithm: number) {
+    const graphOrError: OriginalGraphOrError = this.mermaid2graph(this.mermaidText)
     if (graphOrError.error !== null) {
       alert(graphOrError.error)
       return
     }
-    this.loadGraph(graphOrError.graph, algorithm);
+    this.loadGraph(graphOrError.graph!, algorithm);
   }
 
-  loadGraph(graph: GraphConnectionsDecorator|null, algorithm: LayerNumberAlgorithm) {
+  loadGraph(graph: OriginalGraph, algorithm: number) {
     const modelOrError: NodeSequenceEditorOrError = this.graph2Model(graph, algorithm);
     if (modelOrError.error !== null) {
       alert(modelOrError.error)
@@ -110,32 +112,27 @@ export class FlowChartEditorComponent {
     this.updateDrawing()
   }
 
-  mermaid2graph(text: string): GraphConnectionsDecoratorOrError {
-    let c: GraphBase
+  mermaid2graph(text: string): OriginalGraphOrError {
+    let graph: OriginalGraph
     try {
       const b = getGraphFromMermaid(text)
-      c = categorize(b)
+      graph = findErrorFlow(b)
     } catch(e) {
       return {graph: null, error: 'Invalid mermaid text:' + (e as Error).message}
     }
-    return {graph: new GraphConnectionsDecorator(c), error: null}
+    return {graph, error: null}
   }
 
-  graph2Model(graph: GraphConnectionsDecorator|null, algorithm: LayerNumberAlgorithm): NodeSequenceEditorOrError {
-    if (!graph) {
-      return {model: null, error: 'mermaid was not yet converted to graph when trying to load graph'}
-    }
+  graph2Model(graph: OriginalGraph, algorithm: number): NodeSequenceEditorOrError {
     const layerMap: Map<string, number> = calculateLayerNumbers(graph, algorithm)
-    const builder: NodeSequenceEditorBuilder = new NodeSequenceEditorBuilder(layerMap, graph)
-    if (builder.orderedOmittedNodes.length > 0) {
-      return {model: null, error: 'Could not assign a layer to the following nodes: ' + builder.orderedOmittedNodes.map(n => n.getId()).join(', ')}
-    }
+    let graphWithLayers: GraphForLayers
     try {
-      return {model: builder.build(), error: null}
+      graphWithLayers = introduceIntermediateNodesAndEdges(graph, layerMap)
     } catch(e) {
-      console.log(e)
+      alert('Could not assign layers to nodes: ' + e)
       return {model: null, error: (e as Error).message}
     }
+    return {model: new NodeSequenceEditor(graphWithLayers), error: null}
   }
 
   onSequenceEditorChanged() {
@@ -149,15 +146,15 @@ export class FlowChartEditorComponent {
     const layout = FlowChartEditorComponent.model2layout(this.layoutModel!, this.dimensions)
     this.numCrossingLines = layout.getNumCrossingLines()
     // TODO: Properly fill selected property
-    const rectangles: Rectangle[] = layout.getNodes()
+    const rectangles: Rectangle[] = layout.nodes
       .map(n => n as PlacedNode)
       // No box around intermediate node
-      .filter(n => n.creationReason === CreationReason.ORIGINAL)
+      .filter(n => ! n.isIntermediate)
       .map(n => { return {
-        id: n.getId(),
+        id: n.id,
         x: n.left, y: n.top, width: n.width, height: n.height, centerX: n.centerX, centerY: n.centerY,
         text: getCaption(n, this.choiceShowNodeTextInDrawing),
-        selected: this.selectionInModel.isNodeHighlightedInDrawing(n.getId(), this.layoutModel!),
+        selected: this.selectionInModel.isNodeHighlightedInDrawing(n.id, this.layoutModel!),
         isError: n.isError
       }})
     const lines: Line[] = layout.getLayoutLineSegments()
@@ -180,7 +177,7 @@ export class FlowChartEditorComponent {
 
   static model2layout(model: NodeSequenceEditor, inDimensions: Dimensions): Layout {
     const builder = new NodeLayoutBuilder(
-      model.getShownNodesLayoutBase(), model.getGraph(), inDimensions)
+      model.getShownNodesLayoutBase(), model.getGraph() as GraphForLayers, inDimensions)
     const nodeLayout = builder.run()
     return new Layout(nodeLayout, inDimensions, getDerivedEdgeLabelDimensions(inDimensions))
   }

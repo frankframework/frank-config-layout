@@ -1,4 +1,3 @@
-import { inject } from '@angular/core'
 import { sha256 } from './hash'
 
 describe('Hashing', () => {

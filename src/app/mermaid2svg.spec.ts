@@ -1,6 +1,19 @@
-import { Mermaid2svgService, Statistics } from './mermaid2svg.service';
-import { OurMermaid2SvgDimensions } from '../app.module'
+import { Mermaid2svgService } from './mermaid2svg';
+import { Dimensions, SvgResult } from './public.api'
 
+const dimeisions: Dimensions = {
+  layerHeight: 50,
+  layerDistance: 120,
+  nodeBoxHeight: 50,
+  intermediateWidth: 60,
+  nodeWidth: 175,
+  nodeBoxWidth: 160,
+  boxConnectorAreaPerc: 50,
+  intermediateLayerPassedByVerticalLine: false,
+  edgeLabelFontSize: 10,
+  preferredVertDistanceFromOrigin: 30,
+  strictlyKeepLabelOutOfBox: false
+}
 const input = `Start("My start"):::normal
 N1("Node 1"):::normal
 N2("Node 2"):::normal
@@ -260,12 +273,12 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   </g>
 </svg>`
 
-describe('Mermaid2svgService - please maintain this test using the GUI', () => {
+describe('Mermaid2svg - please maintain this test using the GUI', () => {
   let service: Mermaid2svgService;
 
   beforeEach(() => {
     // No need to test injection - if injection does not work then the app does not show
-    service = new Mermaid2svgService(new OurMermaid2SvgDimensions())
+    service = new Mermaid2svgService(dimeisions)
   });
 
   it('Test the plain SVG', (done) => {
@@ -286,7 +299,7 @@ describe('Mermaid2svgService - please maintain this test using the GUI', () => {
   })
 
   it('Test that real calculation is done only once', (done) => {
-    const first: Promise<Statistics> = service.mermaid2svgStatistics(input)
+    const first: Promise<SvgResult> = service.mermaid2svgStatistics(input)
     const second: Promise<string> = service.mermaid2svg(input)
     Promise.all([first, second]).then(() => {
       expect(service.numSvgCalculations).toEqual(1)

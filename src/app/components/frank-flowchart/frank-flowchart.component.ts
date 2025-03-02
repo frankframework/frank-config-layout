@@ -15,7 +15,7 @@
 */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { EdgeLabel } from '../../graphics/edge-layout'
+import { EdgeLabel } from '../../public.api'
 
 @Component({
   selector: 'app-frank-flowchart',

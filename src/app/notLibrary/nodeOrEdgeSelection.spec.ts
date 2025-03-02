@@ -1,15 +1,11 @@
-import { getRange } from "../util/util"
-import { ConcreteGraphBase, GraphConnectionsDecorator } from "./graph"
-import { Node } from "./graph"
-import { LayoutBase } from "./layoutBase"
-import { NodeSequenceEditorBuilder } from "./horizontalGrouping"
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
+import { getRange, createText, LayoutBase, createGraphForLayers, GraphForLayers, PASS_DIRECTION_DOWN } from '../public.api'
 
 describe('NodeOrEdgeSelection', () => {
   it ('Select position and undo again', () => {
     const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
+    expect(m.getSequence().map(n => n!.id)).toEqual(['Start', 'N1', 'N2', 'End'])
     let instance = new NodeOrEdgeSelection()
     checkNothingSelected(instance, m)
     instance.selectPosition(1, m)
@@ -22,7 +18,7 @@ describe('NodeOrEdgeSelection', () => {
 
   it('Select cell and undo again', () => {
     const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
+    expect(m.getSequence().map(n => n!.id)).toEqual(['Start', 'N1', 'N2', 'End'])
     let instance = new NodeOrEdgeSelection()
     checkNothingSelected(instance, m)
     instance.selectCell(0, 1, m)
@@ -37,7 +33,7 @@ describe('NodeOrEdgeSelection', () => {
 
   it ('Select node id and undo again', () => {
     const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
+    expect(m.getSequence().map(n => n!.id)).toEqual(['Start', 'N1', 'N2', 'End'])
     let instance = new NodeOrEdgeSelection()
     checkNothingSelected(instance, m)
     instance.selectNodeId('N1', m)
@@ -50,7 +46,7 @@ describe('NodeOrEdgeSelection', () => {
 
   it('Select edge key and undo again', () => {
     const m = getSelectionTestModel()
-    expect(m.getSequence().map(n => n!.getId())).toEqual(['Start', 'N1', 'N2', 'End'])
+    expect(m.getSequence().map(n => n!.id)).toEqual(['Start', 'N1', 'N2', 'End'])
     let instance = new NodeOrEdgeSelection()
     checkNothingSelected(instance, m)
     instance.selectEdgeKey('Start-N1', m)
@@ -64,27 +60,19 @@ describe('NodeOrEdgeSelection', () => {
   })
 
   it('When changed sequence from layoutBase is put back in model with omitted nodes, permutation correctly updates index of some selected node', () => {
-    const b = new ConcreteGraphBase()
-    newNode('N1', b)
-    newNode('N2', b)
-    newNode('N3', b)
-    newNode('N4', b)
-    const m: Map<string, number> = new Map([
-      ['N1', 0],
-      ['N2', 0],
-      ['N3', 0],
-      ['N4', 0]
-    ])
-    const g = new GraphConnectionsDecorator(b)
-    const builder = new NodeSequenceEditorBuilder(m, g)
-    const model: NodeSequenceEditor = builder.build()
+    const g = createGraphForLayers()
+    newNode('N1', 0, g)
+    newNode('N2', 0, g)
+    newNode('N3', 0, g)
+    newNode('N4', 0, g)
+    const model = new NodeSequenceEditor(g)
     // Omits N2
     expect(model.omitNodeFrom(1)).toEqual(UpdateResponse.ACCEPTED)
     const lb: LayoutBase = model.getShownNodesLayoutBase()
     expect(lb.getSequence()).toEqual(['N1', 'N3', 'N4'])
     lb.putNewSequenceInLayer(0, ['N3', 'N4', 'N1'])
     const permutation = model.updatePositionsOfShownNodes(lb)
-    const updatedSequence: (string | null)[] = model.getSequence().map(n => n === null ? null : n.getId())
+    const updatedSequence: (string | null)[] = model.getSequence().map(n => n === null ? null : n.id)
     expect(updatedSequence).toEqual(['N3', null, 'N4', 'N1'])
     // If N1 was selected, it was index 0 and becomes index 3
     expect(permutation[0]).toEqual(3)
@@ -96,23 +84,16 @@ describe('NodeOrEdgeSelection', () => {
 })
 
 function getSelectionTestModel(): NodeSequenceEditor {
-  const b = new ConcreteGraphBase()
-  newNode('Start', b)
-  newNode('N1', b)
-  newNode('N2', b)
-  newNode('End', b)
-  insertNewEdge('Start', 'N1', b)
-  insertNewEdge('Start', 'N2', b)
-  insertNewEdge('N1', 'End', b)
-  insertNewEdge('N2', 'End', b)
-  const layerMap: Map<string, number> = new Map([
-    ['Start', 0],
-    ['N1', 1],
-    ['N2', 1],
-    ['End', 2]
-  ])
-  const builder = new NodeSequenceEditorBuilder(layerMap, b)
-  return builder.build()
+  const g = createGraphForLayers()
+  newNode('Start', 0, g)
+  newNode('N1', 1, g)
+  newNode('N2', 1, g)
+  newNode('End', 2, g)
+  connect('Start', 'N1', g)
+  connect('Start', 'N2', g)
+  connect('N1', 'End', g)
+  connect('N2', 'End', g)
+  return new NodeSequenceEditor(g)
 }
 
 function checkNothingSelected(instance: NodeOrEdgeSelection, m: NodeSequenceEditor) {
@@ -197,18 +178,19 @@ function checkEdgeStartN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: Nod
   })
 }
 
-function newNode(id: string, g: ConcreteGraphBase) {
-  g.addNode(id, '', '')
+function newNode(id: string, layer: number, g: GraphForLayers) {
+  g.addNode({id, layer, text: '', isError: false, isIntermediate: false})
 }
 
-function insertNewEdge(fromId: string, toId: string, b: ConcreteGraphBase) {
-  const from: Node | undefined = b.getNodeById(fromId)
-  const to: Node | undefined = b.getNodeById(toId)
-  if (from === undefined) {
-    throw new Error(`Invalid test case, node with id ${fromId} does not exist`)
-  }
-  if (to === undefined) {
-    throw new Error(`Invalid test case, node with id ${toId} does not exist`)
-  }
-  b.connect(from!, to!, '')
+function connect(idFrom: string, idTo: string, g: GraphForLayers) {
+  g.addEdge({
+    from: g.getNodeById(idFrom),
+    to: g.getNodeById(idTo),
+    isError: false,
+    isIntermediate: false,
+    text: createText(undefined),
+    isFirstSegment: false,
+    isLastSegment: false,
+    passDirection: PASS_DIRECTION_DOWN
+  })
 }

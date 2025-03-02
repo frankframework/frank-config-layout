@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2024, 2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 */
 
-import { Component, ElementRef, Input } from '@angular/core';
-import { Mermaid2svgService } from '../../services/mermaid2svg.service';
+import { Component, ElementRef, Input } from '@angular/core'
+import { mermaid2svg } from '../../public.api'
 
 @Component({
   selector: 'app-calculated-static-svg',
@@ -26,9 +26,8 @@ export class CalculatedStaticSvgComponent {
   static readonly SHOW_IMAGE = "IMAGE"
   static readonly SHOW_TEXT = "TEXT"
 
-  constructor(
-    private mermaid2svg: Mermaid2svgService,
-    private rootElement: ElementRef) {}
+  constructor(private rootElement: ElementRef) {
+  }
 
   private _show: string|null = null
   @Input() set show(show: string) {
@@ -54,7 +53,7 @@ export class CalculatedStaticSvgComponent {
         this.showNoSvg()
         return
       }
-      this.mermaid2svg.mermaid2svg(this._mermaid)
+      mermaid2svg(this._mermaid)
       .then((svg) => {
         this.showSvg(svg)
       })

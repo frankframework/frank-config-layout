@@ -15,7 +15,7 @@
 */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
-import { Dimensions } from '../../graphics/edge-layout';
+import { Dimensions, getFactoryDimensions } from '../../public.api';
 
 @Component({
   selector: 'app-dimensions-editor',
@@ -45,22 +45,5 @@ export class DimensionsEditorComponent {
     this.editDimensions = getFactoryDimensions()
     this.lastPosted = getFactoryDimensions()
     this.onDimensions.emit({ ... this.lastPosted })
-  }
-}
-
-export function getFactoryDimensions(): Dimensions {
-  return {
-    layerHeight: 50,
-    layerDistance: 120,
-    nodeBoxHeight: 50,
-    intermediateWidth: 60,
-    nodeWidth: 175,
-    omittedPlaceholderWidth: 90,
-    nodeBoxWidth: 160,
-    boxConnectorAreaPerc: 50,
-    intermediateLayerPassedByVerticalLine: false,
-    edgeLabelFontSize: 10,
-    preferredVertDistanceFromOrigin: 30,
-    strictlyKeepLabelOutOfBox: false
   }
 }
