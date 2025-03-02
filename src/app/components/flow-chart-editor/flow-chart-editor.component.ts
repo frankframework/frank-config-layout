@@ -24,7 +24,7 @@ import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
 import { getGraphFromMermaid,
   findErrorFlow, OriginalGraph,
   LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
-  assignHorizontalLayerNumbers, calculateLayerNumbers, GraphForLayers,
+  introduceIntermediateNodesAndEdges, calculateLayerNumbers, GraphForLayers,
   Dimensions, getFactoryDimensions,
   NodeLayoutBuilder,
   getDerivedEdgeLabelDimensions,
@@ -127,7 +127,7 @@ export class FlowChartEditorComponent {
     const layerMap: Map<string, number> = calculateLayerNumbers(graph, algorithm)
     let graphWithLayers: GraphForLayers
     try {
-      graphWithLayers = assignHorizontalLayerNumbers(graph, layerMap)
+      graphWithLayers = introduceIntermediateNodesAndEdges(graph, layerMap)
     } catch(e) {
       alert('Could not assign layers to nodes: ' + e)
       return {model: null, error: (e as Error).message}

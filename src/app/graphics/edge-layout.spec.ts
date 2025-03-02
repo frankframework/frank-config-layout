@@ -1,5 +1,5 @@
 import { createText } from '../model/text'
-import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath, assignHorizontalLayerNumbers } from '../model/horizontalGrouping'
+import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath, introduceIntermediateNodesAndEdges } from '../model/horizontalGrouping'
 import { OriginalGraph, createOriginalGraph } from '../model/error-flow'
 import { LayoutBase } from '../model/layoutBase'
 import { Point, Line } from "./graphics"
@@ -101,7 +101,7 @@ describe('Layout', () => {
     connect('N2', 'End', g)
     connect('N1', 'N2', g)
     const m = calculateLayerNumbersFirstOccuringPath(g)
-    const gl = assignHorizontalLayerNumbers(g, m)
+    const gl = introduceIntermediateNodesAndEdges(g, m)
     const lb = LayoutBase.create(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'], gl, 4)
     const nodeLayout = new NodeLayoutBuilder(lb, gl, dimensions).run()
     const layout = new Layout(nodeLayout, dimensions, derivedEdgeLabelDimensions)
@@ -144,7 +144,7 @@ describe('Layout', () => {
     connect('N1', 'N2', g)
     const modifiedDimensions = modifyForVerticalLines(dimensions)
     const m = calculateLayerNumbersFirstOccuringPath(g)
-    const gl = assignHorizontalLayerNumbers(g, m)
+    const gl = introduceIntermediateNodesAndEdges(g, m)
     const lb = LayoutBase.create(['Start', 'N1', 'intermediate1', 'N2', 'intermediate2', 'End'], gl, 4)
     const nodeLayout = new NodeLayoutBuilder(lb, gl, modifiedDimensions).run()
     const layout = new Layout(nodeLayout, modifiedDimensions, derivedEdgeLabelDimensions)

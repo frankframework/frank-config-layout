@@ -1,7 +1,7 @@
 import { createText } from './text'
 import { OriginalNode, OriginalGraph, createOriginalGraph } from './error-flow'
 import { getKey } from './graph'
-import { calculateLayerNumbers, assignHorizontalLayerNumbers, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP,
+import { calculateLayerNumbers, introduceIntermediateNodesAndEdges, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP,
   calculateLayerNumbersLongestPath, calculateLayerNumbersFirstOccuringPath, GraphForLayers, EdgeForLayers,
   LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH
 } from './horizontalGrouping'
@@ -222,7 +222,7 @@ describe('Calculating layer numbers', () => {
   }
 })
 
-describe('NodeSequenceEditorBuilder', () => {
+describe('Assigning layers and introducing intermediate nodes and edges', () => {
   it('Downward lines', () => {
     const instance: GraphForLayers = getInstanceDownwardLinks()
     expect(instance.nodes.map(n => n.id))
@@ -294,7 +294,7 @@ describe('NodeSequenceEditorBuilder', () => {
       ['N2', 2],
       ['N3', 3]
     ])
-    return assignHorizontalLayerNumbers(g, m)
+    return introduceIntermediateNodesAndEdges(g, m)
   }
 
   it('Upward lines', () => {
@@ -375,6 +375,6 @@ describe('NodeSequenceEditorBuilder', () => {
       ['N2', 2],
       ['N3', 3]
     ])
-    return assignHorizontalLayerNumbers(g, m)
+    return introduceIntermediateNodesAndEdges(g, m)
   }
 })

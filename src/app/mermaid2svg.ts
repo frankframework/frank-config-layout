@@ -23,7 +23,7 @@ import { AsynchronousCache } from './util/asynchronousCache';
 import { sha256 } from './util/hash';
 import { getDerivedEdgeLabelDimensions } from './graphics/edge-label-layouter';
 import { findErrorFlow, OriginalGraph } from './model/error-flow';
-import { assignHorizontalLayerNumbers, calculateLayerNumbersLongestPath, GraphForLayers } from './model/horizontalGrouping';
+import { introduceIntermediateNodesAndEdges, calculateLayerNumbersLongestPath, GraphForLayers } from './model/horizontalGrouping';
 import { SvgResult, Dimensions } from './public.api'
 
 export class Mermaid2svgService {
@@ -61,7 +61,7 @@ export class Mermaid2svgService {
     const g: OriginalGraph = findErrorFlow(b)
     let numNodeVisits = 0
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits)
-    const gl: GraphForLayers = assignHorizontalLayerNumbers(g, nodeIdToLayer)
+    const gl: GraphForLayers = introduceIntermediateNodesAndEdges(g, nodeIdToLayer)
     let lb: LayoutBase
     const numLayers = Math.max( ... gl.nodes.map(n => n.layer)) + 1
     try {

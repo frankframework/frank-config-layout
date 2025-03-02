@@ -1,5 +1,5 @@
 import { getKey } from '../model/graph'
-import { GraphForLayers, assignHorizontalLayerNumbers, createGraphForLayers } from '../model/horizontalGrouping'
+import { GraphForLayers, introduceIntermediateNodesAndEdges, createGraphForLayers } from '../model/horizontalGrouping'
 import { LayoutBase } from '../model/layoutBase'
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-layout"
 import { createText } from '../model/text'
@@ -99,7 +99,7 @@ function getSimpleGraph(): GraphForLayers {
   m.set('N1', 1)
   m.set('N2', 1)
   m.set('End', 2)
-  return assignHorizontalLayerNumbers(g, m)
+  return introduceIntermediateNodesAndEdges(g, m)
 }
 
 function getGraphWithConflictAndIntermediate(nodeIdToLayer: Map<string, number>): GraphForLayers {
@@ -113,7 +113,7 @@ function getGraphWithConflictAndIntermediate(nodeIdToLayer: Map<string, number>)
   connect('N1', 'End', g)
   // Introduces intermediate node
   connect('End', 'S2', g)
-  return assignHorizontalLayerNumbers(g, nodeIdToLayer)
+  return introduceIntermediateNodesAndEdges(g, nodeIdToLayer)
 }
 
 function withConflictAndIntermediate(): Map<string, number> {

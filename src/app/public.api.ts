@@ -86,7 +86,7 @@ export { Text, createText } from './model/text'
 export { getGraphFromMermaid } from './parsing/mermaid-parser'
 export { findErrorFlow, OriginalGraph } from './model/error-flow'
 export { LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH, PASS_DIRECTION_DOWN,
-  assignHorizontalLayerNumbers, calculateLayerNumbers, createGraphForLayers,
+  introduceIntermediateNodesAndEdges, calculateLayerNumbers, createGraphForLayers,
   NodeForLayers, EdgeForLayers, GraphForLayers, NodeOrEdgeForLayers, OptionalNodeForLayers, OptionalEdgeForLayers
 } from './model/horizontalGrouping'
 export { LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning } from './model/layoutBase'

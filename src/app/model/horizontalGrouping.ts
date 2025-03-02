@@ -56,7 +56,7 @@ export function createGraphForLayers(): GraphForLayers {
   return new Graph<NodeForLayers, EdgeForLayers>()
 }
 
-export function assignHorizontalLayerNumbers(original: OriginalGraph, nodeIdToLayer: Map<string, number>): GraphForLayers {
+export function introduceIntermediateNodesAndEdges(original: OriginalGraph, nodeIdToLayer: Map<string, number>): GraphForLayers {
   let intermediateNodeSeq: number = 1
   let orderedOmittedNodes = original.nodes
     .filter(n => ! nodeIdToLayer.has(n.id))
