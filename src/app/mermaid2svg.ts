@@ -22,9 +22,9 @@ import { generateSvg } from './graphics/svg-generator';
 import { AsynchronousCache } from './util/asynchronousCache';
 import { sha256 } from './util/hash';
 import { getDerivedEdgeLabelDimensions } from './graphics/edge-label-layouter';
-import { SvgResult, Dimensions } from './public.api'
 import { findErrorFlow, OriginalGraph } from './model/error-flow';
 import { assignHorizontalLayerNumbers, calculateLayerNumbersLongestPath, GraphForLayers } from './model/horizontalGrouping';
+import { SvgResult, Dimensions } from './public.api'
 
 export class Mermaid2svgService {
   private cache = new AsynchronousCache<SvgResult>()

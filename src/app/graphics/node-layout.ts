@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { NodeImpl, EdgeImpl, GraphForLayers } from '../model/horizontalGrouping'
+import { NodeForLayers, EdgeForLayers, GraphForLayers } from '../model/horizontalGrouping'
 import { LayoutBase } from "../model/layoutBase";
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
@@ -32,11 +32,11 @@ export interface NodeLayout {
   readonly height: number
   readonly positions: Position[]
   readonly positionMap: Map<string, Position>
-  readonly edges: EdgeImpl[]
+  readonly edges: EdgeForLayers[]
 }
 
 export interface Position {
-  readonly node: NodeImpl
+  readonly node: NodeForLayers
   readonly layerNumber: number
   x: number | null
   y: number | null
@@ -80,7 +80,7 @@ export class NodeLayoutBuilder {
     const positions: Position[] = []
     const idToPosition: Map<string, Position> = new Map()
     let cursor = 0
-    const nodes: NodeImpl[] = this.lb.getIdsOfLayer(layerNumber).map(id => this.graph.getNodeById(id))
+    const nodes: NodeForLayers[] = this.lb.getIdsOfLayer(layerNumber).map(id => this.graph.getNodeById(id))
     for (let node of nodes) {
       const position = this.createPosition(node, cursor, layerNumber)
       positions.push(position)
@@ -91,7 +91,7 @@ export class NodeLayoutBuilder {
     return {positions, idToPosition, initialWidth, layerNumber}
   }
 
-  private createPosition(node: NodeImpl, startX: number, layerNumber: number): Position {
+  private createPosition(node: NodeForLayers, startX: number, layerNumber: number): Position {
     const defaultX = Interval.createFromMinSize(startX, this.widthOf(node)).center
     return {
       node,
@@ -161,7 +161,7 @@ export class NodeLayoutBuilder {
     return predPositionIndexes.map(i => sourceLayer.positions[i]!.x!)
  }
 
-  widthOf(n: NodeImpl) {
+  widthOf(n: NodeForLayers) {
     if (n.isIntermediate) {
       return this.dimensions.intermediateWidth
     } else {

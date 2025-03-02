@@ -16,13 +16,11 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
+import { Observable, Subscription } from 'rxjs';
 import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../notLibrary/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
-import { Observable, Subscription } from 'rxjs';
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
-import { getRange,
-  Edge, NodeOrEdge, getKey,
-  LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning,
+import { getRange, getKey, LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning,
   NodeOrEdgeForLayers
 } from '../../public.api'
 

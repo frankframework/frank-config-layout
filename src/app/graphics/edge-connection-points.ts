@@ -17,7 +17,7 @@
 import { getKey } from '../model/graph'
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
-import { EdgeImpl } from '../model/horizontalGrouping'
+import { EdgeForLayers } from '../model/horizontalGrouping'
 import { NodeAndEdgeDimensions, PlacedNode } from "./edge-layout";
 import { Line, Point } from "./graphics";
 import { NodeLayout } from "./node-layout";
@@ -25,7 +25,7 @@ import { NodeLayout } from "./node-layout";
 export class Edge2LineCalculation {
   private placedNodes: PlacedNode[] = []
   private nodeMap: Map<string, ConnectedPlacedNode> = new Map()
-  private edges: EdgeImpl[] = []
+  private edges: EdgeForLayers[] = []
   private edge2lineMap: Map<string, Line> = new Map()
 
   constructor(
@@ -53,7 +53,7 @@ export class Edge2LineCalculation {
     })
   }
 
-  private connectEdge(edge: EdgeImpl) {
+  private connectEdge(edge: EdgeForLayers) {
     const nodeFrom = this.nodeMap.get(edge.from.id)!
     const nodeTo = this.nodeMap.get(edge.to.id)!
     const layerFrom: number = nodeFrom.node.layer
@@ -79,7 +79,7 @@ export class Edge2LineCalculation {
     return this.edges
   }
 
-  edge2line(edge: EdgeImpl): Line {
+  edge2line(edge: EdgeForLayers): Line {
     return this.edge2lineMap.get(getKey(edge))!
   }
 
@@ -98,13 +98,13 @@ class ConnectedPlacedNode {
     readonly node: PlacedNode
   ) {}
 
-  connectEdgeToTop(edge: EdgeImpl, xOtherSide: number) {
+  connectEdgeToTop(edge: EdgeForLayers, xOtherSide: number) {
     const connector: Connector = new Connector(this.getDirection(edge), xOtherSide)
     this.edge2connectorTop.set(getKey(edge), connector)
     this.connectorsTop.push(connector)
   }
 
-  private getDirection(edge: EdgeImpl) {
+  private getDirection(edge: EdgeForLayers) {
     let direction: RelativeDirection
     if (edge.from.id === this.node.id) {
       direction = RelativeDirection.OUT
@@ -116,7 +116,7 @@ class ConnectedPlacedNode {
     return direction
   }
 
-  connectEdgeToBottom(edge: EdgeImpl, xOtherSide: number) {
+  connectEdgeToBottom(edge: EdgeForLayers, xOtherSide: number) {
     const connector: Connector = new Connector(this.getDirection(edge), xOtherSide)
     this.edge2connectorBottom.set(getKey(edge), connector)
     this.connectorsBottom.push(connector)
@@ -134,7 +134,7 @@ class ConnectedPlacedNode {
     xbottom.forEach((coord, index) => this.connectorsBottom[index].x = coord)
   }
 
-  getPointFor(edge: EdgeImpl): Point {
+  getPointFor(edge: EdgeForLayers): Point {
     if (this.edge2connectorTop.has(getKey(edge))) {
       const connector = this.edge2connectorTop.get(getKey(edge))!
       const y = this.node.centerTop.y

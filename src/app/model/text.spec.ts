@@ -1,5 +1,4 @@
-import { Text } from '../public.api'
-import { createText } from './text'
+import { createText, Text } from './text'
 
 describe('Text', () => {
   it('When Text is created from empty string then zero lines', () => {

@@ -1,12 +1,10 @@
 import { createText } from './text'
-import { OriginalNode, OriginalEdge, OriginalGraph } from './error-flow'
-import { Graph, getKey } from './graph'
+import { OriginalNode, OriginalGraph, createOriginalGraph } from './error-flow'
+import { getKey } from './graph'
 import { calculateLayerNumbers, assignHorizontalLayerNumbers, PASS_DIRECTION_DOWN, PASS_DIRECTION_UP,
-  calculateLayerNumbersLongestPath, calculateLayerNumbersFirstOccuringPath, GraphForLayers,
-  EdgeImpl, NodeImpl
+  calculateLayerNumbersLongestPath, calculateLayerNumbersFirstOccuringPath, GraphForLayers, EdgeForLayers,
+  LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH
 } from './horizontalGrouping'
-import { getRange } from '../util/util'
-import { LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH } from '../public.api'
 
 function newNode(id: string): OriginalNode {
   return { id, text: '', isError: false }
@@ -181,7 +179,7 @@ describe('Calculating layer numbers', () => {
   })
 
   function getSimpleNodesForGraph(): OriginalGraph {
-    const g = new Graph<OriginalNode, OriginalEdge>()
+    const g = createOriginalGraph()
     g.addNode(newNode('Start'))
     g.addNode(newNode('N1'))
     g.addNode(newNode('N2'))
@@ -189,7 +187,7 @@ describe('Calculating layer numbers', () => {
   }
 
   function getNodesForComplexGraph(): OriginalGraph {
-    const g = new Graph<OriginalNode, OriginalEdge>()
+    const g = createOriginalGraph()
     g.addNode(newNode('Start'))
     g.addNode(newNode('N1'))
     g.addNode(newNode('N2'))
@@ -238,7 +236,7 @@ describe('NodeSequenceEditorBuilder', () => {
     expect( (instance.getNodeById('intermediate1')).passDirection).toEqual(PASS_DIRECTION_DOWN)
     expect( (instance.getNodeById('intermediate2')).passDirection).toEqual(PASS_DIRECTION_DOWN)
     expect( (instance.getNodeById('intermediate3')).passDirection).toEqual(PASS_DIRECTION_DOWN)
-    let edge: EdgeImpl = instance.edges[0]
+    let edge: EdgeForLayers = instance.edges[0]
     expect(edge.from.id).toBe('N0')
     expect(edge.to.id).toBe('N1')
     expect(edge.isIntermediate).toBe(false)
@@ -282,7 +280,7 @@ describe('NodeSequenceEditorBuilder', () => {
   })
 
   function getInstanceDownwardLinks(): GraphForLayers {
-    const g = new Graph<OriginalNode, OriginalEdge>()
+    const g = createOriginalGraph()
     g.addNode(newNode('N0'))
     g.addNode(newNode('N1'))
     g.addNode(newNode('N2'))
@@ -360,7 +358,7 @@ describe('NodeSequenceEditorBuilder', () => {
   })
 
   function getInstanceUpwardLinks(): GraphForLayers {
-    const g = new Graph<OriginalNode, OriginalEdge>()
+    const g = createOriginalGraph()
     g.addNode(newNode('N0A'))
     g.addNode(newNode('N0B'))
     g.addNode(newNode('N1'))

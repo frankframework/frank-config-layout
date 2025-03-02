@@ -14,14 +14,14 @@
    limitations under the License.
 */
 
-import { Node } from '../public.api'
+import { NodeForLayers } from '../public.api'
 
 export enum NodeCaptionChoice {
   ID = "id",
   TEXT = "text"
 }
 
-export function getCaption(n: Node, choice: NodeCaptionChoice): string {
+export function getCaption(n: NodeForLayers, choice: NodeCaptionChoice): string {
   switch (choice) {
 	case NodeCaptionChoice.ID: return n.id
 	case NodeCaptionChoice.TEXT: return n.text

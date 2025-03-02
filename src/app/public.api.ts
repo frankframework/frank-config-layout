@@ -81,13 +81,13 @@ export async function mermaid2svgStatistics(mermaid: string): Promise<SvgResult>
  */
 
 export { getRange, rotateToSwapItems, permutationFrom } from './util/util'
-export { NodeOrEdge, getKey } from './model/graph'
+export { getKey } from './model/graph'
 export { Text, createText } from './model/text'
 export { getGraphFromMermaid } from './parsing/mermaid-parser'
 export { findErrorFlow, OriginalGraph } from './model/error-flow'
-export { Node, Edge, OptionalNode, OptionalEdge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
-  assignHorizontalLayerNumbers, calculateLayerNumbers, GraphForLayers, createGraphForLayers,
-  NodeOrEdgeForLayers, PASS_DIRECTION_DOWN
+export { LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH, PASS_DIRECTION_DOWN,
+  assignHorizontalLayerNumbers, calculateLayerNumbers, createGraphForLayers,
+  NodeForLayers, EdgeForLayers, GraphForLayers, NodeOrEdgeForLayers, OptionalNodeForLayers, OptionalEdgeForLayers
 } from './model/horizontalGrouping'
 export { LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning } from './model/layoutBase'
 export { NodeLayoutBuilder } from './graphics/node-layout'

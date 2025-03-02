@@ -1,9 +1,9 @@
-import { Graph, getKey } from '../model/graph'
-import { NodeImpl, EdgeImpl, GraphForLayers, PASS_DIRECTION_DOWN, assignHorizontalLayerNumbers } from '../model/horizontalGrouping'
+import { getKey } from '../model/graph'
+import { GraphForLayers, assignHorizontalLayerNumbers, createGraphForLayers } from '../model/horizontalGrouping'
 import { LayoutBase } from '../model/layoutBase'
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-layout"
 import { createText } from '../model/text'
-import { OriginalEdge, OriginalGraph, OriginalNode } from '../model/error-flow'
+import { createOriginalGraph, OriginalGraph } from '../model/error-flow'
 
 describe('NodeLayoutBuilder', () => {
   it('Simple model', () => {
@@ -85,7 +85,7 @@ function getTestDimensions(): NodeSpacingDimensions {
 }
 
 function getSimpleGraph(): GraphForLayers {
-  const g = new Graph<NodeImpl, EdgeImpl>()
+  const g = createGraphForLayers()
   addNode('Start', g)
   addNode('N1', g)
   addNode('N2', g)
@@ -103,7 +103,7 @@ function getSimpleGraph(): GraphForLayers {
 }
 
 function getGraphWithConflictAndIntermediate(nodeIdToLayer: Map<string, number>): GraphForLayers {
-  const g = new Graph<OriginalNode, OriginalEdge>()
+  const g = createOriginalGraph()
   addNode('S1', g)
   addNode('S2', g)
   addNode('N1', g)

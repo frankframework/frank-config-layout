@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Subject } from 'rxjs';
 import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
 import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
-import { Subject } from 'rxjs';
-import { createText, GraphForLayers, createGraphForLayers, Edge, PASS_DIRECTION_DOWN } from '../../public.api'
+import { createText, GraphForLayers, createGraphForLayers, PASS_DIRECTION_DOWN } from '../../public.api'
 
 describe('SequenceEditorComponent', () => {
   let component: SequenceEditorComponent;

@@ -1,5 +1,5 @@
 import { Mermaid2svgService } from './mermaid2svg';
-import { SvgResult, Dimensions } from './public.api'
+import { Dimensions, SvgResult } from './public.api'
 
 const dimeisions: Dimensions = {
   layerHeight: 50,

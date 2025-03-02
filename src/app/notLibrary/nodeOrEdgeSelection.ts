@@ -15,7 +15,7 @@
 */
 
 import { NodeSequenceEditor } from "./nodeSequenceEditor"
-import { Node, Edge, getKey, OptionalNode, OptionalEdge } from '../public.api'
+import { getKey, EdgeForLayers, OptionalNodeForLayers, OptionalEdgeForLayers } from '../public.api'
 
 // If a node has been selected, all its incoming and outgoing
 // edges should also be highlighted.
@@ -65,7 +65,7 @@ export class NodeOrEdgeSelection {
   }
 
   selectEdgeKey(key: string, model: NodeSequenceEditor) {
-    const edge: Edge<Node> | undefined = model.getGraph().getEdgeByKey(key)
+    const edge: EdgeForLayers | undefined = model.getGraph().getEdgeByKey(key)
     if (edge === undefined) {
       return
     }
@@ -198,10 +198,10 @@ class NodeOrEdgeSelectionStateCell implements NodeOrEdgeSelectionState {
   {
     const optionalFromNode = model.getSequence()[this.indexFrom]
     const optionalToNode = model.getSequence()[this.indexTo]
-    let optionalSelectedEdge: OptionalEdge
+    let optionalSelectedEdge: OptionalEdgeForLayers
     if ( (optionalFromNode !== null) && (optionalToNode !== null)) {
       const raw = model.getGraph().searchEdge(optionalFromNode.id, optionalToNode.id)
-      const optionalSelectedEdge: OptionalEdge = raw === undefined ? null : raw;
+      const optionalSelectedEdge: OptionalEdgeForLayers = raw === undefined ? null : raw;
       return {optionalFromNode, optionalToNode, optionalSelectedEdge}
     } else {
       return {optionalFromNode, optionalToNode, optionalSelectedEdge: null}
@@ -230,7 +230,7 @@ class NodeOrEdgeSelectionStateCell implements NodeOrEdgeSelectionState {
     return this.isIdMatchesOptionalNode(id, modelData.optionalFromNode) || this.isIdMatchesOptionalNode(id, modelData.optionalToNode)
   }
 
-  private isIdMatchesOptionalNode(id: string, n: OptionalNode): boolean {
+  private isIdMatchesOptionalNode(id: string, n: OptionalNodeForLayers): boolean {
     return (n !== null) && (id === n.id)
   }
 
@@ -250,7 +250,7 @@ class NodeOrEdgeSelectionStateCell implements NodeOrEdgeSelectionState {
 }
 
 interface ModelData {
-  optionalFromNode: OptionalNode,
-  optionalToNode: OptionalNode,
-  optionalSelectedEdge: OptionalEdge
+  optionalFromNode: OptionalNodeForLayers,
+  optionalToNode: OptionalNodeForLayers,
+  optionalSelectedEdge: OptionalEdgeForLayers
 }

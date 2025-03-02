@@ -17,51 +17,43 @@
 import { getRange } from '../util/util'
 import { Text } from './text'
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow'
-import { Graph, NodeOrEdge } from './graph'
+import { Graph, NodeOrEdge, Connection, WithId } from './graph'
 
-export interface Node {
+export interface NodeForLayers extends WithId {
   readonly id: string
   readonly text: string
   readonly isError: boolean
   readonly layer: number
   readonly isIntermediate: boolean
-}
-
-export type OptionalNode = Node | null
-
-export interface Edge<TNode extends Node> {
-  readonly from: TNode
-  readonly to: TNode
-  readonly text: Text
-  readonly isError: boolean
-  readonly isIntermediate: boolean
-}
-
-export type OptionalEdge = Edge<Node> | null
-
-export type NodeOrEdgeForLayers = NodeOrEdge<Node, Edge<Node>>
-
-export const LAYERS_FIRST_OCCURING_PATH = 0
-export const LAYERS_LONGEST_PATH = 1
-
-export interface NodeImpl extends Node {
   readonly passDirection?: number
 }
 
-export interface EdgeImpl extends Edge<NodeImpl> {
+export type OptionalNodeForLayers = NodeForLayers | null
+
+export interface EdgeForLayers extends Connection<NodeForLayers> {
+  readonly from: NodeForLayers
+  readonly to: NodeForLayers
+  readonly text: Text
+  readonly isError: boolean
+  readonly isIntermediate: boolean
   readonly isFirstSegment: boolean,
   readonly isLastSegment: boolean,
   readonly passDirection: number
 }
 
+export type OptionalEdgeForLayers = EdgeForLayers | null
+export type NodeOrEdgeForLayers = NodeOrEdge<NodeForLayers, EdgeForLayers>
+export type GraphForLayers = Graph<NodeForLayers, EdgeForLayers>
+
+export const LAYERS_FIRST_OCCURING_PATH = 0
+export const LAYERS_LONGEST_PATH = 1
+
 export const PASS_DIRECTION_DOWN = 0
 export const PASS_DIRECTION_UP = 1
 
-export type GraphForLayers = Graph<NodeImpl, EdgeImpl>
-
 // For unit tests
 export function createGraphForLayers(): GraphForLayers {
-  return new Graph<NodeImpl, EdgeImpl>()
+  return new Graph<NodeForLayers, EdgeForLayers>()
 }
 
 export function assignHorizontalLayerNumbers(original: OriginalGraph, nodeIdToLayer: Map<string, number>): GraphForLayers {
@@ -72,7 +64,7 @@ export function assignHorizontalLayerNumbers(original: OriginalGraph, nodeIdToLa
     const idsOmittedNodes = orderedOmittedNodes.map(n => n.id).join(', ')
     throw new Error(`Not all nodes could be grouped into horizontal layers: ${idsOmittedNodes}`)
   }
-  let result = new Graph<NodeImpl, EdgeImpl>()
+  let result = createGraphForLayers()
   for (const n of original.nodes.filter(n => nodeIdToLayer.has(n.id))) {
     result.addNode({
       id: n.id,
@@ -112,7 +104,7 @@ function handleEdge(edge: OriginalEdge, nodeIdToLayer: Map<string, number>, resu
       passDirection
     })
   } else {
-    const intermediateNodes: NodeImpl[] = getIntermediateLayers(layerFrom, layerTo).map(layer => {
+    const intermediateNodes: NodeForLayers[] = getIntermediateLayers(layerFrom, layerTo).map(layer => {
       return {
         id: `intermediate${intermediateNodeSeq++}`,
         text: '',

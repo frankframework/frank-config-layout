@@ -15,15 +15,15 @@
 */
 
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Subject } from 'rxjs';
 import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
+import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
 import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
-import { Subject } from 'rxjs';
-import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
 import { getGraphFromMermaid,
   findErrorFlow, OriginalGraph,
-  Edge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
+  LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
   assignHorizontalLayerNumbers, calculateLayerNumbers, GraphForLayers,
   Dimensions, getFactoryDimensions,
   NodeLayoutBuilder,

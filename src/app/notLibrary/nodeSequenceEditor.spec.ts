@@ -1,5 +1,5 @@
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
-import { createText, Node, Edge, createGraphForLayers, GraphForLayers, PASS_DIRECTION_DOWN } from '../public.api'
+import { createText, createGraphForLayers, GraphForLayers, PASS_DIRECTION_DOWN, NodeForLayers } from '../public.api'
 
 function getInstanceToCheckOrdering(): NodeSequenceEditor {
   const g = createGraphForLayers()
@@ -13,7 +13,7 @@ function getInstanceToCheckOrdering(): NodeSequenceEditor {
   return new NodeSequenceEditor(g)
 }
 
-function newTestNode(id: string, layer: number): Node {
+function newTestNode(id: string, layer: number): NodeForLayers {
   return {id, layer, text: '', isError: false, isIntermediate: false}
 }
 
@@ -216,7 +216,7 @@ describe('NodeSequenceEditor', () => {
     const instance: NodeSequenceEditor = getSimpleInstance()
     expect(instance.omitNodeFrom(0)).toBe(UpdateResponse.ACCEPTED)
     checkStateAfterOmittingPositionZero(instance)
-    const node: Node = instance.graph.getNodeById('A')!
+    const node: NodeForLayers = instance.graph.getNodeById('A')!
     expect(node.id).toBe('A')
     expect(instance.reintroduceNode(1, node)).toBe(UpdateResponse.REJECTED)
     checkStateAfterOmittingPositionZero(instance)
@@ -235,7 +235,7 @@ describe('NodeSequenceEditor', () => {
     expect(instance.omitNodeFrom(0)).toBe(UpdateResponse.ACCEPTED)
     expect(instance.omitNodeFrom(3)).toBe(UpdateResponse.ACCEPTED)
     checkStateAfterOmittingPositionsZeroAndThree(instance)
-    const node: Node = instance.graph.getNodeById('A')!
+    const node: NodeForLayers = instance.graph.getNodeById('A')!
     expect(node.id).toBe('A')
     expect(instance.reintroduceNode(3, node)).toBe(UpdateResponse.REJECTED)
     checkStateAfterOmittingPositionsZeroAndThree(instance)

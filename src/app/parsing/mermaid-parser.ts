@@ -14,9 +14,8 @@
    limitations under the License.
 */
 
-import { createText } from '../model/text'
+import { createText, Text } from '../model/text'
 import { Graph } from '../model/graph'
-import { Text } from '../public.api'
 
 export interface MermaidNode {
   id: string

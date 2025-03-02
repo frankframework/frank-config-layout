@@ -15,14 +15,13 @@
 */
 
 import { getKey } from '../model/graph'
-import { NodeImpl, EdgeImpl, GraphForLayers, PASS_DIRECTION_DOWN } from '../model/horizontalGrouping'
+import { NodeForLayers, EdgeForLayers, PASS_DIRECTION_DOWN } from '../model/horizontalGrouping'
 import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
 import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, Box } from "./edge-label-layouter";
-import { createText } from '../model/text'
-import { Text } from '../public.api'
+import { Text, createText } from '../model/text'
 
 export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   nodeBoxWidth: number
@@ -31,7 +30,7 @@ export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   intermediateLayerPassedByVerticalLine: boolean
 }
 
-export class PlacedNode implements NodeImpl {
+export class PlacedNode implements NodeForLayers {
   readonly horizontalBox: Interval
   readonly verticalBox: Interval
   readonly passDirection?: number
@@ -108,7 +107,7 @@ interface BoxDimensions {
   readonly verticalBox: Interval
 }
 
-export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, edge: EdgeImpl, line: Line): LayoutLineSegment {
+export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, edge: EdgeForLayers, line: Line): LayoutLineSegment {
   let minLayer = 0
   let maxLayer = 0
   if (fromNode.layer < toNode.layer) {

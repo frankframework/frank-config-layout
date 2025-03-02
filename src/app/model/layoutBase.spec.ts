@@ -1,6 +1,5 @@
 import { createText } from './text'
-import { Graph } from './graph'
-import { GraphForLayers, NodeImpl, EdgeImpl, PASS_DIRECTION_DOWN } from './horizontalGrouping'
+import { GraphForLayers, PASS_DIRECTION_DOWN, createGraphForLayers } from './horizontalGrouping'
 import { LayoutBase, getNumCrossings, alignFromLayer, NumCrossingsJudgement} from './layoutBase'
 
 function addNode(id: string, layer: number, g: GraphForLayers) {
@@ -31,7 +30,7 @@ function connect(idFrom: string, idTo: string, g: GraphForLayers) {
 // See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
 // for the graphical representation of this layout.
 function getOtherLayoutBase(): LayoutBase {
-  const g = new Graph<NodeImpl, EdgeImpl>()
+  const g = createGraphForLayers()
   addNode('S1', 0, g)
   addNode('S2', 0, g)
   addNode('N1', 1, g)
@@ -51,7 +50,7 @@ function getOtherLayoutBase(): LayoutBase {
 
 describe('LayoutBase', () => {
   function getSimpleLayoutBase() {
-    const g = new Graph<NodeImpl, EdgeImpl>()
+    const g = createGraphForLayers()
     addNode('Start', 0, g)
     addNode('N1', 1, g)
     addNode('N2', 1, g)
@@ -64,7 +63,7 @@ describe('LayoutBase', () => {
   }
 
   function getSimpleLayoutBaseFromOtherSequence() {
-    const g = new Graph<NodeImpl, EdgeImpl>()
+    const g = createGraphForLayers()
     addNode('End', 2, g)
     addNode('N1', 1, g)
     addNode('Start', 0, g)
@@ -104,7 +103,7 @@ describe('LayoutBase', () => {
   })
 
   function getOtherLayoutBaseFromOtherSequence(): LayoutBase {
-    const g = new Graph<NodeImpl, EdgeImpl>()
+    const g = createGraphForLayers()
     addNode('S1', 0, g)
     addNode('N1', 1, g)
     addNode('S2', 0, g)
@@ -158,7 +157,7 @@ describe('LayoutBase', () => {
 
 describe('Operations on LayoutBase', () => {
   it('When no line crosses then none counted', () => {
-    const g = new Graph<NodeImpl, EdgeImpl>()
+    const g = createGraphForLayers()
     addNode('S1', 0, g)
     addNode('S2', 0, g)
     addNode('E1', 1, g)
@@ -170,7 +169,7 @@ describe('Operations on LayoutBase', () => {
   })
 
   it('When there is one crossing then one counted', () => {
-    const g = new Graph<NodeImpl, EdgeImpl>()
+    const g = createGraphForLayers()
     addNode('S1', 0, g)
     addNode('S2', 0, g)
     addNode('E1', 1, g)
@@ -216,7 +215,7 @@ describe('Operations on LayoutBase', () => {
 
   for (let alignmentLayer = 0; alignmentLayer <= 2; ++alignmentLayer) {
     it(`When aligning with fixed layer ${alignmentLayer}, then others are aligned correctly`, () => {
-      const g = new Graph<NodeImpl, EdgeImpl>()
+      const g = createGraphForLayers()
       for (let layerNumber = 0; layerNumber <= 2; ++layerNumber) {
         for (let position = 0; position <= 2; ++position) {
           const id: string = '' + layerNumber + alignmentCase[layerNumber][position]

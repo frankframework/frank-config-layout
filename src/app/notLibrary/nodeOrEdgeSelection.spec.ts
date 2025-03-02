@@ -1,6 +1,6 @@
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
-import { getRange, createText, Edge, LayoutBase, createGraphForLayers, GraphForLayers, PASS_DIRECTION_DOWN } from '../public.api'
+import { getRange, createText, LayoutBase, createGraphForLayers, GraphForLayers, PASS_DIRECTION_DOWN } from '../public.api'
 
 describe('NodeOrEdgeSelection', () => {
   it ('Select position and undo again', () => {

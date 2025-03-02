@@ -1,10 +1,9 @@
 import { createText } from '../model/text'
 import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath, assignHorizontalLayerNumbers } from '../model/horizontalGrouping'
-import { OriginalNode, OriginalEdge, OriginalGraph } from '../model/error-flow'
-import { Graph, getKey } from '../model/graph'
+import { OriginalGraph, createOriginalGraph } from '../model/error-flow'
 import { LayoutBase } from '../model/layoutBase'
 import { Point, Line } from "./graphics"
-import { NodeLayoutBuilder, NodeLayout } from './node-layout'
+import { NodeLayoutBuilder } from './node-layout'
 import { Layout, NodeAndEdgeDimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"
 import { DerivedEdgeLabelDimensions } from "./edge-label-layouter"
 
@@ -91,7 +90,7 @@ function connect(idFrom: string, idTo: string, g: OriginalGraph) {
 
 describe('Layout', () => {
   it('Test with intermediate nodes', () => {
-    const g = new Graph<OriginalNode, OriginalEdge>()
+    const g = createOriginalGraph()
     addNode('Start', 'Text of Start', g)
     addNode('N1', 'Text of N1', g)
     addNode('N2', 'Text of N2', g)
@@ -133,7 +132,7 @@ describe('Layout', () => {
   })
 
   it('When layers passed through by vertical line segments, then have according line segments', () => {
-    const g = new Graph<OriginalNode, OriginalEdge>()
+    const g = createOriginalGraph()
     addNode('Start', 'Text of Start', g)
     addNode('N1', 'Text of N1', g)
     addNode('N2', 'Text of N2', g)

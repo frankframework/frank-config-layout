@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Text } from '../public.api'
+import { Text } from './text'
 import { Graph } from './graph'
 import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser'
 
@@ -47,8 +47,13 @@ export interface OriginalEdge {
 
 export type OriginalGraph = Graph<OriginalNode, OriginalEdge>
 
+// For testing
+export function createOriginalGraph(): OriginalGraph {
+  return new Graph<OriginalNode, OriginalEdge>()
+}
+
 export function findErrorFlow(b: MermaidGraph): OriginalGraph {
-  const result = new Graph<OriginalNode, OriginalEdge>()
+  const result = createOriginalGraph()
   for (const n of b.nodes) {
     result.addNode(transformNode(n))
   }
