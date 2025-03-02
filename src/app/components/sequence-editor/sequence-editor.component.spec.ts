@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
-import { NodeSequenceEditor, ConcreteNodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
+import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
 import { createText } from '../../model/text'
 import { Graph } from '../../model/generic-graph'
 import { Node, Edge } from '../../public.api'
@@ -37,7 +37,7 @@ describe('SequenceEditorComponent', () => {
     connect('Start', 'N2', g)
     connect('N1', 'End', g)
     connect('N2', 'End', g)
-    const model: NodeSequenceEditor = new ConcreteNodeSequenceEditor(g)
+    const model: NodeSequenceEditor = new NodeSequenceEditor(g)
     model.omitNodeFrom(1)
     component.model = model
     const actual: ManualView = component.getManualView()

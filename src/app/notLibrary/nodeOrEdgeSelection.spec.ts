@@ -1,7 +1,7 @@
 import { Graph } from '../model/generic-graph'
 import { getRange } from "../util/util"
 import { LayoutBase } from "../model/layoutBase"
-import { NodeSequenceEditor, ConcreteNodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
+import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
 import { createText } from '../model/text'
 import { Node, Edge } from '../public.api'
@@ -69,7 +69,7 @@ describe('NodeOrEdgeSelection', () => {
     newNode('N2', 0, g)
     newNode('N3', 0, g)
     newNode('N4', 0, g)
-    const model = new ConcreteNodeSequenceEditor(g)
+    const model = new NodeSequenceEditor(g)
     // Omits N2
     expect(model.omitNodeFrom(1)).toEqual(UpdateResponse.ACCEPTED)
     const lb: LayoutBase = model.getShownNodesLayoutBase()
@@ -97,7 +97,7 @@ function getSelectionTestModel(): NodeSequenceEditor {
   connect('Start', 'N2', g)
   connect('N1', 'End', g)
   connect('N2', 'End', g)
-  return new ConcreteNodeSequenceEditor(g)
+  return new NodeSequenceEditor(g)
 }
 
 function checkNothingSelected(instance: NodeOrEdgeSelection, m: NodeSequenceEditor) {

@@ -17,7 +17,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
 import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
-import { ConcreteNodeSequenceEditor, NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
+import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
 import { NodeLayoutBuilder } from '../../graphics/node-layout';
 import { getDerivedEdgeLabelDimensions } from '../../graphics/edge-label-layouter';
@@ -134,7 +134,7 @@ export class FlowChartEditorComponent {
       alert('Could not assign layers to nodes: ' + e)
       return {model: null, error: (e as Error).message}
     }
-    return {model: new ConcreteNodeSequenceEditor(graphWithLayers), error: null}
+    return {model: new NodeSequenceEditor(graphWithLayers), error: null}
   }
 
   onSequenceEditorChanged() {

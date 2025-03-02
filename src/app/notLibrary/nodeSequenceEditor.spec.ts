@@ -1,9 +1,9 @@
-import { NodeSequenceEditor, ConcreteNodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
+import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
 import { createText } from "../model/text";
 import { Graph } from '../model/generic-graph'
 import { Node, Edge } from '../public.api'
 
-function getInstanceToCheckOrdering(): ConcreteNodeSequenceEditor {
+function getInstanceToCheckOrdering(): NodeSequenceEditor {
   const g = new Graph<Node, Edge<Node>>()
   g.addNode(newTestNode('1A', 0))
   g.addNode(newTestNode('5B', 0))
@@ -12,7 +12,7 @@ function getInstanceToCheckOrdering(): ConcreteNodeSequenceEditor {
   g.addNode(newTestNode('2E', 0))
   connect('1A','4C', g)
   connect('5B','2E', g)
-  return new ConcreteNodeSequenceEditor(g)
+  return new NodeSequenceEditor(g)
 }
 
 function newTestNode(id: string, layer: number): Node {
@@ -29,10 +29,10 @@ function connect(idFrom: string, idTo: string, g: Graph<Node, Edge<Node>>) {
   })
 }
 
-function getSimpleInstance(): ConcreteNodeSequenceEditor {
+function getSimpleInstance(): NodeSequenceEditor {
   const g = new Graph<Node, Edge<Node>>()
   addEdgesToSimple(g, simpleNodeToLayerMap())
-  return new ConcreteNodeSequenceEditor(g)
+  return new NodeSequenceEditor(g)
 }
 
 function addEdgesToSimple(g: Graph<Node, Edge<Node>>, nodeIdToLayer: Map<string, number>) {
@@ -73,7 +73,7 @@ describe('NodeSequenceEditor', () => {
   })
 
   it('Check properly initialized', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     checkInitialState(instance)
   })
 
@@ -94,7 +94,7 @@ describe('NodeSequenceEditor', () => {
   }
 
   it('Move node upward, rotating the nodes in between', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     // No need to test the permutation here so thoroughly because
     // the swapping is done based on the permutation. With a wrong
     // permutation, the swapping result would be wrong.
@@ -107,7 +107,7 @@ describe('NodeSequenceEditor', () => {
   })
 
   it('Move node downward, rotating the nodes in between', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     // No need to test the permutation here so thoroughly because
     // the swapping is done based on the permutation. With a wrong
     // permutation, the swapping result would be wrong.
@@ -120,7 +120,7 @@ describe('NodeSequenceEditor', () => {
   })
 
   it('Move node up to swap with adjacent', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     // No need to test the permutation here so thoroughly because
     // the swapping is done based on the permutation. With a wrong
     // permutation, the swapping result would be wrong.
@@ -138,13 +138,13 @@ describe('NodeSequenceEditor', () => {
   }
 
   it('Move node down to swap with adjacent', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     instance.rotateToSwap(4, 3)
     checkAfterSwapping(instance)
   })
 
   it('Omit node that is from node of edge', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     instance.omitNodeFrom(0)
     checkStateAfterOmittingPositionZero(instance)
   })
@@ -169,14 +169,14 @@ describe('NodeSequenceEditor', () => {
   }
 
   it('Omit node that is to node of edge', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     instance.omitNodeFrom(3)
     const cell03 = instance.getCell(0, 3)
     expect(cell03.getEdgeIfConnected()).toBe(null)
   })
 
   it('Check order of omitted nodes and reintroducing', () => {
-    const instance: ConcreteNodeSequenceEditor = getInstanceToCheckOrdering()
+    const instance: NodeSequenceEditor = getInstanceToCheckOrdering()
     // NodeSequenceEditor orders nodes by id
     // Original order is 1A, 5B, 4C, 3D, 2E
     expect(instance.getSequence().map(n => n?.id)).toEqual(['1A', '5B', '2E', '4C', '3D'])
@@ -199,20 +199,20 @@ describe('NodeSequenceEditor', () => {
   })
 
   it('Check rotateToSwap swapping same node does nothing', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     expect(instance.rotateToSwap(0, 0)).toEqual([0, 1, 2, 3, 4])
     checkInitialState(instance)
   })
 
   it('Check rotateToSwap swapping nodes from different layers is rejected', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     // Expect the permutation that does nothing
     expect(instance.rotateToSwap(0, 3)).toEqual([0, 1, 2, 3, 4])
     checkInitialState(instance)
   })
 
   it('Cannot reintroduce node at position that is filled', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     expect(instance.omitNodeFrom(0)).toBe(UpdateResponse.ACCEPTED)
     checkStateAfterOmittingPositionZero(instance)
     const node: Node = instance.graph.getNodeById('A')!
@@ -222,7 +222,7 @@ describe('NodeSequenceEditor', () => {
   })
 
   it('Cannot duplicate node by reintroducing it in an empty spot', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     expect(instance.omitNodeFrom(0)).toBe(UpdateResponse.ACCEPTED)
     checkStateAfterOmittingPositionZero(instance)
     expect(instance.reintroduceNode(0, instance.getSequence()[1]!)).toBe(UpdateResponse.REJECTED)
@@ -230,7 +230,7 @@ describe('NodeSequenceEditor', () => {
   })
 
   it('Cannot reintroduce node that belongs to different layer', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance()
+    const instance: NodeSequenceEditor = getSimpleInstance()
     expect(instance.omitNodeFrom(0)).toBe(UpdateResponse.ACCEPTED)
     expect(instance.omitNodeFrom(3)).toBe(UpdateResponse.ACCEPTED)
     checkStateAfterOmittingPositionsZeroAndThree(instance)
@@ -260,7 +260,7 @@ describe('NodeSequenceEditor', () => {
   }
 
   it('optionalPositionOfNode', () => {
-    const instance: ConcreteNodeSequenceEditor = getSimpleInstance();
+    const instance: NodeSequenceEditor = getSimpleInstance();
     ['A', 'B', 'E', 'C', 'D'].forEach((nodeId, expectedPosition) => {
       expect(instance.optionalPositionOfNode(nodeId)).toEqual(expectedPosition)
     })
@@ -287,7 +287,7 @@ describe('NodeSequenceEditor', () => {
     connect('N1', 'E3', g)
     connect('N2', 'E1', g)
     connect('N3', 'E2', g)
-    return new ConcreteNodeSequenceEditor(g)
+    return new NodeSequenceEditor(g)
   }
 
   it('When node is omitted then correct LayoutBase can still be extracted', () => {
