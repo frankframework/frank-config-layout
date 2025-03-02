@@ -16,22 +16,21 @@
 
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component'
-import { getGraphFromMermaid } from '../../parsing/mermaid-parser';
 import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
-import { NodeLayoutBuilder } from '../../graphics/node-layout';
-import { getDerivedEdgeLabelDimensions } from '../../graphics/edge-label-layouter';
-import { Layout, PlacedNode } from '../../graphics/edge-layout';
 import { Subject } from 'rxjs';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
-import { Connection, Graph, WithId } from '../../model/graph';
-import { LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH } from '../../public.api';
-import { Dimensions, getFactoryDimensions, Node, Edge } from '../../public.api'
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
-import { findErrorFlow, OriginalEdge, OriginalGraph, OriginalNode } from '../../model/error-flow';
-import { GraphConnectionsDecorator } from '../../../../dist/src/app/model/graph';
-import { LayerNumberAlgorithm, NodeSequenceEditorBuilder, CreationReason } from '../../../../dist/src/app/model/horizontalGrouping';
-import { assignHorizontalLayerNumbers, calculateLayerNumbers, GraphForLayers } from '../../model/horizontalGrouping';
+import { Connection, Graph, WithId,
+  getGraphFromMermaid,
+  findErrorFlow, OriginalEdge, OriginalGraph, OriginalNode,
+  Node, Edge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
+  assignHorizontalLayerNumbers, calculateLayerNumbers, GraphForLayers,
+  Dimensions, getFactoryDimensions,
+  NodeLayoutBuilder,
+  getDerivedEdgeLabelDimensions,
+  Layout, PlacedNode
+} from '../../public.api';
 
 export interface NodeSequenceEditorOrError {
   model: NodeSequenceEditor | null

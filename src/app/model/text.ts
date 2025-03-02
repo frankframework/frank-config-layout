@@ -14,7 +14,12 @@
    limitations under the License.
 */
 
-import { Text } from '../public.api'
+export interface Text {
+  readonly html: string
+  readonly lines: string[]
+  readonly numLines: number
+  readonly maxLineLength: number
+}
 
 export function createText(originalHtml: string | undefined): Text {
   let lines: string[] = []

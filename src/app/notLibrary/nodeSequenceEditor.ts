@@ -21,11 +21,8 @@
 // Managing how to choose the sequence of nodes within a layer is also
 // supported here.
 
-import { getRange, rotateToSwapItems, permutationFrom } from '../util/util'
-import { LayoutBase } from '../model/layoutBase'
-import { Node, Edge, OptionalNode, OptionalEdge } from '../public.api'
-// This is not OK
-import { Graph } from '../model/graph'
+import { getRange, rotateToSwapItems, permutationFrom,
+  Graph, Node, Edge, OptionalNode, OptionalEdge, LayoutBase } from '../public.api'
 
 export enum UpdateResponse {
   ACCEPTED = "accepted",

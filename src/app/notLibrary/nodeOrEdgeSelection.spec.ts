@@ -1,10 +1,6 @@
-import { Graph } from '../model/graph'
-import { getRange } from "../util/util"
-import { LayoutBase } from "../model/layoutBase"
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
-import { createText } from '../model/text'
-import { Node, Edge } from '../public.api'
+import { getRange, createText, Graph, Node, Edge, LayoutBase } from '../public.api'
 
 describe('NodeOrEdgeSelection', () => {
   it ('Select position and undo again', () => {

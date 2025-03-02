@@ -16,15 +16,14 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
-import { LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning } from '../../model/layoutBase'
 import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../notLibrary/nodeSequenceEditor';
 import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
-import { getRange } from '../../util/util';
 import { Observable, Subscription } from 'rxjs';
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
-import { NodeOrEdge } from '../../model/graph';
-import { getKey } from '../../model/graph'
-import { Node, Edge } from '../../public.api'
+import { getRange,
+  Node, Edge, NodeOrEdge, getKey,
+  LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning
+} from '../../public.api'
 
 interface Tab {
   id: string,

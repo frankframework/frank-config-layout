@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Node, Edge } from '../public.api'
+import { Node } from '../public.api'
 
 export enum NodeCaptionChoice {
   ID = "id",

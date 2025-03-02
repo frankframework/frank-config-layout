@@ -80,32 +80,15 @@ export async function mermaid2svgStatistics(mermaid: string): Promise<SvgResult>
  * the intended outputs of the library.
  */
 
-export interface Text {
-  readonly html: string
-  readonly lines: string[]
-  readonly numLines: number
-  readonly maxLineLength: number
-}
-
-export interface Node {
-  readonly id: string
-  readonly text: string
-  readonly isError: boolean
-  readonly layer: number
-  readonly isIntermediate: boolean
-}
-
-export type OptionalNode = Node | null
-
-export interface Edge<TNode extends Node> {
-  readonly from: TNode
-  readonly to: TNode
-  readonly text: Text
-  readonly isError: boolean
-  readonly isIntermediate: boolean
-}
-
-export type OptionalEdge = Edge<Node> | null
-
-export const LAYERS_FIRST_OCCURING_PATH = 0
-export const LAYERS_LONGEST_PATH = 1
+export { getRange, rotateToSwapItems, permutationFrom } from './util/util'
+export { Connection, Graph, WithId, NodeOrEdge, getKey } from './model/graph'
+export { Text, createText } from './model/text'
+export { getGraphFromMermaid } from './parsing/mermaid-parser'
+export { findErrorFlow, OriginalEdge, OriginalGraph, OriginalNode } from './model/error-flow'
+export { Node, Edge, OptionalNode, OptionalEdge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
+  assignHorizontalLayerNumbers, calculateLayerNumbers, GraphForLayers
+} from './model/horizontalGrouping'
+export { LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning } from './model/layoutBase'
+export { NodeLayoutBuilder } from './graphics/node-layout'
+export { getDerivedEdgeLabelDimensions} from './graphics/edge-label-layouter'
+export { Layout, PlacedNode, EdgeLabel } from './graphics/edge-layout'

@@ -15,9 +15,32 @@
 */
 
 import { getRange } from '../util/util'
+import { Text } from './text'
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow'
 import { Graph } from './graph'
-import { Node, Edge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH } from '../public.api'
+
+export interface Node {
+  readonly id: string
+  readonly text: string
+  readonly isError: boolean
+  readonly layer: number
+  readonly isIntermediate: boolean
+}
+
+export type OptionalNode = Node | null
+
+export interface Edge<TNode extends Node> {
+  readonly from: TNode
+  readonly to: TNode
+  readonly text: Text
+  readonly isError: boolean
+  readonly isIntermediate: boolean
+}
+
+export type OptionalEdge = Edge<Node> | null
+
+export const LAYERS_FIRST_OCCURING_PATH = 0
+export const LAYERS_LONGEST_PATH = 1
 
 export interface NodeImpl extends Node {
   readonly passDirection?: number

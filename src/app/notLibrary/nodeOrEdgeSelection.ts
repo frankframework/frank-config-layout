@@ -15,8 +15,7 @@
 */
 
 import { NodeSequenceEditor } from "./nodeSequenceEditor"
-import { getKey } from '../model/graph'
-import { Node, Edge, OptionalNode, OptionalEdge } from '../public.api'
+import { Node, Edge, getKey, OptionalNode, OptionalEdge } from '../public.api'
 
 // If a node has been selected, all its incoming and outgoing
 // edges should also be highlighted.

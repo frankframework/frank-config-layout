@@ -1,7 +1,5 @@
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
-import { createText } from "../model/text";
-import { Graph } from '../model/graph'
-import { Node, Edge } from '../public.api'
+import { createText, Graph, Node, Edge } from '../public.api'
 
 function getInstanceToCheckOrdering(): NodeSequenceEditor {
   const g = new Graph<Node, Edge<Node>>()
