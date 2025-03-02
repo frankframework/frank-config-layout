@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
 import { NodeSequenceEditor } from '../../notLibrary/nodeSequenceEditor';
 import { Subject } from 'rxjs';
-import { createText, Graph, Node, Edge } from '../../public.api'
+import { createText, GraphForLayers, createGraphForLayers, Edge, PASS_DIRECTION_DOWN } from '../../public.api'
 
 describe('SequenceEditorComponent', () => {
   let component: SequenceEditorComponent;
@@ -25,7 +25,7 @@ describe('SequenceEditorComponent', () => {
   });
 
   it('Should create correct View', () => {
-    const g = new Graph<Node, Edge<Node>>()
+    const g = createGraphForLayers()
     addNode('Start', 0, g)
     addNode('N1', 1, g)
     addNode('N2', 1, g)
@@ -42,15 +42,16 @@ describe('SequenceEditorComponent', () => {
     expect(actual).toEqual(expected)
   })
 
-  function addNode(id: string, layer: number, g: Graph<Node, Edge<Node>>) {
+  function addNode(id: string, layer: number, g: GraphForLayers) {
     g.addNode({
       id, layer, isError: false, isIntermediate: false, text: ''
     })
   }
 
-  function connect(idFrom: string, idTo: string, g: Graph<Node, Edge<Node>>) {
+  function connect(idFrom: string, idTo: string, g: GraphForLayers) {
     g.addEdge({
-      from: g.getNodeById(idFrom), to: g.getNodeById(idTo), isError: false, isIntermediate: false, text: createText(undefined)
+      from: g.getNodeById(idFrom), to: g.getNodeById(idTo), isError: false, isIntermediate: false, text: createText(undefined),
+      isFirstSegment: false, isLastSegment: false, passDirection: PASS_DIRECTION_DOWN
     })
   }
 

@@ -22,7 +22,8 @@
 // supported here.
 
 import { getRange, rotateToSwapItems, permutationFrom,
-  Graph, Node, Edge, OptionalNode, OptionalEdge, LayoutBase } from '../public.api'
+  Node, Edge, OptionalNode, OptionalEdge, LayoutBase, 
+  GraphForLayers} from '../public.api'
 
 export enum UpdateResponse {
   ACCEPTED = "accepted",
@@ -46,7 +47,7 @@ export class NodeSequenceEditor {
 
   constructor(
     // Not modified, no need to copy
-    readonly graph: Graph<Node, Edge<Node>>
+    readonly graph: GraphForLayers
   ) {
     const initialSequence: string[] = graph.nodes.map(n => n.id)
     const numLayers = Math.max( ... graph.nodes.map(n => n.layer)) + 1
@@ -286,7 +287,7 @@ class ConcreteNodeSequenceCell implements NodeSequenceEditorCell {
   }
 }
 
-function calculateLayerStartPositions(sequence: readonly string[], g: Graph<Node, Edge<Node>>): number[] {
+function calculateLayerStartPositions(sequence: readonly string[], g: GraphForLayers): number[] {
   let layerStartPositions: number[] = []
   if (sequence.length > 0) {
     let previousLayer = -1

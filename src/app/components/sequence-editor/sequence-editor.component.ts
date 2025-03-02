@@ -21,8 +21,9 @@ import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
 import { Observable, Subscription } from 'rxjs';
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
 import { getRange,
-  Node, Edge, NodeOrEdge, getKey,
-  LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning
+  Edge, NodeOrEdge, getKey,
+  LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning,
+  NodeOrEdgeForLayers
 } from '../../public.api'
 
 interface Tab {
@@ -127,7 +128,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     if (context.model === null) {
       return
     }
-    const item: NodeOrEdge<Node, Edge<Node>> = context.model!.getGraph().parseNodeOrEdgeId(itemClicked)
+    const item: NodeOrEdgeForLayers = context.model!.getGraph().parseNodeOrEdgeId(itemClicked)
     if (item.optionalEdge !== null) {
       context.selectEdgeKey(getKey(item.optionalEdge!))
     }

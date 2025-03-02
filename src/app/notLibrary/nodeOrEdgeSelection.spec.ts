@@ -1,6 +1,6 @@
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor"
 import { NodeOrEdgeSelection } from "./nodeOrEdgeSelection"
-import { getRange, createText, Graph, Node, Edge, LayoutBase } from '../public.api'
+import { getRange, createText, Edge, LayoutBase, createGraphForLayers, GraphForLayers, PASS_DIRECTION_DOWN } from '../public.api'
 
 describe('NodeOrEdgeSelection', () => {
   it ('Select position and undo again', () => {
@@ -60,7 +60,7 @@ describe('NodeOrEdgeSelection', () => {
   })
 
   it('When changed sequence from layoutBase is put back in model with omitted nodes, permutation correctly updates index of some selected node', () => {
-    const g = new Graph<Node, Edge<Node>>()
+    const g = createGraphForLayers()
     newNode('N1', 0, g)
     newNode('N2', 0, g)
     newNode('N3', 0, g)
@@ -84,7 +84,7 @@ describe('NodeOrEdgeSelection', () => {
 })
 
 function getSelectionTestModel(): NodeSequenceEditor {
-  const g = new Graph<Node, Edge<Node>>()
+  const g = createGraphForLayers()
   newNode('Start', 0, g)
   newNode('N1', 1, g)
   newNode('N2', 1, g)
@@ -178,16 +178,19 @@ function checkEdgeStartN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: Nod
   })
 }
 
-function newNode(id: string, layer: number, g: Graph<Node, Edge<Node>>) {
+function newNode(id: string, layer: number, g: GraphForLayers) {
   g.addNode({id, layer, text: '', isError: false, isIntermediate: false})
 }
 
-function connect(idFrom: string, idTo: string, g: Graph<Node, Edge<Node>>) {
+function connect(idFrom: string, idTo: string, g: GraphForLayers) {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
     isError: false,
     isIntermediate: false,
-    text: createText(undefined)
+    text: createText(undefined),
+    isFirstSegment: false,
+    isLastSegment: false,
+    passDirection: PASS_DIRECTION_DOWN
   })
 }

@@ -21,10 +21,9 @@ import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
 import { Subject } from 'rxjs';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
 import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
-import { Connection, Graph, WithId,
-  getGraphFromMermaid,
-  findErrorFlow, OriginalEdge, OriginalGraph, OriginalNode,
-  Node, Edge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
+import { getGraphFromMermaid,
+  findErrorFlow, OriginalGraph,
+  Edge, LAYERS_FIRST_OCCURING_PATH, LAYERS_LONGEST_PATH,
   assignHorizontalLayerNumbers, calculateLayerNumbers, GraphForLayers,
   Dimensions, getFactoryDimensions,
   NodeLayoutBuilder,
@@ -37,8 +36,8 @@ export interface NodeSequenceEditorOrError {
   error: string | null
 }
 
-export interface GraphOrError<T extends WithId, U extends Connection<T>> {
-  graph: Graph<T, U> | null
+export interface OriginalGraphOrError {
+  graph: OriginalGraph | null
   error: string | null
 }
 
@@ -94,7 +93,7 @@ export class FlowChartEditorComponent {
   }
 
   loadMermaid(algorithm: number) {
-    const graphOrError: GraphOrError<OriginalNode, OriginalEdge> = this.mermaid2graph(this.mermaidText)
+    const graphOrError: OriginalGraphOrError = this.mermaid2graph(this.mermaidText)
     if (graphOrError.error !== null) {
       alert(graphOrError.error)
       return
@@ -102,7 +101,7 @@ export class FlowChartEditorComponent {
     this.loadGraph(graphOrError.graph!, algorithm);
   }
 
-  loadGraph(graph: Graph<OriginalNode, OriginalEdge>, algorithm: number) {
+  loadGraph(graph: OriginalGraph, algorithm: number) {
     const modelOrError: NodeSequenceEditorOrError = this.graph2Model(graph, algorithm);
     if (modelOrError.error !== null) {
       alert(modelOrError.error)
@@ -113,7 +112,7 @@ export class FlowChartEditorComponent {
     this.updateDrawing()
   }
 
-  mermaid2graph(text: string): GraphOrError<OriginalNode, OriginalEdge> {
+  mermaid2graph(text: string): OriginalGraphOrError {
     let graph: OriginalGraph
     try {
       const b = getGraphFromMermaid(text)
@@ -124,9 +123,9 @@ export class FlowChartEditorComponent {
     return {graph, error: null}
   }
 
-  graph2Model(graph: Graph<OriginalNode, OriginalEdge>, algorithm: number): NodeSequenceEditorOrError {
+  graph2Model(graph: OriginalGraph, algorithm: number): NodeSequenceEditorOrError {
     const layerMap: Map<string, number> = calculateLayerNumbers(graph, algorithm)
-    let graphWithLayers: Graph<Node, Edge<Node>>
+    let graphWithLayers: GraphForLayers
     try {
       graphWithLayers = assignHorizontalLayerNumbers(graph, layerMap)
     } catch(e) {

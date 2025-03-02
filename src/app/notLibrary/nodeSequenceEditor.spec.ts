@@ -1,8 +1,8 @@
 import { NodeSequenceEditor, UpdateResponse } from "./nodeSequenceEditor";
-import { createText, Graph, Node, Edge } from '../public.api'
+import { createText, Node, Edge, createGraphForLayers, GraphForLayers, PASS_DIRECTION_DOWN } from '../public.api'
 
 function getInstanceToCheckOrdering(): NodeSequenceEditor {
-  const g = new Graph<Node, Edge<Node>>()
+  const g = createGraphForLayers()
   g.addNode(newTestNode('1A', 0))
   g.addNode(newTestNode('5B', 0))
   g.addNode(newTestNode('4C', 1))
@@ -17,23 +17,26 @@ function newTestNode(id: string, layer: number): Node {
   return {id, layer, text: '', isError: false, isIntermediate: false}
 }
 
-function connect(idFrom: string, idTo: string, g: Graph<Node, Edge<Node>>) {
+function connect(idFrom: string, idTo: string, g: GraphForLayers) {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
     isError: false,
     isIntermediate: false,
-    text: createText(undefined)
+    text: createText(undefined),
+    isFirstSegment: false,
+    isLastSegment: false,
+    passDirection: PASS_DIRECTION_DOWN
   })
 }
 
 function getSimpleInstance(): NodeSequenceEditor {
-  const g = new Graph<Node, Edge<Node>>()
+  const g = createGraphForLayers()
   addEdgesToSimple(g, simpleNodeToLayerMap())
   return new NodeSequenceEditor(g)
 }
 
-function addEdgesToSimple(g: Graph<Node, Edge<Node>>, nodeIdToLayer: Map<string, number>) {
+function addEdgesToSimple(g: GraphForLayers, nodeIdToLayer: Map<string, number>) {
   g.addNode(newTestNode('A', nodeIdToLayer.get('A')!))
   g.addNode(newTestNode('B', nodeIdToLayer.get('B')!))
   g.addNode(newTestNode('C', nodeIdToLayer.get('C')!))
@@ -270,7 +273,7 @@ describe('NodeSequenceEditor', () => {
   // See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
   // for the graphical representation of this layout.
   function getOtherNodeSequenceEditor(): NodeSequenceEditor {
-    const g = new Graph<Node, Edge<Node>>()
+    const g = createGraphForLayers()
     g.addNode(newTestNode('S1', 0))
     g.addNode(newTestNode('S2', 0))
     g.addNode(newTestNode('N1', 1))

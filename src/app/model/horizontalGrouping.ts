@@ -17,7 +17,7 @@
 import { getRange } from '../util/util'
 import { Text } from './text'
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow'
-import { Graph } from './graph'
+import { Graph, NodeOrEdge } from './graph'
 
 export interface Node {
   readonly id: string
@@ -39,6 +39,8 @@ export interface Edge<TNode extends Node> {
 
 export type OptionalEdge = Edge<Node> | null
 
+export type NodeOrEdgeForLayers = NodeOrEdge<Node, Edge<Node>>
+
 export const LAYERS_FIRST_OCCURING_PATH = 0
 export const LAYERS_LONGEST_PATH = 1
 
@@ -56,6 +58,11 @@ export const PASS_DIRECTION_DOWN = 0
 export const PASS_DIRECTION_UP = 1
 
 export type GraphForLayers = Graph<NodeImpl, EdgeImpl>
+
+// For unit tests
+export function createGraphForLayers(): GraphForLayers {
+  return new Graph<NodeImpl, EdgeImpl>()
+}
 
 export function assignHorizontalLayerNumbers(original: OriginalGraph, nodeIdToLayer: Map<string, number>): GraphForLayers {
   let intermediateNodeSeq: number = 1

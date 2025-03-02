@@ -31,7 +31,6 @@ export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   intermediateLayerPassedByVerticalLine: boolean
 }
 
-// TODO: Bring to public api.
 export class PlacedNode implements NodeImpl {
   readonly horizontalBox: Interval
   readonly verticalBox: Interval
