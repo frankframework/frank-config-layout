@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "FlowChartEditor": {
+    "angular-library-playground": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/flow-chart-editor",
+            "outputPath": "dist/angular-library-playground",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "FlowChartEditor:build:production"
+              "buildTarget": "angular-library-playground:build:production"
             },
             "development": {
-              "buildTarget": "FlowChartEditor:build:development"
+              "buildTarget": "angular-library-playground:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -73,11 +73,11 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "FlowChartEditor:build"
+            "buildTarget": "angular-library-playground:build"
           }
         },
         "test": {
-          "builder": "@angular-builders/custom-webpack:karma",
+          "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
               "zone.js",
@@ -92,16 +92,29 @@
             "styles": [
               "src/styles.scss"
             ],
-            "customWebpackConfig": {
-              "path": "webpack.conf.ts"
-            },
             "scripts": []
           }
         }
       }
+    },
+    "frank-config-layout": {
+      "projectType": "library",
+      "root": "projects/frank-config-layout",
+      "sourceRoot": "projects/frank-config-layout/src",
+      "prefix": "frank-config-layout",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/frank-config-layout/ng-package.json"
+          }
+        }
+      }
     }
-  },
-  "cli": {
-    "analytics": false
   }
 }
