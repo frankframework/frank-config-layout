@@ -16,12 +16,13 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop'
-import { LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning } from '../../model/layoutBase'
-import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../model/nodeSequenceEditor';
-import { NodeOrEdgeSelection } from '../../model/nodeOrEdgeSelection';
-import { getRange } from '../../util/util';
-import { NodeCaptionChoice, NodeOrEdge, getCaption } from '../../model/graph';
 import { Observable, Subscription } from 'rxjs';
+import { NodeSequenceEditor, NodeSequenceEditorCell } from '../../notLibrary/nodeSequenceEditor';
+import { NodeOrEdgeSelection } from '../../notLibrary/nodeOrEdgeSelection';
+import { getCaption, NodeCaptionChoice } from '../../notLibrary/misc';
+import { getRange, getKey, LayoutBase, getNumCrossings, alignFromLayer, calculateNumCrossingsChangesFromAligning,
+  NodeOrEdgeForLayers
+} from '../../public.api'
 
 interface Tab {
   id: string,
@@ -125,12 +126,12 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     if (context.model === null) {
       return
     }
-    const item: NodeOrEdge = context.model!.parseNodeOrEdgeId(itemClicked)
+    const item: NodeOrEdgeForLayers = context.model!.getGraph().parseNodeOrEdgeId(itemClicked)
     if (item.optionalEdge !== null) {
-      context.selectEdgeKey(item.optionalEdge.getKey())
+      context.selectEdgeKey(getKey(item.optionalEdge!))
     }
     if (item.optionalNode !== null) {
-      context.selectNodeId(item.optionalNode.getId())
+      context.selectNodeId(item.optionalNode!.id)
     }
   }
 
@@ -160,7 +161,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     if (this.model !== null) {
       const target = $event.target as HTMLSelectElement
       const option: string = target.value
-      this.model!.reintroduceNode(position, this.model.getNodeById(option)!)
+      this.model!.reintroduceNode(position, this.model.getGraph().getNodeById(option)!)
       this.updateViews()
       this.onChanged.emit(true)
     }
@@ -270,7 +271,7 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
       position: index,
       nodeId: node === null ? null : getCaption(node, this.captionChoice),
       backgroundClass: this.model!.getLayerOfPosition(index) % 2 === 1 ? BackgroundClass.ODD : BackgroundClass.EVEN,
-      fillOptions: node !== null ? [] : this.model!.getOrderedOmittedNodesInLayer(this.model!.getLayerOfPosition(index)).map(omitted => omitted.getId()),
+      fillOptions: node !== null ? [] : this.model!.getOrderedOmittedNodesInLayer(this.model!.getLayerOfPosition(index)).map(omitted => omitted.id),
       selected
     }
   }

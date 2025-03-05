@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { DimensionsEditorComponent } from './dimensions-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DimensionsEditorComponent } from './dimensions-editor.component';
 
 describe('DimensionsEditorComponent', () => {
   let component: DimensionsEditorComponent;

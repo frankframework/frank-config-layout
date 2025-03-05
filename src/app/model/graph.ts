@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,233 +14,172 @@
    limitations under the License.
 */
 
-// Holds a graph, a set of nodes and edges. No data here on how to layout nodes and edges
-
-export interface GraphBase {
-  getNodes(): readonly Node[]
-  getNodeById(id: string): Node | undefined
-  getEdges(): readonly Edge[]
-  getEdgeByKey(id: string): Edge | undefined
-  parseNodeOrEdgeId(id: string): NodeOrEdge
+export interface WithId {
+  id: string
 }
 
-export interface Graph extends GraphBase {
-  getOrderedEdgesStartingFrom(startNode: Node): readonly Edge[]
-  getOrderedEdgesLeadingTo(endNode: Node): readonly Edge[]
-  getSuccessors(node: Node): readonly Node[]
-  getPredecessors(node: Node): readonly Node[]
+export interface Connection<T extends WithId> {
+  readonly from: T,
+  readonly to: T,
 }
 
-export class ConcreteGraphBase implements GraphBase {
-  private nodes: Node[] = []
-  private nodesById: Map<string, Node> = new Map()
-  private edges: Edge[] = []
-  private edgesByKey: Map<string, Edge> = new Map()
+export interface NodeOrEdge<T extends WithId, U extends Connection<T>> {
+  optionalNode: T | undefined
+  optionalEdge: U | undefined
+}
 
-  getNodes(): readonly Node[] {
-    return this.nodes
+export function getKey<T extends WithId>(c: Connection<T>): string {
+  return keyFor(c.from.id, c.to.id)
+}
+
+function keyFor(idFrom: string, idTo: string): string {
+  return idFrom + '-' + idTo
+}
+
+/*
+ * A set of nodes of type T and a set of connections of type U
+ *
+ * Usage:
+ *
+ * Use addNode() and addEdge() to set the nodes and the edges.
+ * Use the existing node objects for the 'from' and 'to' properties
+ * of each edge connecting them. When two edges connect to or from
+ * the same node, the referred node object should be the same.
+ *
+ * Add all the nodes or edges before using the other methods of
+ * this class. For example, do not add a new node after asking the
+ * successors of some node.
+ */
+export class Graph<T extends WithId, U extends Connection<T>> {
+  readonly _nodes: T[] = []
+  private _edges: U[] = []
+  private _nodesById: Map<string, T> = new Map()
+  private _edgesByKey: Map<string, U> = new Map()
+  private _startingFrom: Map<string, U[]> | undefined
+  private _leadingTo: Map<string, U[]> | undefined
+
+  constructor() {
   }
 
-  getNodeById(id: string): Node | undefined {
-    return this.nodesById.get(id)
-  }
-
-  getEdges(): readonly Edge[] {
-    return this.edges
-  }
-
-  getEdgeByKey(key: string): Edge | undefined {
-    return this.edgesByKey.get(key)
-  }
-
-  parseNodeOrEdgeId(id: string): NodeOrEdge {
-    if (id.indexOf('-') >= 0) {
-      const rawEdge: Edge | undefined = this.getEdgeByKey(id)
-      return {
-        optionalNode: null,
-        optionalEdge: rawEdge === undefined ? null : rawEdge
-      }
-    } else {
-      const rawNode: Node | undefined = this.getNodeById(id)
-      return {
-        optionalNode: rawNode === undefined ? null : rawNode,
-        optionalEdge: null
-      }
+  addNode(node: T) {
+    if(this._nodesById.has(node.id)) {
+      throw new Error(`Cannot put node with id ${node.id} because this id is already present`)
     }
+    this._nodes.push(node)
+    this._nodesById.set(node.id, node)
   }
-
-  addNode(id: string, text: string, style: string) {
-    if (id.includes('-')) {
-      throw new Error(`Node id [${id}] is illegal because it contains '-'`)
-    }
-    const seq = this.nodes.length
-    const node = new ConcreteNode(seq, id, text, style)
-    this.addExistingNode(node)
-  }
-
-  addExistingNode(node: Node) {
-    let id = node.getId()
-    if(this.nodesById.has(id)) {
-      throw new Error(`Cannot put node with id ${id} because this id is already present`)
-    }
-    this.nodes.push(node)
-    this.nodesById.set(id, node)
-  }
-  connect(from: Node, to: Node, text?: string) {
-    const seq = this.edges.length
-    const edge = new ConcreteEdge(seq, from, to, text)
-    this.addEdge(edge)
-  }
-
-  addEdge(existingEdge: Edge) {
-    this.checkEdgeRefersToExistingNodes(existingEdge)
-    const key: string = existingEdge.getKey()
-    if (this.edgesByKey.has(key)) {
+  
+  addEdge(edge: U) {
+    this.checkEdgeRefersToExistingNodes(edge)
+    const key: string = getKey(edge)
+    if (this._edgesByKey.has(key)) {
       throw new Error(`Cannot add existing edge with key ${key} because that connection is present already`)
     }
-    this.edges.push(existingEdge)
-    this.edgesByKey.set(key, existingEdge)
+    this._edges.push(edge)
+    this._edgesByKey.set(key, edge)
   }
 
-  private checkEdgeRefersToExistingNodes(edge: Edge) {
-    const key = edge.getKey()
-    if (! this.nodesById.has(edge.getFrom().getId())) {
+  private checkEdgeRefersToExistingNodes(edge: U) {
+    const key = getKey(edge)
+    if (! this._nodesById.has(edge.from.id)) {
       throw new Error(`Illegal edge with key ${key} because referred from node is not in this graph`)
     }
-    if( ! this.nodesById.has(edge.getTo().getId())) {
+    if( ! this._nodesById.has(edge.to.id)) {
       throw new Error(`Illegal edge with key ${key} because referred to node is not in this graph`)
     }
   }
+
+  get nodes(): readonly T[] {
+    return this._nodes
+  }
+
+  getNodeById(id: string): T {
+    if (! this._nodesById.has(id)) {
+      throw new Error(`Graph does not have a node with id: ${id}`)
+    }
+    return this._nodesById.get(id)!
+  }
+
+  get edges(): readonly U[] {
+    return this._edges
+  }
+
+  getEdgeByKey(key: string): U {
+    if (! this._edgesByKey.has(key)) {
+      throw new Error(`Graph does not have an edge with key: ${key}`)
+    }
+    return this._edgesByKey.get(key)!
+  }
+
+  // TODO: Unit test this.
+  searchEdge(idFrom: string, idTo: string): U | undefined {
+    const key = keyFor(idFrom, idTo)
+    return this._edgesByKey.get(key)
+  }
+
+  parseNodeOrEdgeId(id: string): NodeOrEdge<T, U> {
+    if (id.indexOf('-') >= 0) {
+      if (this._edgesByKey.has(id)) {
+        return {
+          optionalNode: undefined,
+          optionalEdge: this.getEdgeByKey(id)
+        }
+      } else {
+        return {
+          optionalNode: undefined,
+          optionalEdge: undefined
+        }
+      }
+    } else {
+      if (this._nodesById.has(id)) {
+        return {
+          optionalNode: this.getNodeById(id),
+          optionalEdge: undefined
+        }
+      } else {
+        return {
+          optionalNode: undefined,
+          optionalEdge: undefined
+        }
+      }
+    }
+  }
+
+  private initIfNeeded() {
+    if (this._startingFrom !== undefined) {
+      return
+    }
+    this._startingFrom = new Map<string, U[]>
+    this._leadingTo = new Map<string, U[]>
+    for (const node of this._nodes) {
+      this._startingFrom.set(node.id, [])
+      this._leadingTo.set(node.id, [])
+    }
+    for (const edge of this._edges) {
+      const fromId = edge.from.id
+      const toId = edge.to.id
+      this._startingFrom.get(fromId)!.push(edge)
+      this._leadingTo.get(toId)!.push(edge)
+    }
+  }
+
+  getOrderedEdgesStartingFrom(startNode: T): readonly U[] {
+    this.initIfNeeded()
+    return this._startingFrom!.get(startNode.id)!
+  }
+
+  getOrderedEdgesLeadingTo(endNode: T): readonly U[] {
+    this.initIfNeeded()
+    return this._leadingTo!.get(endNode.id)!
+  }
+
+  getSuccessors(node: T): readonly T[] {
+    this.initIfNeeded()
+    return this.getOrderedEdgesStartingFrom(node).map(edge => edge.to)
+  }
+
+  getPredecessors(node: T): readonly T[] {
+    this.initIfNeeded()
+    return this.getOrderedEdgesLeadingTo(node).map(edge => edge.from)
+  } 
 }
-
-export class GraphConnectionsDecorator implements Graph {
-  private startingFrom: Map<string, Edge[]>;
-  private leadingTo: Map<string, Edge[]>;
-
-  constructor(
-    private delegate: GraphBase
-  ) {
-    this.startingFrom = new Map<string, Edge[]>
-    this.leadingTo = new Map<string, Edge[]>
-    this.getNodes().forEach(node => {
-      this.startingFrom.set(node.getId(), [])
-      this.leadingTo.set(node.getId(), [])
-    })
-    this.getEdges().forEach(edge => {
-      const fromId = edge.getFrom().getId()
-      const toId = edge.getTo().getId()
-      this.startingFrom.get(fromId)!.push(edge)
-      this.leadingTo.get(toId)!.push(edge)
-    });
-  }
-
-  getNodes(): readonly Node[] {
-    return this.delegate.getNodes()
-  }
-
-  getNodeById(id: string): Node | undefined {
-    return this.delegate.getNodeById(id)
-  }
-
-  getEdges(): readonly Edge[] {
-    return this.delegate.getEdges()
-  }
-
-  getEdgeByKey(key: string): Edge | undefined {
-    return this.delegate.getEdgeByKey(key)
-  }
-
-  parseNodeOrEdgeId(id: string): NodeOrEdge {
-    return this.delegate.parseNodeOrEdgeId(id)
-  }
-
-  getOrderedEdgesStartingFrom(startNode: Node): readonly Edge[] {
-    return this.startingFrom!.get(startNode.getId())!
-  }
-
-  getOrderedEdgesLeadingTo(endNode: Node): readonly Edge[] {
-    return this.leadingTo!.get(endNode.getId())!
-  }
-
-  getSuccessors(node: Node): readonly Node[] {
-    return this.getOrderedEdgesStartingFrom(node).map(edge => edge.getTo())
-  }
-
-  getPredecessors(node: Node): readonly Node[] {
-    return this.getOrderedEdgesLeadingTo(node).map(edge => edge.getFrom())
-  }
-}
-
-export interface Node {
-  getId(): string
-  // GUI components should be able to show the text of a node if available
-  getText(): string
-}
-
-export class ConcreteNode implements Node {
-  constructor(
-    readonly sequence: number,
-    readonly id: string,
-    readonly text: string,
-    readonly style: string
-  ) {}
-
-  getId(): string {
-    return this.id
-  }
-
-  getText() {
-    return this.text
-  }
-}
-
-export function getEdgeKey(from: Node, to: Node): string {
-  return from.getId() + '-' + to.getId();
-}
-
-export interface Edge {
-  getFrom(): Node
-  getTo(): Node
-  getKey(): string
-}
-
-export class ConcreteEdge implements Edge {
-  constructor(
-    readonly seq: number,
-    readonly from: Node,
-    readonly to: Node,
-    readonly text?: string
-  ) {}
-
-  getFrom(): Node {
-    return this.from
-  }
-
-  getTo(): Node {
-    return this.to
-  }
-
-  getKey(): string {
-    return getEdgeKey(this.getFrom(), this.getTo())
-  }
-}
-
-export interface NodeOrEdge {
-  optionalNode: OptionalNode
-  optionalEdge: OptionalEdge
-}
-
-export enum NodeCaptionChoice {
-  ID = "id",
-  TEXT = "text"
-}
-
-export function getCaption(n: Node, choice: NodeCaptionChoice): string {
-  switch (choice) {
-    case NodeCaptionChoice.ID: return n.getId()
-    case NodeCaptionChoice.TEXT: return n.getText()
-  }
-}
-
-export type OptionalNode = Node | null
-export type OptionalEdge = Edge | null

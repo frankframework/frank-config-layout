@@ -1,7 +1,7 @@
-import { Node, ConcreteGraphBase, Graph, GraphConnectionsDecorator, ConcreteNode, NodeCaptionChoice, getCaption } from './graph'
+import { WithId, Connection, Graph, getKey } from './graph'
 
-describe('Graph test', () => {
-  it('Calculation of outgoing and incoming edges', () => {
+describe('Generic graph', () => {
+  it('When a graph is created, the nodes and the edges are related correctly', () => {
     const g = getTestGraph()
     checkNodePointsTo("Start", ["N1", "N2"], g)
     checkNodeReachedFrom("Start", [], g)
@@ -17,69 +17,67 @@ describe('Graph test', () => {
     checkNodeReachedFrom("Unconnected", [], g)
   })
 
-  it('Parsing node or edge id, and check ConcreteEdge.getKey()', () => {
-    const g: Graph = getTestGraph()
-    expect(g.parseNodeOrEdgeId('Start').optionalNode).not.toEqual(null)
-    expect(g.parseNodeOrEdgeId('Start').optionalEdge).toEqual(null)
-    expect(g.parseNodeOrEdgeId('Start').optionalNode?.getId()).toEqual('Start')
-    expect(g.parseNodeOrEdgeId('Start-N1').optionalNode).toEqual(null)
-    expect(g.parseNodeOrEdgeId('Start-N1').optionalEdge!.getFrom().getId()).toEqual('Start')
-    expect(g.parseNodeOrEdgeId('Start-N1').optionalEdge!.getTo().getId()).toEqual('N1')
-    expect(g.parseNodeOrEdgeId('Start-N1').optionalEdge!.getKey()).toEqual('Start-N1')
-    expect(g.parseNodeOrEdgeId('Start-End').optionalNode).toEqual(null)
-    expect(g.parseNodeOrEdgeId('Start-End').optionalEdge).toEqual(null)
-    expect(g.parseNodeOrEdgeId('xyz').optionalNode).toEqual(null)
-    expect(g.parseNodeOrEdgeId('xyz').optionalEdge).toEqual(null)
-  })
-
-  function getTestGraph(): Graph {
-    const b: ConcreteGraphBase = new ConcreteGraphBase()
-    newNode('Start', b)
-    newNode('Unconnected', b)
-    newNode('N1', b)
-    newNode('N2', b)
-    newNode('N3', b)
-    newNode('End', b)
-    newEdge('Start', 'N1', b)
-    newEdge('Start', 'N2', b)
-    newEdge('N1', 'N3', b)
-    newEdge('N2', 'N3', b)
-    newEdge('N3', 'N2', b)
-    newEdge('N3', 'End', b)
-    return new GraphConnectionsDecorator(b)
-  }
-
-  function checkNodePointsTo(fromId: string, toIds: string[], g: Graph) {
-    const from: Node = g.getNodeById(fromId)!
-    const successors: readonly Node[] = g.getSuccessors(from)
-    expect(successors.map(n => n.getId())).toEqual(toIds)
-  }
-
-  function checkNodeReachedFrom(toId: string, fromIds: string[], g: Graph) {
-    let to: Node = g.getNodeById(toId)!
-    let predecessors: readonly Node[] = g.getPredecessors(to)
-    expect(predecessors.map(n => n.getId())).toEqual(fromIds)
-  }
-
-  function newNode(id: string, g: ConcreteGraphBase) {
-    g.addNode(id, '', '')
-  }
-
-  function newEdge(fromId: string, toId: string, g: ConcreteGraphBase) {
-    const from: Node | undefined = g.getNodeById(fromId)
-    const to: Node | undefined = g.getNodeById(toId)
-    if (from === undefined) {
-      throw new Error(`Invalid test case, node with id ${fromId} does not exist`)
-    }
-    if (to === undefined) {
-      throw new Error(`Invalid test case, node with id ${toId} does not exist`)
-    }
-    g.connect(from!, to!, '')
-  }
-
-  it('getCaption', () => {
-    const n = new ConcreteNode(0, 'myId', 'My text', '')
-    expect(getCaption(n, NodeCaptionChoice.ID)).toBe('myId')
-    expect(getCaption(n, NodeCaptionChoice.TEXT)).toBe('My text')
+  it('Parse node or edge id', () => {
+    const g: Graph<WithId, TestEdge> = getTestGraph()
+    expect(g.parseNodeOrEdgeId('Start').optionalEdge).toEqual(undefined)
+    expect(g.parseNodeOrEdgeId('Start').optionalNode?.id).toEqual('Start')
+    expect(g.parseNodeOrEdgeId('Start-N1').optionalNode).toEqual(undefined)
+    expect(g.parseNodeOrEdgeId('Start-N1').optionalEdge?.from.id).toEqual('Start')
+    expect(g.parseNodeOrEdgeId('Start-N1').optionalEdge?.to.id).toEqual('N1')
+    expect(getKey(g.parseNodeOrEdgeId('Start-N1').optionalEdge!)).toEqual('Start-N1')
+    expect(g.parseNodeOrEdgeId('Start-End').optionalNode).toEqual(undefined)
+    expect(g.parseNodeOrEdgeId('Start-End').optionalEdge).toEqual(undefined)
+    expect(g.parseNodeOrEdgeId('xyz').optionalNode).toEqual(undefined)
+    expect(g.parseNodeOrEdgeId('xyz').optionalEdge).toEqual(undefined)
   })
 })
+
+interface TestEdge {
+  from: WithId,
+  to: WithId
+}
+
+function getTestGraph(): Graph<WithId, TestEdge> {
+  const g = new Graph<WithId, Connection<WithId>>()
+  newNode('Start', g)
+  newNode('Unconnected', g)
+  newNode('N1', g)
+  newNode('N2', g)
+  newNode('N3', g)
+  newNode('End', g)
+  newEdge('Start', 'N1', g)
+  newEdge('Start', 'N2', g)
+  newEdge('N1', 'N3', g)
+  newEdge('N2', 'N3', g)
+  newEdge('N3', 'N2', g)
+  newEdge('N3', 'End', g)
+  return g
+}
+
+function newNode(id: string, g: Graph<WithId, Connection<WithId>>) {
+  g.addNode({id})
+}
+
+function newEdge(fromId: string, toId: string, g: Graph<WithId, Connection<WithId>>) {
+  const from: WithId | undefined = g.getNodeById(fromId)
+  const to: WithId | undefined = g.getNodeById(toId)
+  if (from === undefined) {
+    throw new Error(`Invalid test case, node with id ${fromId} does not exist`)
+  }
+  if (to === undefined) {
+    throw new Error(`Invalid test case, node with id ${toId} does not exist`)
+  }
+  g.addEdge({from, to})
+}
+
+function checkNodePointsTo(fromId: string, toIds: string[], g: Graph<WithId, TestEdge>) {
+  const from: WithId = g.getNodeById(fromId)
+  const successors: readonly WithId[] = g.getSuccessors(from)
+  expect(successors.map(n => n.id)).toEqual(toIds)
+}
+
+function checkNodeReachedFrom(toId: string, fromIds: string[], g: Graph<WithId, TestEdge>) {
+  let to: WithId = g.getNodeById(toId)
+  let predecessors: readonly WithId[] = g.getPredecessors(to)
+  expect(predecessors.map(n => n.id)).toEqual(fromIds)
+}

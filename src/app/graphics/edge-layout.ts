@@ -14,17 +14,14 @@
    limitations under the License.
 */
 
-import { Edge, Node, OptionalNode, getEdgeKey } from "../model/graph";
-import { CategorizedNode, CategorizedEdge } from '../model/error-flow'
-import { CreationReason, EdgeForEditor, IntermediateNode, NodeForEditor, OriginalNode, PASS_DIRECTION_DOWN } from "../model/horizontalGrouping";
+import { getKey } from '../model/graph'
+import { NodeForLayers, EdgeForLayers, PASS_DIRECTION_DOWN } from '../model/horizontalGrouping'
 import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";
 import { NodeLayout, NodeSpacingDimensions, Position } from "./node-layout";
-import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, EdgeLabelDimensions, Box } from "./edge-label-layouter";
-
-export interface Dimensions extends NodeAndEdgeDimensions, EdgeLabelDimensions {
-}
+import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, Box } from "./edge-label-layouter";
+import { Text, createText } from '../model/text'
 
 export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   nodeBoxWidth: number
@@ -32,55 +29,27 @@ export interface NodeAndEdgeDimensions extends NodeSpacingDimensions {
   boxConnectorAreaPerc: number
   intermediateLayerPassedByVerticalLine: boolean
 }
-  
-export class PlacedNode implements Node {
-  private id: string
-  readonly creationReason: CreationReason
-  readonly text: string
-  readonly isError: boolean
-  readonly layerNumber: number
+
+export class PlacedNode implements NodeForLayers {
   readonly horizontalBox: Interval
   readonly verticalBox: Interval
-  readonly intermediateNodePassDirection: number | null
-  readonly intermediateNodeOriginalEdge: Edge | null
+  readonly passDirection?: number
+  readonly id: string
+  readonly text: string
+  readonly isError: boolean
+  readonly layer: number
+  readonly isIntermediate: boolean
 
   constructor(p: Position, d: NodeAndEdgeDimensions) {
-    this.id = p.node.getId()
-    this.text = p.node.getText()
-    this.creationReason = (p.node as NodeForEditor).getCreationReason()
-    this.intermediateNodePassDirection = (this.creationReason === CreationReason.ORIGINAL ? null : (p.node as IntermediateNode).getPassDirection())
-    this.intermediateNodeOriginalEdge = (this.creationReason === CreationReason.ORIGINAL ? null : (p.node as IntermediateNode).originalEdge)
-    const optionalOriginalNode = PlacedNode.optionalOriginalNode(p.node)
-    this.isError = optionalOriginalNode === null ? false : optionalOriginalNode.isError
-    this.layerNumber = p.layerNumber
-    if (this.creationReason === CreationReason.ORIGINAL) {
-      this.horizontalBox = Interval.createFromCenterSize(p.x!, d.nodeBoxWidth)
-      this.verticalBox = Interval.createFromCenterSize(p.y!, d.nodeBoxHeight)  
-    } else {
-      this.horizontalBox = Interval.createFromCenterSize(p.x!, 1)
-      if (d.intermediateLayerPassedByVerticalLine) {
-        this.verticalBox = Interval.createFromCenterSize(p.y!, d.nodeBoxHeight)
-      } else {
-        this.verticalBox = Interval.createFromCenterSize(p.y!, 1)
-      }
-    }
-  }
-
-  getId() {
-    return this.id
-  }
-
-  getText() {
-    return this.text
-  }
-
-  private static optionalOriginalNode(rawNode: OptionalNode): CategorizedNode | null {
-    const node = rawNode as NodeForEditor
-    if (node.getCreationReason() === CreationReason.INTERMEDIATE) {
-      return null
-    }
-    const originalNode: Node = (node as OriginalNode).original
-    return originalNode as CategorizedNode
+    const bd: BoxDimensions = getBoxDimensions(p, d)
+    this.horizontalBox = bd.horizontalBox
+    this.verticalBox = bd.verticalBox
+    this.passDirection = p.node.passDirection
+    this.id = p.node.id
+    this.text = p.node.text
+    this.isError = p.node.isError
+    this.layer = p.node.layer
+    this.isIntermediate = p.node.isIntermediate
   }
 
   get centerTop(): Point {
@@ -116,37 +85,46 @@ export class PlacedNode implements Node {
   }
 }
 
-export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, rawEdge: Edge, line: Line): LayoutLineSegment {
-  const key: string = getEdgeKey(fromNode, toNode)
-  const edge = rawEdge as EdgeForEditor
-  const isFirstSegment = edge.isFirstSegment
-  const isLastSegment = edge.isLastSegment
-  const originalEdge = edge.original as CategorizedEdge
-  const isError = originalEdge.isError
-  const optionalOriginalText = originalEdge.text === undefined ? null : originalEdge.text
-  const numtextLines = originalEdge.text === undefined ? 0 : originalEdge.getNumLines()
-  const textLines = originalEdge.getTextLines()
-  const maxLineLength = originalEdge.getMaxLineLength()
+function getBoxDimensions(p: Position, d: NodeAndEdgeDimensions): BoxDimensions {
+  let horizontalBox: Interval
+  let verticalBox: Interval
+  if (p.node.isIntermediate) {
+    horizontalBox = Interval.createFromCenterSize(p.x!, 1)
+    if (d.intermediateLayerPassedByVerticalLine) {
+      verticalBox = Interval.createFromCenterSize(p.y!, d.nodeBoxHeight)
+    } else {
+      verticalBox = Interval.createFromCenterSize(p.y!, 1)
+    }
+  } else {
+    horizontalBox = Interval.createFromCenterSize(p.x!, d.nodeBoxWidth)
+    verticalBox = Interval.createFromCenterSize(p.y!, d.nodeBoxHeight)  
+  }
+  return { horizontalBox, verticalBox }
+}
+
+interface BoxDimensions {
+  readonly horizontalBox: Interval,
+  readonly verticalBox: Interval
+}
+
+export function createLayoutLineSegmentFromEdge(fromNode: PlacedNode, toNode: PlacedNode, edge: EdgeForLayers, line: Line): LayoutLineSegment {
   let minLayer = 0
   let maxLayer = 0
-  if (fromNode.layerNumber < toNode.layerNumber) {
-    minLayer = fromNode.layerNumber
-    maxLayer = toNode.layerNumber
+  if (fromNode.layer < toNode.layer) {
+    minLayer = fromNode.layer
+    maxLayer = toNode.layer
   } else {
-    minLayer = toNode.layerNumber
-    maxLayer = fromNode.layerNumber
+    minLayer = toNode.layer
+    maxLayer = fromNode.layer
   }
   return {
-    key,
-    originId: fromNode.getId(),
+    key: getKey(edge),
+    originId: fromNode.id,
     line,
-    optionalOriginalText,
-    numtextLines,
-    textLines,
-    maxLineLength,
-    isError,
-    isFirstLineSegment: isFirstSegment,
-    isLastLineSegment: isLastSegment,
+    text: edge.text,
+    isError: edge.isError,
+    isFirstLineSegment: edge.isFirstSegment,
+    isLastLineSegment: edge.isLastSegment,
     minLayerNumber: minLayer,
     maxLayerNumber: maxLayer,
     passDirection: edge.passDirection
@@ -157,10 +135,7 @@ export interface LayoutLineSegment {
   readonly key: string,
   readonly originId: string,
   readonly line: Line,
-  readonly optionalOriginalText: string | null,
-  readonly numtextLines: number,
-  readonly textLines: string[] | null,
-  readonly maxLineLength: number
+  readonly text: Text,
   readonly isError: boolean,
   readonly isFirstLineSegment: boolean,
   readonly isLastLineSegment: boolean,
@@ -178,7 +153,7 @@ export interface EdgeLabel {
 export class Layout {
   readonly width: number
   readonly height: number
-  private nodes: PlacedNode[] = []
+  private _nodes: PlacedNode[] = []
   private idToNode: Map<string, PlacedNode> = new Map<string, PlacedNode>()
   private layoutLineSegments: LayoutLineSegment[] = []
   readonly edgeLabels: EdgeLabel[]
@@ -187,13 +162,13 @@ export class Layout {
     this.width = layout.width
     this.height = layout.height
     const calc = new Edge2LineCalculation(layout, d)
-    this.nodes = [ ... calc.getPlacedNodes() ]
+    this._nodes = [ ... calc.getPlacedNodes() ]
     for (const n of this.nodes) {
-      this.idToNode.set(n.getId(), n)
+      this.idToNode.set(n.id, n)
     }
     this.layoutLineSegments = calc.getOriginalEdges().map(e => createLayoutLineSegmentFromEdge(
-      this.idToNode.get(e.getFrom().getId())!,
-      this.idToNode.get(e.getTo().getId())!,
+      this.idToNode.get(e.from.id)!,
+      this.idToNode.get(e.to.id)!,
       e,
       calc.edge2line(e))
     )
@@ -205,42 +180,36 @@ export class Layout {
 
   private addVerticalLineSegmentsForIntermediateNodes(nodes: PlacedNode[]) {
     for (const n of nodes) {
-      if (n.creationReason === CreationReason.ORIGINAL) {
+      if (! n.isIntermediate) {
         continue
       }
-      const edge = n.intermediateNodeOriginalEdge as CategorizedEdge
-      const isError = edge.isError
-      const optionalOriginalText = edge.text === undefined ? null : edge.text
       let line: Line
-      if (n.intermediateNodePassDirection === PASS_DIRECTION_DOWN) {
+      if (n.passDirection === PASS_DIRECTION_DOWN) {
         line = new Line(n.centerTop, n.centerBottom)
       } else {
         line = new Line(n.centerBottom, n.centerTop)
       }
-      const verticalLineSegmentKey = "pass-" + n.getId()
+      const verticalLineSegmentKey = "pass-" + n.id
       this.layoutLineSegments.push({
         key: verticalLineSegmentKey,
-        originId: n.getId(),
+        originId: n.id,
         line,
-        optionalOriginalText,
-        numtextLines: 0,
-        textLines: null,
-        maxLineLength: 0,
-        isError,
+        text: createText(undefined),
+        isError: n.isError,
         isFirstLineSegment: false,
         isLastLineSegment: false,
-        minLayerNumber: n.layerNumber,
-        maxLayerNumber: n.layerNumber,
-        passDirection: n.intermediateNodePassDirection!
+        minLayerNumber: n.layer,
+        maxLayerNumber: n.layer,
+        passDirection: n.passDirection!
       })  
     }
   }
 
-  getNodes(): readonly Node[] {
-    return [ ... this.nodes ]
+  get nodes(): readonly PlacedNode[] {
+    return [ ... this._nodes ]
   }
 
-  getNodeById(id: string): Node | undefined {
+  getNodeById(id: string): PlacedNode | undefined {
     return this.idToNode.get(id)
   }
 
@@ -285,18 +254,18 @@ export class Layout {
   private addEdgeLabels(): EdgeLabel[] {
     const firstLineSegments = this.layoutLineSegments
       .filter(s => s.isFirstLineSegment)
-      .filter(s => (s.optionalOriginalText !== null) && (s.optionalOriginalText.length >= 1))
+      .filter(s => s.text.numLines >= 1)
     const groups: LayoutLineSegment[][] = groupForEdgeLabelLayout(firstLineSegments)
     const result: EdgeLabel[] = []
     for (const group of groups) {
       const layouter = new EdgeLabelLayouter(this.derivedEdgeLabelDimensions)
       for (const ls of group) {
-        const box: Box = layouter!.add(ls.line, ls.maxLineLength, ls.numtextLines)
+        const box: Box = layouter!.add(ls.line, ls.text.maxLineLength, ls.text.lines.length)
         result.push({
           horizontalBox: box.horizontalBox,
           verticalBox: box.verticalBox,
           // This ensures that the lines are trimmed
-          text: ls.textLines!.join("<br/>")
+          text: ls.text.html
         })
       }
     }
