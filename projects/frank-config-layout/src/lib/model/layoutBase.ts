@@ -15,7 +15,7 @@
 */
 
 import { LayerCalculationNode, LayerCalculation } from '../util/layer-calculation'
-import { GraphForLayers } from './horizontalGrouping'
+import { GraphForLayers } from './horizontal-grouping'
 
 // On ordering of nodes in nodes and edges in vertically-stacked layers.
 // These are numbered from top to bottom. Within each layer, the nodes are

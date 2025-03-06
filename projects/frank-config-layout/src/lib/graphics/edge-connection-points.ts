@@ -17,7 +17,7 @@
 import { getKey } from '../model/graph'
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
-import { EdgeForLayers } from '../model/horizontalGrouping'
+import { EdgeForLayers } from '../model/horizontal-grouping'
 import { NodeAndEdgeDimensions, PlacedNode } from "./edge-layout";
 import { Line, Point } from "./graphics";
 import { NodeLayout } from "./node-layout";

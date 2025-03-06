@@ -15,7 +15,7 @@
 */
 
 import { getKey } from '../model/graph'
-import { NodeForLayers, EdgeForLayers, PASS_DIRECTION_DOWN } from '../model/horizontalGrouping'
+import { NodeForLayers, EdgeForLayers, PASS_DIRECTION_DOWN } from '../model/horizontal-grouping'
 import { Interval } from "../util/interval";
 import { Edge2LineCalculation } from "./edge-connection-points";
 import { Line, LineRelation, Point, relateLines } from "./graphics";

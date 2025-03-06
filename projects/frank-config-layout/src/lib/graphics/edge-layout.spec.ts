@@ -1,5 +1,5 @@
 import { createText } from '../model/text'
-import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath, introduceIntermediateNodesAndEdges } from '../model/horizontalGrouping'
+import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath, introduceIntermediateNodesAndEdges } from '../model/horizontal-grouping'
 import { OriginalGraph, createOriginalGraph } from '../model/error-flow'
 import { LayoutBase } from '../model/layoutBase'
 import { Point, Line } from "./graphics"

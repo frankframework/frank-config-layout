@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { NodeForLayers, EdgeForLayers, GraphForLayers } from '../model/horizontalGrouping'
+import { NodeForLayers, EdgeForLayers, GraphForLayers } from '../model/horizontal-grouping'
 import { LayoutBase } from "../model/layoutBase";
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";

@@ -1,5 +1,5 @@
 import { createText } from './text'
-import { GraphForLayers, PASS_DIRECTION_DOWN, createGraphForLayers } from './horizontalGrouping'
+import { GraphForLayers, PASS_DIRECTION_DOWN, createGraphForLayers } from './horizontal-grouping'
 import { LayoutBase, getNumCrossings, alignFromLayer, NumCrossingsJudgement} from './layoutBase'
 
 function addNode(id: string, layer: number, g: GraphForLayers) {

@@ -15,25 +15,25 @@
 */
 
 export interface Text {
-  readonly html: string
-  readonly lines: string[]
-  readonly numLines: number
-  readonly maxLineLength: number
+  readonly html: string;
+  readonly lines: string[];
+  readonly numLines: number;
+  readonly maxLineLength: number;
 }
 
-export function createText(originalHtml: string | undefined): Text {
-  let lines: string[] = []
-  if ( (originalHtml !== undefined) && (originalHtml.length >= 1) ) {
-    lines = originalHtml.split('<br/>').map(s => s.trim())
+export function createText(originalHtml?: string): Text {
+  let lines: string[] = [];
+  if (originalHtml !== undefined && originalHtml.length > 0) {
+    lines = originalHtml.split('<br/>').map((s) => s.trim());
   }
-  let maxLineLength = 0
-  if (lines.length >= 1) {
-    maxLineLength = Math.max( ... lines.map(s => s.length))
+  let maxLineLength = 0;
+  if (lines.length > 0) {
+    maxLineLength = Math.max(...lines.map((s) => s.length));
   }
   return {
-    html: lines.join("<br/>"),
+    html: lines.join('<br/>'),
     lines,
-    maxLineLength, 
-    numLines: lines.length
-  }
+    maxLineLength,
+    numLines: lines.length,
+  };
 }

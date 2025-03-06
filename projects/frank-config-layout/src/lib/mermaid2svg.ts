@@ -27,7 +27,7 @@ import {
   introduceIntermediateNodesAndEdges,
   calculateLayerNumbersLongestPath,
   GraphForLayers,
-} from './model/horizontalGrouping';
+} from './model/horizontal-grouping';
 import { SvgResult, Dimensions } from '../public_api';
 
 export class Mermaid2svgService {

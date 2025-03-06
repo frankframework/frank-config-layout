@@ -100,7 +100,7 @@ export {
   NodeOrEdgeForLayers,
   OptionalNodeForLayers,
   OptionalEdgeForLayers,
-} from './lib/model/horizontalGrouping';
+} from './lib/model/horizontal-grouping';
 export {
   LayoutBase,
   getNumCrossings,

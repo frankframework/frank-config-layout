@@ -1,5 +1,5 @@
 import { getKey } from '../model/graph'
-import { GraphForLayers, introduceIntermediateNodesAndEdges, createGraphForLayers } from '../model/horizontalGrouping'
+import { GraphForLayers, introduceIntermediateNodesAndEdges, createGraphForLayers } from '../model/horizontal-grouping'
 import { LayoutBase } from '../model/layoutBase'
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from "./node-layout"
 import { createText } from '../model/text'
