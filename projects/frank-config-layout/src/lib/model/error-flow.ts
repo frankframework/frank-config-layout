@@ -14,13 +14,13 @@
    limitations under the License.
 */
 
-import { Text } from './text'
-import { Graph } from './graph'
-import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser'
+import { Text } from './text';
+import { Graph } from './graph';
+import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser';
 
-const NODE_ERROR_CLASS = 'errorOutline'
+const NODE_ERROR_CLASS = 'errorOutline';
 
-const ERROR_FORWARD_NAMES = [
+const ERROR_FORWARD_NAMES = new Set([
   'exception',
   'failure',
   'fail',
@@ -30,59 +30,60 @@ const ERROR_FORWARD_NAMES = [
   'interrupt',
   'parserError',
   'outputParserError',
-  'outputFailure'];
+  'outputFailure',
+]);
 
 export interface OriginalNode {
-  id: string
-  text: string
-  isError: boolean
+  id: string;
+  text: string;
+  isError: boolean;
 }
 
 export interface OriginalEdge {
-  from: OriginalNode
-  to: OriginalNode
-  text: Text
-  isError: boolean
+  from: OriginalNode;
+  to: OriginalNode;
+  text: Text;
+  isError: boolean;
 }
 
-export type OriginalGraph = Graph<OriginalNode, OriginalEdge>
+export type OriginalGraph = Graph<OriginalNode, OriginalEdge>;
 
 // For testing
 export function createOriginalGraph(): OriginalGraph {
-  return new Graph<OriginalNode, OriginalEdge>()
+  return new Graph<OriginalNode, OriginalEdge>();
 }
 
 export function findErrorFlow(b: MermaidGraph): OriginalGraph {
-  const result = createOriginalGraph()
+  const result = createOriginalGraph();
   for (const n of b.nodes) {
-    result.addNode(transformNode(n))
+    result.addNode(transformNode(n));
   }
   for (const e of b.edges) {
-    const from: OriginalNode = result.getNodeById(e.from.id)
-    const to: OriginalNode = result.getNodeById(e.to.id)
-    result.addEdge(transformEdge(from, to, e.text))
+    const from: OriginalNode = result.getNodeById(e.from.id);
+    const to: OriginalNode = result.getNodeById(e.to.id);
+    result.addEdge(transformEdge(from, to, e.text));
   }
-  return result
+  return result;
 }
 
 function transformNode(n: MermaidNode): OriginalNode {
   if (n.style === NODE_ERROR_CLASS) {
-    return { id: n.id, text: n.text, isError: true }
+    return { id: n.id, text: n.text, isError: true };
   } else {
-    return { id: n.id, text: n.text, isError: false }
+    return { id: n.id, text: n.text, isError: false };
   }
 }
 
 function transformEdge(from: OriginalNode, to: OriginalNode, text: Text): OriginalEdge {
   if (from.isError) {
-    return { from, to, text, isError: true}
+    return { from, to, text, isError: true };
   }
   if (text.numLines === 0) {
-    return { from, to, text, isError: false}
+    return { from, to, text, isError: false };
   } else {
     const isError: boolean = text.lines
-      .map(line => ERROR_FORWARD_NAMES.includes(line))
-      .every(lineIsError => lineIsError === true)
-    return {from, to, text, isError}
+      .map((line) => ERROR_FORWARD_NAMES.has(line))
+      .every((lineIsError) => lineIsError === true);
+    return { from, to, text, isError };
   }
 }

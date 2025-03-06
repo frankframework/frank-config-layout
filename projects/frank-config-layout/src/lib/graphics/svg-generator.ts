@@ -14,24 +14,26 @@
    limitations under the License.
 */
 
-import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from "./edge-layout"
+import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from './edge-layout';
 
-export function generateSvg(layout: Layout, edgeLabelFontSize: number) {
-  return openSvg(layout.width, layout.height)
-    + renderDefs(edgeLabelFontSize)
-    + renderNodes(layout.nodes.map(n => n as PlacedNode))
-    + renderEdges(layout.getLayoutLineSegments().map(e => e as LayoutLineSegment))
-    + renderLabels(layout.edgeLabels)
-    + closeSvg()
+export function generateSvg(layout: Layout, edgeLabelFontSize: number): string {
+  return (
+    openSvg(layout.width, layout.height) +
+    renderDefs(edgeLabelFontSize) +
+    renderNodes(layout.nodes.map((n) => n as PlacedNode)) +
+    renderEdges(layout.getLayoutLineSegments().map((e) => e as LayoutLineSegment)) +
+    renderLabels(layout.edgeLabels) +
+    closeSvg()
+  );
 }
 
-function openSvg(width: number, height: number) {
+function openSvg(width: number, height: number): string {
   return `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   width="${width}" height="${height}" >
-`
+`;
 }
 
-function renderDefs(fontSize: number) {
+function renderDefs(fontSize: number): string {
   return `  <defs>
     <style>
       .rectangle {
@@ -101,11 +103,14 @@ function renderDefs(fontSize: number) {
       <path d="M 0 0 L 4 2 L 0 4 z" />
     </marker>
   </defs>
-`
+`;
 }
 
 function renderNodes(nodes: readonly PlacedNode[]): string {
-  return nodes.filter(n => ! n.isIntermediate).map(n => renderOriginalNode(n)).join('')
+  return nodes
+    .filter((n) => !n.isIntermediate)
+    .map((n) => renderOriginalNode(n))
+    .join('');
 }
 
 function renderOriginalNode(n: PlacedNode): string {
@@ -123,56 +128,58 @@ function renderOriginalNode(n: PlacedNode): string {
       </div>
     </foreignObject>
   </g>
-`
+`;
 }
 
-function getNodeGroupClass(id: string) {
-  return "frank-flowchart-node-" + id
+function getNodeGroupClass(id: string): string {
+  return `frank-flowchart-node-${id}`;
 }
 
 function getRectangleClass(n: PlacedNode): string {
   if (n.isError) {
-    return "rectangle errorOutline"
+    return 'rectangle errorOutline';
   } else {
-    return "rectangle"
+    return 'rectangle';
   }
 }
 
 function renderEdges(edges: LayoutLineSegment[]): string {
-  return edges.map(edge => renderEdge(edge)).join('')
+  return edges.map((edge) => renderEdge(edge)).join('');
 }
 
 function renderEdge(edge: LayoutLineSegment): string {
   return `  <g class="${getEdgeGroupClass(edge.key)}">
     <polyline ${classOfLine(edge)} points="${edge.line.startPoint.x},${edge.line.startPoint.y} ${edge.line.endPoint.x},${edge.line.endPoint.y}" ${getMarkerEnd(edge)}/>
   </g>
-`
+`;
 }
 
-function getEdgeGroupClass(key: string) {
-  return "frank-flowchart-edge-" + key
+function getEdgeGroupClass(key: string): string {
+  return `frank-flowchart-edge-${key}`;
 }
 
 function getMarkerEnd(lineSegment: LayoutLineSegment): string {
   if (lineSegment.isLastLineSegment) {
-    return 'marker-end="url(#arrow)"'
+    return 'marker-end="url(#arrow)"';
   } else {
-    return ''
+    return '';
   }
 }
 
 function classOfLine(edge: LayoutLineSegment): string {
   if (edge.isError) {
-    return 'class="line error"'
+    return 'class="line error"';
   } else {
-    return 'class="line"'
+    return 'class="line"';
   }
 }
 
 function renderLabels(labels: EdgeLabel[]): string {
-  return '  <g text-anchor="middle" dominant-baseline="middle">\n'
-    + labels.map(label => renderLabel(label)).join('')
-    + '  </g>\n'
+  return [
+    '  <g text-anchor="middle" dominant-baseline="middle">\n',
+    labels.map((label) => renderLabel(label)).join(''),
+    '  </g>\n',
+  ].join('');
 }
 
 function renderLabel(label: EdgeLabel): string {
@@ -185,9 +192,9 @@ function renderLabel(label: EdgeLabel): string {
         </div>
       </foreignObject>
     </g>
-`
+`;
 }
 
 function closeSvg(): string {
-  return '</svg>'
+  return '</svg>';
 }

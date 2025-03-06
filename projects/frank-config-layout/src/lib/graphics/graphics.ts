@@ -15,14 +15,14 @@
 */
 
 export enum LineRelation {
-  UNRELATED = "Unrelated",
-  CROSS = "Cross",
+  UNRELATED = 'Unrelated',
+  CROSS = 'Cross',
 }
 
 export function relateLines(line1: Line, line2: Line): LineRelation {
   let shortest: Line;
   let longest: Line;
-  if(line1.getSquaredLength() < line2.getSquaredLength()) {
+  if (line1.getSquaredLength() < line2.getSquaredLength()) {
     shortest = line1;
     longest = line2;
   } else {
@@ -43,10 +43,11 @@ export function relateLines(line1: Line, line2: Line): LineRelation {
 export class Point {
   constructor(
     readonly x: number,
-    readonly y: number) {}
+    readonly y: number,
+  ) {}
 
   equals(other: Point): boolean {
-    return (this.x == other.x) && (this.y == other.y)
+    return this.x == other.x && this.y == other.y;
   }
 
   rotateOtherBackAndMultiplyByMyLength(other: Point): Point {
@@ -69,9 +70,10 @@ export class Point {
 export class Line {
   constructor(
     readonly startPoint: Point,
-    readonly endPoint: Point) {}
+    readonly endPoint: Point,
+  ) {}
 
-  subtract(other: Point) {
+  subtract(other: Point): Line {
     const newStart = this.startPoint.subtract(other);
     const newEnd = this.endPoint.subtract(other);
     return new Line(newStart, newEnd);
@@ -82,9 +84,9 @@ export class Line {
   }
 
   // Undefined behavior when touches or coincides
-  relateToHorizontalLine(refLength: number) {
+  relateToHorizontalLine(refLength: number): LineRelation {
     if (this.getSquaredLength() < LINE_LENGTH_DEGENERATE_THRESHOLD) {
-      throw new Error(`Degenerate line segment ${JSON.stringify(this)}, squared length is ${this.getSquaredLength()}`)
+      throw new Error(`Degenerate line segment ${JSON.stringify(this)}, squared length is ${this.getSquaredLength()}`);
     }
     let first: Point;
     let second: Point;
@@ -95,20 +97,20 @@ export class Line {
       first = this.startPoint;
       second = this.endPoint;
     }
-    if( (second.x < 0) || (first.x > refLength) ) {
+    if (second.x < 0 || first.x > refLength) {
       return LineRelation.UNRELATED;
     }
-    if ( Math.abs(second.x - first.x) < EPS) {
+    if (Math.abs(second.x - first.x) < EPS) {
       // The calculation would be numerically more precise if we do
       // this test also if first.x and second.x are not close.
       // But that way it is harder to make up test cases.
-      if ( (first.x >= 0) && (second.x <= refLength) ) {
-        return this.compareYValues(first.y, second.y)
+      if (first.x >= 0 && second.x <= refLength) {
+        return this.compareYValues(first.y, second.y);
       } else {
         // Corner case. The x-coordinates are close to each other and close
         // to the reference interval boundaries, but they are not within
         // the interval. We say unrelated
-        return LineRelation.UNRELATED
+        return LineRelation.UNRELATED;
       }
     }
     const startXWindow = Math.max(0, first.x); // Between 0 and refLength
@@ -117,19 +119,19 @@ export class Line {
     const relDistanceEnd = (endXWindow - first.x) / (second.x - first.x);
     const startY = first.y + relDistanceStart * (second.y - first.y);
     const endY = first.y + relDistanceEnd * (second.y - first.y);
-    return this.compareYValues(startY, endY)
+    return this.compareYValues(startY, endY);
   }
 
   private compareYValues(startY: number, endY: number): LineRelation {
-    if ( (startY < 0) && (endY < 0) ) {
+    if (startY < 0 && endY < 0) {
       return LineRelation.UNRELATED;
     }
-    if ( (startY > 0) && (endY > 0)) {
+    if (startY > 0 && endY > 0) {
       return LineRelation.UNRELATED;
     }
     return LineRelation.CROSS;
   }
 }
 
-const LINE_LENGTH_DEGENERATE_THRESHOLD = 0.01
-const EPS = 1e-3
+const LINE_LENGTH_DEGENERATE_THRESHOLD = 0.01;
+const EPS = 1e-3;
