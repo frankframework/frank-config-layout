@@ -15,7 +15,7 @@
 */
 
 import { NodeForLayers, EdgeForLayers, GraphForLayers } from '../model/horizontal-grouping'
-import { LayoutBase } from "../model/layoutBase";
+import { LayoutBase } from "../model/layout-base";
 import { Interval } from "../util/interval";
 import { getRange } from "../util/util";
 import { HorizontalConflictResolver } from "./horizontal-conflict";

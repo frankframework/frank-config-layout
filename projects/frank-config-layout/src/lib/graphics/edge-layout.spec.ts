@@ -1,7 +1,7 @@
 import { createText } from '../model/text'
 import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP, calculateLayerNumbersFirstOccuringPath, introduceIntermediateNodesAndEdges } from '../model/horizontal-grouping'
 import { OriginalGraph, createOriginalGraph } from '../model/error-flow'
-import { LayoutBase } from '../model/layoutBase'
+import { LayoutBase } from '../model/layout-base'
 import { Point, Line } from "./graphics"
 import { NodeLayoutBuilder } from './node-layout'
 import { Layout, NodeAndEdgeDimensions, PlacedNode, LayoutLineSegment, groupForEdgeLabelLayout } from "./edge-layout"

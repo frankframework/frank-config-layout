@@ -16,7 +16,7 @@
 
 import { Layout } from './graphics/edge-layout';
 import { getGraphFromMermaid, MermaidGraph } from './parsing/mermaid-parser';
-import { LayoutBase, minimizeNumCrossings } from './model/layoutBase';
+import { LayoutBase, minimizeNumCrossings } from './model/layout-base';
 import { NodeLayoutBuilder } from './graphics/node-layout';
 import { generateSvg } from './graphics/svg-generator';
 import { AsynchronousCache } from './util/asynchronous-cache';

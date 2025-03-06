@@ -106,7 +106,7 @@ export {
   getNumCrossings,
   alignFromLayer,
   calculateNumCrossingsChangesFromAligning,
-} from './lib/model/layoutBase';
+} from './lib/model/layout-base';
 export { NodeLayoutBuilder } from './lib/graphics/node-layout';
 export { getDerivedEdgeLabelDimensions } from './lib/graphics/edge-label-layouter';
 export { Layout, PlacedNode, EdgeLabel } from './lib/graphics/edge-layout';
