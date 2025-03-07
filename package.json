@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng build angular-components && ng serve",
+    "start": "ng build angular-library-playground && ng serve",
     "serve": "ng serve",
     "build": "ng build frank-config-layout",
-    "watch": "ng build angular-components --watch --configuration development",
+    "watch": "ng build angular-library-playground --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
