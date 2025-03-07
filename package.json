@@ -7,7 +7,8 @@
     "serve": "ng serve",
     "build": "ng build frank-config-layout",
     "watch": "ng build angular-library-playground --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "testLib": "cd projects/frank-config-layout && npx ng test"
   },
   "private": true,
   "dependencies": {
