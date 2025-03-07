@@ -30,6 +30,7 @@ yarn-error.log
 
 # Miscellaneous
 /.angular/cache
+/projects/frank-config-layout/.angular/
 .sass-cache/
 /connect.lock
 /coverage
