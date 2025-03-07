@@ -131,7 +131,7 @@ class ConnectedPlacedNode {
       this.connectorsTop[index].x = coord;
     }
     const xbottom: number[] = getXCoords(this.node.horizontalBox, this.connectorsBottom.length, d.boxConnectorAreaPerc);
-    for (const [coord, index] of xbottom.entries()) {
+    for (const [index, coord] of xbottom.entries()) {
       this.connectorsBottom[index].x = coord;
     }
   }
