@@ -1,0 +1,124 @@
+<adapter name="Generiek" description="This process is created to allow asking applications to question the datawarehouse Nedgraphics Nedmagazijn">
+	<receiver name="Generiek">
+		<listener name="Generiek" address="Generiek" className="nl.nn.adapterframework.http.WebServiceListener"/>
+	</receiver>
+	<receiver name="Generiek">
+		<listener name="Generiek" method="POST" uriPattern="Generiek" className="nl.nn.adapterframework.http.rest.ApiListener"/>
+	</receiver>
+	<receiver name="Generiek">
+		<listener name="Generiek" className="nl.nn.adapterframework.receivers.JavaListener"/>
+	</receiver>
+	<pipeline>
+		<exit name="Exit" state="SUCCESS" code="200"/>
+		<exit name="Error" state="ERROR" code="500"/>
+		<exit name="TimeOutFailure" state="ERROR" code="408"/>
+		<pipe name="storeSopaAction" className="nl.nn.adapterframework.pipes.PutInSession">
+			<param name="soapActionParam" namespaceDefs="xs=http://www.w3.org/2001/XMLSchema" xpathExpression="concat(xs:string(namespace-uri(/*)), '/', */local-name())"/>
+			<forward name="success" path="MAP_Genriek_OntvangerAppl_to_Contextvar"/>
+		</pipe>
+		<pipe name="MAP_Genriek_OntvangerAppl_to_Contextvar" getInputFromSessionKey="originalMessage" styleSheetName="xsl/PF_StUFBG310_Generiek/MAP_Genriek_OntvangerAppl_to_Contextvar.xslt" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<forward name="success" path="storeVarOntvangerapplicatie"/>
+		</pipe>
+		<pipe name="storeVarOntvangerapplicatie" className="nl.nn.adapterframework.pipes.PutInSession">
+			<param name="varOntvangerapplicatie" xpathExpression="Root/Record/varOntvangerapplicatie"/>
+			<forward name="success" path="ReadFile"/>
+		</pipe>
+		<pipe name="ReadFile" root="/mnt/windows-share/Config/BG310_Generiek/Test" action="read" className="nl.nn.adapterframework.pipes.LocalFileSystemPipe">
+			<param name="filename" value="GeneriekBG0310.xml"/>
+			<forward name="success" path="MAP_BG310_Config_to_endpoints"/>
+		</pipe>
+		<pipe name="MAP_BG310_Config_to_endpoints" styleSheetName="xsl/PF_StUFBG310_Generiek/MAP_BG310_Config_to_endpoints.xslt" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<param name="varOntvanger" sessionKey="varOntvangerapplicatie"/>
+			<forward name="success" path="StoreVariables"/>
+		</pipe>
+		<pipe name="StoreVariables" className="nl.nn.adapterframework.pipes.PutInSession">
+			<param name="varWSCVolgindicatie" xpathExpression="Root/Record/varWSCVolgindicatie"/>
+			<param name="varWSCPersoonsbevraging" xpathExpression="Root/Record/varWSCPersoonsbevraging"/>
+			<forward name="success" path="checkWSP"/>
+		</pipe>
+		<pipe name="checkWSP" styleSheetName="xsl/PF_StUFBG310_Generiek/check_WSP.xslt" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<param name="WsProvider" sessionKey="WsProvider"/>
+			<forward name="success" path="check"/>
+		</pipe>
+		<pipe name="check" xpathExpression="Root='DDS'" className="nl.nn.adapterframework.pipes.XmlIf">
+			<forward name="then" path="WAF_GMN_WSCONS_StUF_BG310_vraagAntwoord_Berichtenmodule"/>
+			<forward name="else" path="WAF_WSC_HLN_BG310_Volgindicatie"/>
+		</pipe>
+		<pipe name="WAF_WSC_HLN_BG310_Volgindicatie" getInputFromSessionKey="originalMessage" className="nl.nn.adapterframework.pipes.SenderPipe">
+			<sender name="WAF_Volgindicatie" soapActionParam="soapActionParam" keystore="esb01.sittard-geleen.lan.pfx" keystoreAuthAlias="keystore" keystoreType="PKCS12" timeout="60000" allowSelfSignedCertificates="true" className="nl.nn.adapterframework.http.WebServiceSender">
+				<param name="url" sessionKey="varWSCVolgindicatie"/>
+				<param name="soapActionParam" sessionKey="soapActionParam"/>
+			</sender>
+			<forward name="success" path="resultVolgindicatie"/>
+			<forward name="exception" path="ReplaceVars"/>
+			<forward name="timeout" path="TimeOutFailure"/>
+		</pipe>
+		<pipe name="resultVolgindicatie" className="nl.nn.adapterframework.pipes.EchoPipe">
+			<forward name="success" path="Exit"/>
+		</pipe>
+		<pipe name="WAF_GMN_WSCONS_StUF_BG310_vraagAntwoord_Berichtenmodule" getInputFromSessionKey="originalMessage" className="nl.nn.adapterframework.pipes.SenderPipe">
+			<sender name="vraagAntwoord_Berichtenmodule" keystore="esb01.sittard-geleen.lan.pfx" keystoreAuthAlias="keystore" keystoreType="PKCS12" timeout="60000" allowSelfSignedCertificates="true" className="nl.nn.adapterframework.http.WebServiceSender">
+				<param name="url" sessionKey="varWSCPersoonsbevraging"/>
+				<param name="soapActionParam" sessionKey="soapActionParam"/>
+			</sender>
+			<forward name="success" path="XSLT_Berichtencode_elementaanpassing"/>
+			<forward name="exception" path="ReplaceVars"/>
+			<forward name="timeout" path="TimeOutFailure"/>
+		</pipe>
+		<pipe name="XSLT_Berichtencode_elementaanpassing" storeResultInSessionKey="result_Berichtencode" styleSheetName="xsl/PF_StUFBG310_Generiek/XSLT_Berichtencode_elementaanpassing.xslt" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<param name="varOntvanger" sessionKey="varOntvangerapplicatie"/>
+			<forward name="success" path="MAP_DDS_Resultaat_var"/>
+		</pipe>
+		<pipe name="MAP_DDS_Resultaat_var" styleSheetName="xsl/PF_StUFBG310_Generiek/MAP_DDS_Resultaat_var.xslt" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<forward name="success" path="checkAantalVoorkomens"/>
+		</pipe>
+		<pipe name="checkAantalVoorkomens" xpathExpression="string-length(Root/Record/aantalVoorkomens) &gt; 0" className="nl.nn.adapterframework.pipes.XmlIf">
+			<forward name="then" path="result"/>
+			<forward name="else" path="WSP_forGBA-V"/>
+		</pipe>
+		<pipe name="WSP_forGBA-V" styleSheetName="xsl/PF_StUFBG310_Generiek/check_WSP_forGBA-V.xslt" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<param name="WsProvider" sessionKey="WsProvider"/>
+			<forward name="success" path="checkWSP_forGBA-V"/>
+		</pipe>
+		<pipe name="checkWSP_forGBA-V" xpathExpression="string-length(Root) &gt; 0" className="nl.nn.adapterframework.pipes.XmlIf">
+			<forward name="then" path="soapAction"/>
+			<forward name="else" path="result"/>
+		</pipe>
+		<pipe name="soapAction" styleSheetName="xsl/PF_StUFBG310_Generiek/checkSoapAction.xslt" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<param name="SOAPACTION" sessionKey="soapActionParam"/>
+			<forward name="success" path="checkSoapAction"/>
+		</pipe>
+		<pipe name="checkSoapAction" xpathExpression="string-length(Root) &gt; 0" className="nl.nn.adapterframework.pipes.XmlIf">
+			<forward name="then" path="WAF_Call_PF_BG310_to_Procura_Bevragen"/>
+			<forward name="else" path="result"/>
+		</pipe>
+		<pipe name="result" getInputFromSessionKey="result_Berichtencode" className="nl.nn.adapterframework.pipes.EchoPipe">
+			<forward name="success" path="Exit"/>
+		</pipe>
+		<pipe name="WAF_Call_PF_BG310_to_Procura_Bevragen" getInputFromSessionKey="originalMessage" className="nl.nn.adapterframework.pipes.SenderPipe">
+			<sender javaListener="Procura_Bevragen" className="nl.nn.adapterframework.senders.IbisLocalSender"/>
+			<forward name="success" path="Exit"/>
+		</pipe>
+		<pipe name="ReplaceVars" filename="GeneriekMail.txt" storeResultInSessionKey="mailMessage" replaceFixedParams="true" className="nl.nn.adapterframework.pipes.FixedResultPipe">
+			<param name="TransactionName" value="BG310_Generiek"/>
+			<param name="TransactionPID" sessionKey="mid"/>
+			<param name="Environment" value="TEST"/>
+			<param name="varErrorMessage" value="Er is een fout opgetreden bij het bevragen van de GBA-V"/>
+			<param name="varError" xpathExpression="//errorMessage"/>
+			<forward name="success" path="WAF_MailNotificatie"/>
+		</pipe>
+		<pipe name="WAF_MailNotificatie" className="nl.nn.adapterframework.pipes.SenderPipe">
+			<sender smtpHost="smtp.sittard-geleen.lan" smtpPort="587" userId="noreply_esb" authAlias="esb_mail" className="nl.nn.adapterframework.senders.MailSender">
+				<param name="from" value="noreply_esb@sittard-geleen.nl"/>
+				<param name="recipients" value="&lt;recipient type=&quot;to&quot;&gt;integratie@sittard-geleen.nl&lt;/recipient&gt;"/>
+				<param name="subject" value="BG310_Generiek: mail notificatie bij error"/>
+				<param name="message" sessionKey="mailMessage"/>
+			</sender>
+			<forward name="success" path="MAP_Generiek_maakFo03"/>
+			<forward name="exception" path="Error"/>
+		</pipe>
+		<pipe name="MAP_Generiek_maakFo03" styleSheetName="xsl/PF_StUFBG310_Generiek/MAP_Generiek_maakFo03.xslt" getInputFromSessionKey="originalMessage" className="nl.nn.adapterframework.pipes.XsltPipe">
+			<forward name="success" path="Error"/>
+		</pipe>
+	</pipeline>
+</adapter>

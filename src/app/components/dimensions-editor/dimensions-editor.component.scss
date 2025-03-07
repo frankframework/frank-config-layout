@@ -1,0 +1,27 @@
+#outer tr td {
+  vertical-align: bottom
+}
+
+#buttons {
+  padding-left: 20px
+}
+
+input {
+  width: 50px
+}
+
+.changed {
+  color: blue
+}
+
+button {
+  background-color: lightgray
+}
+
+button:hover {
+  background-color: gray
+}
+
+button:active {
+  transform: translateY(6px)
+}

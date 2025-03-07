@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 WeAreFrank!
+   Copyright 2025 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,10 +14,20 @@
    limitations under the License.
 */
 
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module';
+import { NodeForLayers } from 'frank-config-layout';
 
-platformBrowserDynamic()
-  .bootstrapModule(AppModule)
-  // eslint-disable-next-line unicorn/prefer-top-level-await
-  .catch((error) => console.error(error));
+export enum NodeCaptionChoice {
+  ID = 'id',
+  TEXT = 'text',
+}
+
+export function getCaption(n: NodeForLayers, choice: NodeCaptionChoice): string {
+  switch (choice) {
+    case NodeCaptionChoice.ID: {
+      return n.id;
+    }
+    case NodeCaptionChoice.TEXT: {
+      return n.text;
+    }
+  }
+}

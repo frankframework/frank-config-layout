@@ -1,0 +1,93 @@
+<table id="outer">
+  <tr>
+    <td>
+      <table id="edits">
+        <tr>
+          <td>Layer height:</td>
+          <td><input
+            [(ngModel)]="editDimensions.layerHeight" type="number" minValue="1"
+            [ngClass]="editDimensions.layerHeight !== lastPosted.layerHeight ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Layer distance:</td>
+          <td><input
+            [(ngModel)]="editDimensions.layerDistance" type="number" minValue="1"
+            [ngClass]="editDimensions.layerDistance !== lastPosted.layerDistance ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Node box height:</td>
+          <td><input
+            [(ngModel)]="editDimensions.nodeBoxHeight" type="number" minValue="1"
+            [ngClass]="editDimensions.nodeBoxHeight !== lastPosted.nodeBoxHeight ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Intermediate width:</td>
+          <td><input
+            [(ngModel)]="editDimensions.intermediateWidth" type="number" minValue="1"
+            [ngClass]="editDimensions.intermediateWidth !== lastPosted.intermediateWidth ? 'changed' : ''" />
+          </td>
+        </tr>
+        <tr>
+          <td>Node width:</td>
+          <td><input
+            [(ngModel)]="editDimensions.nodeWidth" type="number" minValue="1"
+            [ngClass]="editDimensions.nodeWidth !== lastPosted.nodeWidth ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Node box width:</td>
+          <td><input
+            [(ngModel)]="editDimensions.nodeBoxWidth" type="number" minValue="1"
+            [ngClass]="editDimensions.nodeBoxWidth !== lastPosted.nodeBoxWidth ? 'changed' : ''" />
+          </td>
+        </tr>
+        <tr>
+          <td>Connector area %:</td>
+          <td><input
+              [(ngModel)]="editDimensions.boxConnectorAreaPerc" type="number" minValue="0" maxValue="100"
+              [ngClass]="editDimensions.boxConnectorAreaPerc !== lastPosted.boxConnectorAreaPerc ? 'changed' : ''" />
+          </td>
+        </tr>
+        <tr>
+          <td>Pass intermediate layers with vertical line segments</td>
+          <td><input
+            [(ngModel)]="editDimensions.intermediateLayerPassedByVerticalLine" type="checkbox"
+            [ngClass]="editDimensions.intermediateLayerPassedByVerticalLine !== lastPosted.intermediateLayerPassedByVerticalLine ? 'changed' : ''"/></td>
+        </tr>
+        <tr>
+          <td>Edge label font size:</td>
+          <td><input
+            [(ngModel)]="editDimensions.edgeLabelFontSize" type="number"
+            [ngClass]="editDimensions.edgeLabelFontSize !== lastPosted.edgeLabelFontSize ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Preferred label offset:</td>
+          <td><input
+            [(ngModel)]="editDimensions.preferredVertDistanceFromOrigin" type="number"
+            [ngClass]="editDimensions.preferredVertDistanceFromOrigin !== lastPosted.preferredVertDistanceFromOrigin ? 'changed' : ''"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Strictly keep edge labels out of box:</td>
+          <td><input
+            [(ngModel)]="editDimensions.strictlyKeepLabelOutOfBox" type="checkbox"
+            [ngClass]="editDimensions.strictlyKeepLabelOutOfBox !== lastPosted.strictlyKeepLabelOutOfBox ? 'changed' : ''"/></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table id="buttons">
+        <tr>
+          <td><button (click)="toFactory()">Back to factory settings</button></td>
+        </tr>
+        <tr>
+          <td><button (click)="commit()">Apply</button></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

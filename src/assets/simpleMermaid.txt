@@ -1,0 +1,8 @@
+Start("My start"):::normal
+N1("Node 1"):::normal
+N2("Node 2"):::normal
+End("End node"):::normal
+Start --> |success| N1
+Start --> |success| N2
+N1 --> |failure| End
+N2 --> |success| End

@@ -1,0 +1,14 @@
+<project default="run.xsl">
+    <target name="run.xsl">
+        <!-- <loadfile property="pipeTypes" srcFile="pipeTypes.xml"/> -->
+        <xslt in="testInput.xml" style="adapter2Mermaid.xsl" out="mermaidOut.txt" classpath="C:\\Users\M64D845\\workspace\\tools\\saxon9ee.jar" force="true">
+            <!-- <Param name="frankElements" expression="${pipeTypes}"/> -->
+        </xslt>
+    </target>
+    <!-- <target name="create.sheet">
+        <loadfile property="pipeTypes" srcFile="pipeTypes.xml"/>
+        <xslt in="dummy.xml" style="createSheet.xsl" out="sheetOut.xml" classpath="C:\\data\\tools\\SaxonEE9-9-1-6J\\saxon9ee.jar" force="true">
+            <Param name="frankElements" expression="${pipeTypes}"/>
+        </xslt>
+    </target> -->
+</project>
