@@ -5,15 +5,17 @@
       <textarea [(ngModel)]="mermaidText"></textarea>
     </td>
     <td>
-      <button class="loadButton" *ngFor="let alg of layerNumberAlgorithms" (click)="loadMermaid(alg.key)">Load with {{alg.value}} algorithm</button>
+      <button class="loadButton" *ngFor="let alg of layerNumberAlgorithms" (click)="loadMermaid(alg.key)">
+        Load with {{ alg.value }} algorithm
+      </button>
     </td>
     <td>
       <table id="values">
         <tr>
           <td>
             <div>
-              <app-dimensions-editor (onDimensions)="onNewDimensions($event)"/>
-              <div id="numCrossingLines">Num crossing lines: {{ numCrossingLines }} </div>
+              <app-dimensions-editor (dimensionsEdited)="onNewDimensions($event)" />
+              <div id="numCrossingLines">Num crossing lines: {{ numCrossingLines }}</div>
             </div>
           </td>
         </tr>
@@ -27,18 +29,27 @@
     <td>
       <h2>Sequence editor</h2>
       <div class="boundary">
-        <app-sequence-editor [model]="layoutModel" [selection]="selectionInModel" [itemClickedObservable]="itemClickedSubject" (onChanged)="onSequenceEditorChanged()"></app-sequence-editor>
+        <app-sequence-editor
+          [model]="layoutModel"
+          [selection]="selectionInModel"
+          [itemClickedObservable]="itemClickedSubject"
+          (newSequenceEstablished)="onSequenceEditorChanged()"
+        ></app-sequence-editor>
       </div>
     </td>
     <td id="drawing">
       <table id="above-drawing">
         <tr>
-          <td id="labelShowNodeText">Show node text: </td>
-          <td><input type="checkbox" [checked]="showNodeTextInDrawing" (click)="newChoiceShowNodeText()"/></td>
+          <td id="labelShowNodeText">Show node text:</td>
+          <td><input type="checkbox" [checked]="showNodeTextInDrawing" (click)="newChoiceShowNodeText()" /></td>
         </tr>
       </table>
       <div id="drawing-area" class="boundary">
-        <app-frank-flowchart id="frankFlowChart" [drawing]="drawing" (onShapeClicked)="onItemClicked($event)"></app-frank-flowchart>
+        <app-frank-flowchart
+          id="frankFlowChart"
+          [drawing]="drawing"
+          (shapeClicked)="onItemClicked($event)"
+        ></app-frank-flowchart>
       </div>
     </td>
   </tr>
@@ -48,7 +59,7 @@
   <tr>
     <td>
       <h2>Static SVG</h2>
-      <app-calculated-static-svg [show]="SHOW_IMAGE" [mermaid]="committedMermaidText" />      
+      <app-calculated-static-svg [show]="SHOW_IMAGE" [mermaid]="committedMermaidText" />
     </td>
     <td id="staticSvgText">
       <h2>Statistics</h2>

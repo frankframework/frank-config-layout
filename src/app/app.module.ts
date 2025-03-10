@@ -14,22 +14,22 @@
    limitations under the License.
 */
 
-import { BrowserModule } from "@angular/platform-browser";
-import { AppComponent } from "./app.component";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { FlowChartEditorComponent } from "./components/flow-chart-editor/flow-chart-editor.component";
-import { DimensionsEditorComponent } from "./components/dimensions-editor/dimensions-editor.component";
-import { FrankFlowchartComponent } from "./components/frank-flowchart/frank-flowchart.component";
-import { SequenceEditorComponent } from "./components/sequence-editor/sequence-editor.component";
-import { NgModule } from "@angular/core";
-import { RxPush } from "@rx-angular/template/push";
-import { DragDropModule } from "@angular/cdk/drag-drop";
-import { RouterModule } from "@angular/router";
-import { routes } from "./app.routes";
-import { SvgZoomPanDirective } from './directives/svg-zoom-pan.directive'
-import { CalculatedStaticSvgComponent } from "./components/calculated-static-svg/calculated-static-svg.component";
-import { StaticSvgStatisticsComponent } from "./components/static-svg-statistics/static-svg-statistics.component";
-import { initMermaid2Svg, getFactoryDimensions } from "./public.api";
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FlowChartEditorComponent } from './components/flow-chart-editor/flow-chart-editor.component';
+import { DimensionsEditorComponent } from './components/dimensions-editor/dimensions-editor.component';
+import { FrankFlowchartComponent } from './components/frank-flowchart/frank-flowchart.component';
+import { SequenceEditorComponent } from './components/sequence-editor/sequence-editor.component';
+import { NgModule } from '@angular/core';
+import { RxPush } from '@rx-angular/template/push';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { RouterModule } from '@angular/router';
+import { routes } from './app.routes';
+import { SvgZoomPanDirective } from './directives/svg-zoom-pan.directive';
+import { CalculatedStaticSvgComponent } from './components/calculated-static-svg/calculated-static-svg.component';
+import { StaticSvgStatisticsComponent } from './components/static-svg-statistics/static-svg-statistics.component';
+import { initMermaid2Svg, getFactoryDimensions } from 'frank-config-layout';
 
 @NgModule({
   declarations: [
@@ -40,18 +40,11 @@ import { initMermaid2Svg, getFactoryDimensions } from "./public.api";
     SequenceEditorComponent,
     SvgZoomPanDirective,
     CalculatedStaticSvgComponent,
-    StaticSvgStatisticsComponent
+    StaticSvgStatisticsComponent,
   ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule.forRoot(routes),
-    RxPush,
-    DragDropModule
-  ],
-  bootstrap: [AppComponent]
+  imports: [BrowserModule, FormsModule, ReactiveFormsModule, RouterModule.forRoot(routes), RxPush, DragDropModule],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 
-initMermaid2Svg(getFactoryDimensions())
+initMermaid2Svg(getFactoryDimensions());

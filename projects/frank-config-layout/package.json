@@ -1,0 +1,17 @@
+{
+  "name": "@frankframework/frank-config-layout",
+  "version": "1.0.0",
+  "description": "Calculate a nice layout for Frank configurations",
+  "main": "master",
+  "author": "Lenard van der Maas and Martijn Dirkse",
+  "license": "Apache-2.0",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frankframework/frank-config-layout",
+    "directory": "projects/frank-config-layout"
+  },
+  "peerDependencies": {
+    "@angular/core": "^19.1.1"
+  }
+}

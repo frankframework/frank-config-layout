@@ -15,69 +15,71 @@
 */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { EdgeLabel } from '../../public.api'
+import { EdgeLabel } from 'frank-config-layout';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  standalone: false,
   selector: 'app-frank-flowchart',
   templateUrl: './frank-flowchart.component.html',
   styleUrl: './frank-flowchart.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FrankFlowchartComponent {
-  @Input() drawing: Drawing|null = null
-  @Output() onShapeClicked: EventEmitter<string> = new EventEmitter()
+  @Input() drawing: Drawing | null = null;
+  @Output() shapeClicked: EventEmitter<string> = new EventEmitter();
 
   scale: string = '100';
 
-  handleShapeClicked(id: string) {
-    this.onShapeClicked.emit(id)
+  handleShapeClicked(id: string): void {
+    this.shapeClicked.emit(id);
   }
 
-  newScale(scale: number) {
-    this.scale = '' + Math.round(scale * 100);
+  newScale(scale: number): void {
+    this.scale = `${Math.round(scale * 100)}`;
   }
 }
 
 export interface Drawing {
-  width: number
-  height: number
-  rectangles: Rectangle[]
-  lines: Line[]
-  edgeLabels: EdgeLabel[]
-  edgeLabelFontSize: number
+  width: number;
+  height: number;
+  rectangles: Rectangle[];
+  lines: Line[];
+  edgeLabels: EdgeLabel[];
+  edgeLabelFontSize: number;
 }
 
 export interface Rectangle {
-  id: string
-  x: number
-  y: number
-  width: number
-  height: number
-  centerX: number
-  centerY: number
-  text: string
-  selected: boolean
-  isError: boolean
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  centerX: number;
+  centerY: number;
+  text: string;
+  selected: boolean;
+  isError: boolean;
 }
 
 export interface Line {
-  id: string
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  selected: boolean
-  arrow: boolean
-  isError: boolean
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  selected: boolean;
+  arrow: boolean;
+  isError: boolean;
 }
 
 export function getEmptyDrawing(): Drawing {
-  return  {
+  return {
     width: 0,
     height: 0,
     rectangles: [],
     lines: [],
     edgeLabels: [],
-    edgeLabelFontSize: 0
-  }
+    edgeLabelFontSize: 0,
+  };
 }

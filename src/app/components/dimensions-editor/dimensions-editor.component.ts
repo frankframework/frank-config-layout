@@ -15,35 +15,36 @@
 */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
-import { Dimensions, getFactoryDimensions } from '../../public.api';
+import { Dimensions, getFactoryDimensions } from 'frank-config-layout';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  standalone: false,
   selector: 'app-dimensions-editor',
   templateUrl: './dimensions-editor.component.html',
   styleUrl: './dimensions-editor.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DimensionsEditorComponent {
-  editDimensions: Dimensions = getFactoryDimensions()
-  lastPosted: Dimensions = getFactoryDimensions()
+  editDimensions: Dimensions = getFactoryDimensions();
+  lastPosted: Dimensions = getFactoryDimensions();
 
-  @Output() onDimensions = new EventEmitter<Dimensions>()
+  @Output() dimensionsEdited = new EventEmitter<Dimensions>();
 
-  constructor() {
+  constructor() {}
+
+  reset(): void {
+    this.editDimensions = { ...this.lastPosted };
   }
 
-  reset() {
-    this.editDimensions = { ... this.lastPosted }
+  commit(): void {
+    this.lastPosted = { ...this.editDimensions };
+    this.dimensionsEdited.emit({ ...this.lastPosted });
   }
 
-  commit() {
-    this.lastPosted = { ... this.editDimensions }
-    this.onDimensions.emit({ ... this.lastPosted })
-  }
-
-  toFactory() {
-    this.editDimensions = getFactoryDimensions()
-    this.lastPosted = getFactoryDimensions()
-    this.onDimensions.emit({ ... this.lastPosted })
+  toFactory(): void {
+    this.editDimensions = getFactoryDimensions();
+    this.lastPosted = getFactoryDimensions();
+    this.dimensionsEdited.emit({ ...this.lastPosted });
   }
 }

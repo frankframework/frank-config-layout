@@ -16,59 +16,61 @@
 
 import { ChangeDetectionStrategy, Component, Input, NgZone } from '@angular/core';
 import { OnInit } from '@angular/core';
-import { SvgResult, mermaid2svgStatistics } from '../../public.api'
+import { SvgResult, mermaid2svgStatistics } from 'frank-config-layout';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  standalone: false,
   selector: 'app-static-svg-statistics',
   templateUrl: './static-svg-statistics.component.html',
   styleUrl: './static-svg-statistics.component.scss',
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class StaticSvgStatisticsComponent implements OnInit {
-  numNodes: string|null = null
-  numEdges: string|null = null
-  numVisitsDuringLayerCalculation: string|null = null
+  numNodes: string | null = null;
+  numEdges: string | null = null;
+  numVisitsDuringLayerCalculation: string | null = null;
 
-  constructor(
-    private ngZone: NgZone
-  ) {
-    this.reset()
+  constructor(private ngZone: NgZone) {
+    this.reset();
   }
 
-  private _mermaid: string|null = null
+  private _mermaid: string | null = null;
 
-  private reset() {
-    this.numNodes = 'n/a'
-    this.numEdges = 'n/a'
-    this.numVisitsDuringLayerCalculation = 'n/a'  
+  private reset(): void {
+    this.numNodes = 'n/a';
+    this.numEdges = 'n/a';
+    this.numVisitsDuringLayerCalculation = 'n/a';
   }
 
   @Input()
   set mermaid(mermaid: string) {
-    this._mermaid = mermaid
-    this.update()
+    this._mermaid = mermaid;
+    this.update();
   }
 
   ngOnInit(): void {
-    this.update()
+    this.update();
   }
 
-  private update() {
-    if ( (this._mermaid === null) || (this._mermaid.length === 0) ) {
-      return
+  private update(): void {
+    if (this._mermaid === null || this._mermaid.length === 0) {
+      return;
     }
-    mermaid2svgStatistics(this._mermaid!).then((statistics) => {
-      this.updateStatistics(statistics)
-    }).catch(() => {
-      this.reset()
-    })
+    mermaid2svgStatistics(this._mermaid!)
+      .then((statistics) => {
+        this.updateStatistics(statistics);
+      })
+      .catch(() => {
+        this.reset();
+      });
   }
 
-  private updateStatistics(statistics: SvgResult) {
+  private updateStatistics(statistics: SvgResult): void {
     this.ngZone.run(() => {
-      this.numNodes = `${statistics.numNodes}`
-      this.numEdges = `${statistics.numEdges}`
-      this.numVisitsDuringLayerCalculation = `${statistics.numNodeVisitsDuringLayerCalculation}`
-    })
+      this.numNodes = `${statistics.numNodes}`;
+      this.numEdges = `${statistics.numEdges}`;
+      this.numVisitsDuringLayerCalculation = `${statistics.numNodeVisitsDuringLayerCalculation}`;
+    });
   }
 }
