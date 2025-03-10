@@ -10,7 +10,5 @@
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.d.ts",
-    "projects/frank-config-layout/src/**/*.spec.ts",
-    "projects/frank-config-layout/src/**/*.d.ts"
   ]
 }
