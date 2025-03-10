@@ -8,7 +8,7 @@
     "build": "ng build frank-config-layout",
     "watch": "ng build angular-library-playground --watch --configuration development",
     "test": "ng test",
-    "testLib": "cd projects/frank-config-layout && npx ng test"
+    "testLib": "ng test frank-config-layout"
   },
   "private": true,
   "dependencies": {
@@ -52,5 +52,6 @@
     "ng-packagr": "^19.1.0",
     "prettier": "^3.2.5",
     "typescript": "~5.6.x"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

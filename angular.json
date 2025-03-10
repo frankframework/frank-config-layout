@@ -113,6 +113,16 @@
           "options": {
             "project": "projects/frank-config-layout/ng-package.json"
           }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/frank-config-layout/tsconfig.spec.json"
+          }
         }
       }
     }
