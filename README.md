@@ -1,14 +1,14 @@
 # Frank config layout playground
 
-This GitHub project contains two angular projects. The first is [Frank config layout](./projects/frank-config-layout/README.md), which is in folder [projects/frank-config-layout](./projects/frank-config-layout). That is a library that generates pictures of Frank configurations. The second angular project is frank-config-layout-playground. It provides a graphical user interface that supports the development of frank-config-layout. This REAdME file will explain the features of frank-config-layoug-playground.
+This GitHub project contains two angular projects. The first is [Frank config layout](./projects/frank-config-layout/README.md), which is in folder [projects/frank-config-layout](./projects/frank-config-layout). That is a library that generates pictures of Frank configurations. The second angular project is "Frank config layout playground". It provides a graphical user interface that supports the development of "Frank config layout". This REAdME file will explain the features of frank-config-layoug-playground.
 
-This GitHub project has a single [angular.json](./angular.json) that manages both Angular projects. Building and testing frank-config-layout is done using the scripts in the top-level [package.json](./package.json). This README explain how to test, build and publish frank-config-layout (configuration management).
+This GitHub project has a single [angular.json](./angular.json) that manages both Angular projects. Building and testing "Frank config layout" is done using the scripts in the top-level [package.json](./package.json). This README explain how to test, build and publish "Frank config layout" (configuration management).
 
 This GitHub project was set up using https://github.com/frankframework/angular-library-template.
 
 # Features of Frank config layout playground
 
-Please keep in mind that frank-config-layout takes Mermaid text as input and that it generates SVG (Scalable Vector Graphics) text. Also remember that the generated picture depends on configurable dimensions. The figure below gives an overview of the playground:
+Please keep in mind that "Frank config layout" takes Mermaid text as input and that it generates SVG (Scalable Vector Graphics) text. Also remember that the generated picture depends on configurable dimensions. The figure below gives an overview of the playground:
 
 ![playground](./pictures/playground.jpg)
 
@@ -18,7 +18,7 @@ The button divides the nodes defined in the Mermaid text over horizontal layers 
 
 You can use the panel on the middle-left (number 3) to manipulate the sequence of the nodes within each layer. The resulting drawing is shown next to it (number 4).
 
-The sequence editor (number 3) supports two methods to manipulate the sequence of the nodes. In tab "Manual", you can drag and drop rows to move nodes to different (horizontal) positions within their layer. You can also remove nodes here to see how the picture would look without them. In tab "Algorithm steps", you can align the nodes while fixing the sequence within a chosen layer. Each button shows how the number of crossing lines will be changed. These are the same steps as performed by the library frank-config-layout. The library aligns on the layer for which aligning result in the biggest reduction of the number of crossing lines. It does so repeatedly until no reduction is possible anymore. In tab "Algorithm steps" you can apply the library's algorithm in a few clicks.
+The sequence editor (number 3) supports two methods to manipulate the sequence of the nodes. In tab "Manual", you can drag and drop rows to move nodes to different (horizontal) positions within their layer. You can also remove nodes here to see how the picture would look without them. In tab "Algorithm steps", you can align the nodes while fixing the sequence within a chosen layer. Each button shows how the number of crossing lines will be changed. These are the same steps as performed by the library "Frank config layout". The library aligns on the layer for which aligning result in the biggest reduction of the number of crossing lines. It does so repeatedly until no reduction is possible anymore. In tab "Algorithm steps" you can apply the library's algorithm in a few clicks.
 
 The result of applying the library is shown to the bottom. To the left (number 5) you see the drawing and to the right (number 6) you see the text of the SVG.
 
@@ -26,14 +26,17 @@ To the top-right (number 2) you can experiment with the dimensions applied. Thes
 
 # Configuration management
 
+Building, testing and publishing is done completely using the scripts of the top-level [package.json](./package.json). Below it is explained how to use the scripts for actions you want to perform.
+
 ### Serve
-Run `npm start` to build the library project first and then serve the testing project.
+Run `npm start` to build "Frank config layout" first and then serve "Frank config layout playground".
 
 ### Serve with live hot-reload
-Run `npm run watch` to build the library on every change. Then in a new terminal run `npm start` to serve the testing project.
+Run `npm run watch` to build "Frank config layout" on every change. Then in a new terminal run `npm start` to serve "Frank config layout playground".
 
 ### Build
-Run `npm run build` to build the library project using ng-packagr. The build artifacts will be stored in the `dist/%PROJECT_NAME%/` directory.
+Run `npm run build` to build "Frank config layout" using ng-packagr. The build artifacts will be stored in the `dist/frank-config-layout` directory.
 
 ### Publishing
-Run `npm publish` in the `dist/%PROJECT_NAME%/` directory in order to publish the library to a package registry.
+Run `npm publish -otp <your 6-digit code>` in the `dist/frank-config-layout/` directory in order to publish the library to a package registry. Get the six-digit code using the Google authenticator on your phone.
+
