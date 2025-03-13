@@ -27,7 +27,7 @@ function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   });
 }
 
-// See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
+// See pictures/ForUnitTests/layout-to-test-class-LayoutBase.jpg
 // for the graphical representation of this layout.
 function getOtherLayoutBase(): LayoutBase {
   const g = createGraphForLayers();

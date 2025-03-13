@@ -305,7 +305,7 @@ function checkStateAfterOmittingPositionsZeroAndThree(instance: NodeSequenceEdit
   expect(instance.getOrderedOmittedNodesInLayer(1).map((n) => n.id)).toEqual(['C']);
 }
 
-// See doc/ForUnitTests/layout-to-test-class-LayoutBase.jpg
+// See pictures/ForUnitTests/layout-to-test-class-LayoutBase.jpg
 // for the graphical representation of this layout.
 function getOtherNodeSequenceEditor(): NodeSequenceEditor {
   const g = createGraphForLayers();
