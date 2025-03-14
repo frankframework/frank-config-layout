@@ -27,6 +27,7 @@ import {
   getNumCrossings,
   alignFromLayer,
   calculateNumCrossingsChangesFromAligning,
+  minimizeNumCrossings,
   NodeOrEdgeForLayers,
 } from 'frank-config-layout';
 
@@ -207,12 +208,23 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
     this.newSequenceEstablished.emit();
   }
 
+  bestSequence(): void {
+    this.doWithLayoutBase((lb) => minimizeNumCrossings(lb));
+  }
+
   onAlignFromLayer(layerNumber: number): void {
+    this.doWithLayoutBase((lb) => {
+      alignFromLayer(lb, layerNumber);
+      return lb;
+    });
+  }
+
+  private doWithLayoutBase(action: (lb: LayoutBase) => LayoutBase): void {
     if (this.model === null) {
       return;
     }
-    const lb: LayoutBase = this.model.getShownNodesLayoutBase();
-    alignFromLayer(lb, layerNumber);
+    let lb: LayoutBase = this.model.getShownNodesLayoutBase();
+    lb = action(lb);
     this.model.updatePositionsOfShownNodes(lb);
     this.updateViews();
     this.newSequenceEstablished.emit();
