@@ -12,9 +12,7 @@ Please keep in mind that "Frank config layout" takes Mermaid text as input and t
 
 ![playground](./pictures/playground.jpg)
 
-To the top-left (number 1), you see a text field to enter Mermaid input. To get started, you can use the examples from [simpleMermaid.txt](./src/assets/simpleMermaid.txt) or [mermaid.txt](./src/assets/mermaid.txt). To get a drawing for the entered Mermaid text, press "Load with longest path algorithm". The button "Load with first occuring path algorithm" exists for historical reasons and is not so important.
-
-To the top-right (number 2) you can experiment with the dimensions applied. You can edit dimensions after loading Mermaid.
+To the top-left (number 1), you see a text field to enter Mermaid input. To get started, you can use the examples from [simpleMermaid.txt](./src/assets/simpleMermaid.txt) or [mermaid.txt](./src/assets/mermaid.txt). To get a drawing for the entered Mermaid text, press "Load with longest path algorithm". The button "Load with first occuring path algorithm" exists for historical reasons and is not so important. To the top-right (number 2) you can experiment with the dimensions applied. You can edit dimensions after loading Mermaid.
 
 When Mermaid is loaded, the nodes are assigned to horizontal layers that are stacked vertically. The nodes in the first layer are on top; the nodes on the second layer are below that, et cetera. It does not automatically optimize the sequence of the nodes within each layer. Press "Best sequence" to the top of the sequence editor to get the best sequence as is done for the static SVG.
 
