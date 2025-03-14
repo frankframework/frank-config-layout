@@ -86,7 +86,13 @@ export { getRange, rotateToSwapItems, permutationFrom } from './lib/util/util';
 export { getKey } from './lib/model/graph';
 export { Text, createText } from './lib/model/text';
 export { getGraphFromMermaid } from './lib/parsing/mermaid-parser';
-export { findErrorFlow, OriginalGraph } from './lib/model/error-flow';
+export {
+  findErrorFlow,
+  OriginalGraph,
+  ERROR_STATUS_SUCCESS,
+  ERROR_STATUS_MIXED,
+  ERROR_STATUS_ERROR,
+} from './lib/model/error-flow';
 export {
   LAYERS_FIRST_OCCURING_PATH,
   LAYERS_LONGEST_PATH,

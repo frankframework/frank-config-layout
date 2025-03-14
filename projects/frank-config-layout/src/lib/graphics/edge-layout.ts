@@ -36,7 +36,7 @@ export class PlacedNode implements NodeForLayers {
   readonly passDirection?: number;
   readonly id: string;
   readonly text: string;
-  readonly isError: boolean;
+  readonly errorStatus: number;
   readonly layer: number;
   readonly isIntermediate: boolean;
 
@@ -47,7 +47,7 @@ export class PlacedNode implements NodeForLayers {
     this.passDirection = p.node.passDirection;
     this.id = p.node.id;
     this.text = p.node.text;
-    this.isError = p.node.isError;
+    this.errorStatus = p.node.errorStatus;
     this.layer = p.node.layer;
     this.isIntermediate = p.node.isIntermediate;
   }
@@ -127,7 +127,7 @@ export function createLayoutLineSegmentFromEdge(
     originId: fromNode.id,
     line,
     text: edge.text,
-    isError: edge.isError,
+    errorStatus: edge.errorStatus,
     isFirstLineSegment: edge.isFirstSegment,
     isLastLineSegment: edge.isLastSegment,
     minLayerNumber: minLayer,
@@ -141,7 +141,7 @@ export interface LayoutLineSegment {
   readonly originId: string;
   readonly line: Line;
   readonly text: Text;
-  readonly isError: boolean;
+  readonly errorStatus: number;
   readonly isFirstLineSegment: boolean;
   readonly isLastLineSegment: boolean;
   readonly minLayerNumber: number;
@@ -208,7 +208,7 @@ export class Layout {
         originId: n.id,
         line,
         text: createText(),
-        isError: n.isError,
+        errorStatus: n.errorStatus,
         isFirstLineSegment: false,
         isLastLineSegment: false,
         minLayerNumber: n.layer,

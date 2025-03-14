@@ -5,6 +5,7 @@ import {
   GraphForLayers,
   PASS_DIRECTION_DOWN,
   NodeForLayers,
+  ERROR_STATUS_SUCCESS,
 } from 'frank-config-layout';
 
 function getInstanceToCheckOrdering(): NodeSequenceEditor {
@@ -20,14 +21,14 @@ function getInstanceToCheckOrdering(): NodeSequenceEditor {
 }
 
 function newTestNode(id: string, layer: number): NodeForLayers {
-  return { id, layer, text: '', isError: false, isIntermediate: false };
+  return { id, layer, text: '', errorStatus: ERROR_STATUS_SUCCESS, isIntermediate: false };
 }
 
 function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    isError: false,
+    errorStatus: ERROR_STATUS_SUCCESS,
     isIntermediate: false,
     text: createText(),
     isFirstSegment: false,

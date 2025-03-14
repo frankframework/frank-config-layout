@@ -170,7 +170,7 @@ export class FlowChartEditorComponent {
           centerY: n.centerY,
           text: getCaption(n, this.choiceShowNodeTextInDrawing),
           selected: this.selectionInModel.isNodeHighlightedInDrawing(n.id, this.layoutModel!),
-          isError: n.isError,
+          errorStatus: n.errorStatus,
         };
       });
     const lines: Line[] = layout.getLayoutLineSegments().map((lls) => {
@@ -182,7 +182,7 @@ export class FlowChartEditorComponent {
         y2: lls.line.endPoint.y,
         selected: this.selectionInModel.isEdgeHighlightedInDrawing(lls.key, this.layoutModel!),
         arrow: lls.isLastLineSegment,
-        isError: lls.isError,
+        errorStatus: lls.errorStatus,
       };
     });
     this.drawing = {

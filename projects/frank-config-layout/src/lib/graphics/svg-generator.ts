@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
 import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from './edge-layout';
 
 export function generateSvg(layout: Layout, edgeLabelFontSize: number): string {
@@ -53,6 +54,10 @@ function renderDefs(fontSize: number): string {
 
       .line.error {
         stroke: #ec4758;
+      }
+
+      .line.mixed {
+        stroke: #FFDE59;
       }
 
       .rect-text-wrapper {
@@ -136,7 +141,7 @@ function getNodeGroupClass(id: string): string {
 }
 
 function getRectangleClass(n: PlacedNode): string {
-  if (n.isError) {
+  if (n.errorStatus === ERROR_STATUS_ERROR) {
     return 'rectangle errorOutline';
   } else {
     return 'rectangle';
@@ -167,10 +172,12 @@ function getMarkerEnd(lineSegment: LayoutLineSegment): string {
 }
 
 function classOfLine(edge: LayoutLineSegment): string {
-  if (edge.isError) {
+  if (edge.errorStatus === ERROR_STATUS_ERROR) {
     return 'class="line error"';
-  } else {
+  } else if (edge.errorStatus === ERROR_STATUS_SUCCESS) {
     return 'class="line"';
+  } else {
+    return 'class="line mixed"';
   }
 }
 

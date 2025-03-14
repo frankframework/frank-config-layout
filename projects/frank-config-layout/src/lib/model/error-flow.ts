@@ -33,17 +33,21 @@ const ERROR_FORWARD_NAMES = new Set([
   'outputFailure',
 ]);
 
+export const ERROR_STATUS_SUCCESS = 0;
+export const ERROR_STATUS_MIXED = 1;
+export const ERROR_STATUS_ERROR = 2;
+
 export interface OriginalNode {
   id: string;
   text: string;
-  isError: boolean;
+  errorStatus: number;
 }
 
 export interface OriginalEdge {
   from: OriginalNode;
   to: OriginalNode;
   text: Text;
-  isError: boolean;
+  errorStatus: number;
 }
 
 export type OriginalGraph = Graph<OriginalNode, OriginalEdge>;
@@ -68,22 +72,31 @@ export function findErrorFlow(b: MermaidGraph): OriginalGraph {
 
 function transformNode(n: MermaidNode): OriginalNode {
   if (n.style === NODE_ERROR_CLASS) {
-    return { id: n.id, text: n.text, isError: true };
+    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_ERROR };
   } else {
-    return { id: n.id, text: n.text, isError: false };
+    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_SUCCESS };
   }
 }
 
 function transformEdge(from: OriginalNode, to: OriginalNode, text: Text): OriginalEdge {
-  if (from.isError) {
-    return { from, to, text, isError: true };
+  if (from.errorStatus === ERROR_STATUS_ERROR) {
+    return { from, to, text, errorStatus: ERROR_STATUS_ERROR };
   }
   if (text.numLines === 0) {
-    return { from, to, text, isError: false };
+    return { from, to, text, errorStatus: ERROR_STATUS_SUCCESS };
   } else {
     const isError: boolean = text.lines
       .map((line) => ERROR_FORWARD_NAMES.has(line))
       .every((lineIsError) => lineIsError === true);
-    return { from, to, text, isError };
+    const isSuccess: boolean = text.lines
+      .map((line) => !ERROR_FORWARD_NAMES.has(line))
+      .every((lineIsSuccess) => lineIsSuccess === true);
+    if (isError) {
+      return { from, to, text, errorStatus: ERROR_STATUS_ERROR };
+    }
+    if (isSuccess) {
+      return { from, to, text, errorStatus: ERROR_STATUS_SUCCESS };
+    }
+    return { from, to, text, errorStatus: ERROR_STATUS_MIXED };
   }
 }
