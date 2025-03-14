@@ -17,7 +17,7 @@ The rotation we need is the matrix shown below:
 
 $\bigg(\begin{matrix}a & b\\-b & a\end{matrix}\bigg) \bigg(\begin{matrix}a\\b\end{matrix}\bigg) = \bigg(\begin{matrix}a^2 + b^2\\0\end{matrix}\bigg)$
 
-The shown matrix multiplication demonstrates that the line segment defined above is transformed to a horizontal segment. In addition the shown matrix, say $R$, is symmetric and not complex-valued. Therefore the inner product $<Rv, Rw> = <v, w>$ for two arbitrary vectors $v$ and $w$. This demonstrates that the transformation preserves angles and is really a rotation.
+The shown matrix multiplication demonstrates that the line segment defined above is transformed to a horizontal segment. See https://en.wikipedia.org/wiki/Rotation_matrix to understand that this matrix is indeed a combination of rotating and scaling.
 
 The problem has been simplified to checking whether some line segment crosses a horizontal line segment, see figure below:
 
