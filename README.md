@@ -14,29 +14,23 @@ Please keep in mind that "Frank config layout" takes Mermaid text as input and t
 
 To the top-left (number 1), you see a text field to enter Mermaid input. To get started, you can use the examples from [simpleMermaid.txt](./src/assets/simpleMermaid.txt) or [mermaid.txt](./src/assets/mermaid.txt). To get a drawing for the entered Mermaid text, press "Load with longest path algorithm". The button "Load with first occuring path algorithm" exists for historical reasons and is not so important.
 
-The button divides the nodes defined in the Mermaid text over horizontal layers that are stacked vertically. The nodes in the first layer are on top; the nodes on the second layer are below that, et cetera. It does not optimize the sequence of the nodes within each layer.
+To the top-right (number 2) you can experiment with the dimensions applied. You can edit dimensions after loading Mermaid.
 
-You can use the panel on the middle-left (number 3) to manipulate the sequence of the nodes within each layer. The resulting drawing is shown next to it (number 4).
+When Mermaid is loaded, the nodes are assigned to horizontal layers that are stacked vertically. The nodes in the first layer are on top; the nodes on the second layer are below that, et cetera. It does not automatically optimize the sequence of the nodes within each layer. Press "Best sequence" to the top of the sequence editor to get the best sequence as is done for the static SVG.
 
-The sequence editor (number 3) supports two methods to manipulate the sequence of the nodes. In tab "Manual", you can drag and drop rows to move nodes to different (horizontal) positions within their layer. You can also remove nodes here to see how the picture would look without them. In tab "Algorithm steps", you can align the nodes while fixing the sequence within a chosen layer. Each button shows how the number of crossing lines will be changed. These are the same steps as performed by the library "Frank config layout". The library aligns on the layer for which aligning result in the biggest reduction of the number of crossing lines. It does so repeatedly until no reduction is possible anymore. In tab "Algorithm steps" you can apply the library's algorithm in a few clicks.
+The sequence editor (number 3) has been introduced to experiment with the sequence of the nodes within each layer. The resulting drawing is shown next to it (number 4). 
 
-The result of applying the library is shown to the bottom. To the left (number 5) you see the drawing and to the right (number 6) you see the text of the SVG.
+The sequence editor supports two methods to experiment with the sequence of the nodes. In tab "Manual", you can drag and drop rows to move nodes to different (horizontal) positions within their layer. You can also remove nodes here to see how the picture would look without them. In tab "Algorithm steps", you can align the nodes while fixing the sequence within a chosen layer. Each button shows how the number of crossing lines will be changed. These are the same steps as performed by the library "Frank config layout". The library aligns on the layer for which aligning results in the biggest reduction of the number of crossing lines. It does so repeatedly until no reduction is possible anymore.
 
-To the top-right (number 2) you can experiment with the dimensions applied. These dimensions are applied to the result produced by the sequence editor (number 4) but not the static SVG shown to the bottom (numbers 5 and 6).
+The static SVG is shown to the bottom. Area number 5 to the bottom-left is the picture that would also be generated in the Frank!Framework. Next to this (number 6) you see the text of the SVG so you can copy-paste it. This is very useful for creating unit tests.
 
 # Configuration management
 
-Building, testing and publishing is done completely using the scripts of the top-level [package.json](./package.json). Below it is explained how to use the scripts for actions you want to perform.
+Building, testing and publishing is done completely using the scripts of the top-level [package.json](./package.json). They speak for themselves if you have some experience with developing Angular applications. To get started, you can do the following:
 
-### Serve
-Run `npm start` to build "Frank config layout" first and then serve "Frank config layout playground".
+* `npm ci` to install dependencies.
+* `npm run build` to build "Frank config layout".
+* `npm run test` to run the unit tests of "Frank config layout playground".
+* `npm run testLib` to run the unit tests of "Frank config layout".
 
-### Serve with live hot-reload
-Run `npm run watch` to build "Frank config layout" on every change. Then in a new terminal run `npm start` to serve "Frank config layout playground".
-
-### Build
-Run `npm run build` to build "Frank config layout" using ng-packagr. The build artifacts will be stored in the `dist/frank-config-layout` directory.
-
-### Publishing
-Run `npm publish -otp <your 6-digit code>` in the `dist/frank-config-layout/` directory in order to publish the library to a package registry. Get the six-digit code using the Google authenticator on your phone.
-
+If you have build "Frank config layout", you can publish it on https://www.npmjs.com/ as follows. Go to folder `dist/frank-config-layout`. Do `npm publish -otp <code from your telephone>` there. The code from your telephone is needed because of two-factor authentication and comes from the Google authenticator.
