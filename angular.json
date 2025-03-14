@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-library-playground": {
+    "frank-config-layout-playground": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/angular-library-playground",
+            "outputPath": "dist/frank-config-layout-playground",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-library-playground:build:production"
+              "buildTarget": "frank-config-layout-playground:build:production"
             },
             "development": {
-              "buildTarget": "angular-library-playground:build:development"
+              "buildTarget": "frank-config-layout-playground:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -73,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "angular-library-playground:build"
+            "buildTarget": "frank-config-layout-playground:build"
           }
         },
         "test": {

@@ -36,9 +36,9 @@ export interface SvgResult {
 let service: Mermaid2svgService | null = null;
 
 export function initMermaid2Svg(d: Dimensions): void {
-  if (service !== null) {
-    throw new Error('Cannot initialize Mermaid2Svg more than once');
-  }
+  // In production, do not initialize more than once.
+  // The playground has to call this function any time
+  // there are new dimensions.
   service = new Mermaid2svgService(d);
 }
 
@@ -106,6 +106,7 @@ export {
   getNumCrossings,
   alignFromLayer,
   calculateNumCrossingsChangesFromAligning,
+  minimizeNumCrossings,
 } from './lib/model/layout-base';
 export { NodeLayoutBuilder } from './lib/graphics/node-layout';
 export { getDerivedEdgeLabelDimensions } from './lib/graphics/edge-label-layouter';

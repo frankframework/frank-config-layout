@@ -15,7 +15,7 @@
 */
 
 import { Component, ElementRef, Input } from '@angular/core';
-import { mermaid2svg } from 'frank-config-layout';
+import { Dimensions, initMermaid2Svg, mermaid2svg } from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -38,14 +38,20 @@ export class CalculatedStaticSvgComponent {
   }
 
   private _mermaid: string | null = null;
+  private _dimensions: Dimensions | null = null;
 
   @Input() set mermaid(mermaid: string) {
     this._mermaid = mermaid;
     this.update();
   }
 
+  @Input() set dimensions(dimensions: Dimensions) {
+    this._dimensions = dimensions;
+    this.update();
+  }
+
   private update(): void {
-    if (this._show !== null && this._mermaid != null) {
+    if (this._show !== null && this._mermaid != null && this._dimensions !== null) {
       // This block is not in a separate function, because then we would
       // have to put ! signs for this._show and this._mermaid
       if (![CalculatedStaticSvgComponent.SHOW_TEXT, CalculatedStaticSvgComponent.SHOW_IMAGE].includes(this._show)) {
@@ -56,6 +62,7 @@ export class CalculatedStaticSvgComponent {
         this.showNoSvg();
         return;
       }
+      initMermaid2Svg(this._dimensions);
       mermaid2svg(this._mermaid)
         .then((svg) => {
           this.showSvg(svg);
