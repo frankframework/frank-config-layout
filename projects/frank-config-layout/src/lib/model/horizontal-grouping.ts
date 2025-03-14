@@ -22,7 +22,7 @@ import { Graph, NodeOrEdge, Connection, WithId } from './graph';
 export interface NodeForLayers extends WithId {
   readonly id: string;
   readonly text: string;
-  readonly isError: boolean;
+  readonly errorStatus: number;
   readonly layer: number;
   readonly isIntermediate: boolean;
   readonly passDirection?: number;
@@ -34,7 +34,7 @@ export interface EdgeForLayers extends Connection<NodeForLayers> {
   readonly from: NodeForLayers;
   readonly to: NodeForLayers;
   readonly text: Text;
-  readonly isError: boolean;
+  readonly errorStatus: number;
   readonly isIntermediate: boolean;
   readonly isFirstSegment: boolean;
   readonly isLastSegment: boolean;
@@ -71,7 +71,7 @@ export function introduceIntermediateNodesAndEdges(
     result.addNode({
       id: n.id,
       text: n.text,
-      isError: n.isError,
+      errorStatus: n.errorStatus,
       layer: nodeIdToLayer.get(n.id)!,
       isIntermediate: false,
       passDirection: undefined,
@@ -104,7 +104,7 @@ function handleEdge(
       to: result.getNodeById(edge.to.id),
       text: edge.text,
       // TODO: Test this.
-      isError: edge.isError,
+      errorStatus: edge.errorStatus,
       isFirstSegment: true,
       isLastSegment: true,
       isIntermediate: false,
@@ -116,7 +116,7 @@ function handleEdge(
         id: `intermediate${intermediateNodeSeq++}`,
         text: '',
         // TODO: Test this.
-        isError: edge.isError,
+        errorStatus: edge.errorStatus,
         layer,
         isIntermediate: true,
         passDirection,
@@ -129,7 +129,7 @@ function handleEdge(
       from: result.getNodeById(edge.from.id),
       to: intermediateNodes[0],
       text: edge.text,
-      isError: edge.isError,
+      errorStatus: edge.errorStatus,
       isFirstSegment: true,
       isLastSegment: false,
       isIntermediate: true,
@@ -140,7 +140,7 @@ function handleEdge(
         from: intermediateNodes[i - 1],
         to: intermediateNodes[i],
         text: edge.text,
-        isError: edge.isError,
+        errorStatus: edge.errorStatus,
         isFirstSegment: false,
         isLastSegment: false,
         isIntermediate: true,
@@ -151,7 +151,7 @@ function handleEdge(
       from: intermediateNodes.at(-1)!,
       to: result.getNodeById(edge.to.id),
       text: edge.text,
-      isError: edge.isError,
+      errorStatus: edge.errorStatus,
       isFirstSegment: false,
       isLastSegment: true,
       isIntermediate: true,

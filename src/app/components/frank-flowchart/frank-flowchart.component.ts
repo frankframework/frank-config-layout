@@ -15,7 +15,11 @@
 */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { EdgeLabel } from 'frank-config-layout';
+import {
+  EdgeLabel,
+  ERROR_STATUS_ERROR as ERROR_STATUS_ERROR_IMPORTED,
+  ERROR_STATUS_MIXED as ERROR_STATUS_MIXED_IMPORTED,
+} from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -26,6 +30,9 @@ import { EdgeLabel } from 'frank-config-layout';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FrankFlowchartComponent {
+  readonly ERROR_STATUS_ERROR = ERROR_STATUS_ERROR_IMPORTED;
+  readonly ERROR_STATUS_MIXED = ERROR_STATUS_MIXED_IMPORTED;
+
   @Input() drawing: Drawing | null = null;
   @Output() shapeClicked: EventEmitter<string> = new EventEmitter();
 
@@ -59,7 +66,7 @@ export interface Rectangle {
   centerY: number;
   text: string;
   selected: boolean;
-  isError: boolean;
+  errorStatus: number;
 }
 
 export interface Line {
@@ -70,7 +77,7 @@ export interface Line {
   y2: number;
   selected: boolean;
   arrow: boolean;
-  isError: boolean;
+  errorStatus: number;
 }
 
 export function getEmptyDrawing(): Drawing {
