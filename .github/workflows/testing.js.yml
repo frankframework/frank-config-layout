@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: 'ladybug-frontend/package-lock.json'
+          cache-dependency-path: 'package-lock.json'
       - name: Cache npm dependencies
         uses: actions/cache@v4
         with:
