@@ -32,6 +32,6 @@ jobs:
       - name: Build project
         run: npm run build
       - name: Test library
-        run: ng test --headless frank-config-layout
+        run: npm run ng test --headless frank-config-layout
       - name: Test playground
-        run: ng test --headless
+        run: npm run ng test --headless
