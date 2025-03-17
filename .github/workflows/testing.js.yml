@@ -1,0 +1,38 @@
+name: Testing
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  testing:
+    name: Unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'ladybug-frontend/package-lock.json'
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: '~/.npm'
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Show npm version
+        run: npm -v
+        working-directory: ladybug-frontend
+      - name: Install dependencies
+        run: npm ci
+      - name: Build project
+        run: npm run build
+      - name: Test library
+        run: ng test --headless frank-config-layout
+      - name: Test playground
+        run: ng test --headless
