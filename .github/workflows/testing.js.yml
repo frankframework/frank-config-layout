@@ -31,6 +31,8 @@ jobs:
         run: npm ci
       - name: Build project
         run: npm run build
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
       - name: Test library
         run: npm run ng test --headless frank-config-layout
       - name: Test playground
