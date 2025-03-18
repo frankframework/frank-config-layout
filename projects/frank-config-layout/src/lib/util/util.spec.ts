@@ -157,4 +157,8 @@ describe('Util test', () => {
     expect(instance.next()).toEqual(-2);
     expect(instance.next()).toEqual(2);
   });
+
+  it('See whether this fails in CI/CD', () => {
+    expect(0).toEqual(1);
+  });
 });
