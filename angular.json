@@ -94,6 +94,26 @@
             ],
             "scripts": []
           }
+        },
+        "testHeadless": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "karmaConfig": "karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
+          }
         }
       }
     },
@@ -122,6 +142,17 @@
               "zone.js/testing"
             ],
             "tsConfig": "projects/frank-config-layout/tsconfig.spec.json"
+          }
+        },
+        "testHeadless": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/frank-config-layout/tsconfig.spec.json",
+            "karmaConfig": "projects/frank-config-layout/karma.conf.js"
           }
         }
       }

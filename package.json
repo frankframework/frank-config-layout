@@ -7,7 +7,7 @@
     "serve": "ng serve",
     "build": "ng build frank-config-layout",
     "watch": "ng build frank-config-layout-playground --watch --configuration development",
-    "test": "ng test",
+    "testPlayground": "ng test frank-config-layout-playground",
     "testLib": "ng test frank-config-layout"
   },
   "private": true,
