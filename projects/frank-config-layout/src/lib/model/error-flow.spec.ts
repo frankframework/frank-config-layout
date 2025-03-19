@@ -1,6 +1,12 @@
 import { getKey } from './graph';
 import { getGraphFromMermaid } from '../parsing/mermaid-parser';
-import { findErrorFlow, OriginalGraph } from './error-flow';
+import {
+  findErrorFlow,
+  OriginalGraph,
+  ERROR_STATUS_SUCCESS,
+  ERROR_STATUS_MIXED,
+  ERROR_STATUS_ERROR,
+} from './error-flow';
 
 describe('Distinguish error flow', () => {
   it('No error flow', () => {
@@ -14,9 +20,9 @@ N1 --> |success| N2
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
     expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
-    checkErrorNode(c, 'N1', false);
-    checkErrorNode(c, 'N2', false);
-    checkErrorEdge(c, 'N1-N2', false);
+    checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
+    checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
+    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_SUCCESS);
   });
 
   it('No error flow if edge has no text', () => {
@@ -30,9 +36,9 @@ N1 --> N2
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
     expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
-    checkErrorNode(c, 'N1', false);
-    checkErrorNode(c, 'N2', false);
-    checkErrorEdge(c, 'N1-N2', false);
+    checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
+    checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
+    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_SUCCESS);
   });
 
   it('Node is error and edge is error because it originates from error node', () => {
@@ -46,9 +52,9 @@ N1 --> |success| N2
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
     expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
-    checkErrorNode(c, 'N1', true);
-    checkErrorNode(c, 'N2', false);
-    checkErrorEdge(c, 'N1-N2', true);
+    checkErrorNode(c, 'N1', ERROR_STATUS_ERROR);
+    checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
+    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_ERROR);
   });
 
   it('Edge is error because of forward name', () => {
@@ -62,10 +68,27 @@ N1 --> |exception| N2
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
     expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
-    checkErrorNode(c, 'N1', false);
-    checkErrorNode(c, 'N2', false);
-    checkErrorEdge(c, 'N1-N2', true);
+    checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
+    checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
+    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_ERROR);
     expect(c.getEdgeByKey('N1-N2').text.numLines).toEqual(1);
+  });
+
+  it('When an edge has both success and error labels then it has error status mixed', () => {
+    const input = `
+N1(""):::normal
+N2(""):::normal
+N1 --> |exception<br/>success| N2
+`;
+    const b = getGraphFromMermaid(input);
+    const c: OriginalGraph = findErrorFlow(b);
+    expect(c.nodes.length).toEqual(2);
+    expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
+    expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
+    checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
+    checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
+    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_MIXED);
+    expect(c.getEdgeByKey('N1-N2').text.numLines).toEqual(2);
   });
 
   it('When edge text has multiple lines, then the number of lines is calculated correctly', () => {
@@ -83,10 +106,10 @@ N1 --> |success<br/>  exception  | N2`;
   });
 });
 
-function checkErrorNode(b: OriginalGraph, nodeId: string, expectError: boolean): void {
-  expect(b.getNodeById(nodeId).isError).toEqual(expectError);
+function checkErrorNode(b: OriginalGraph, nodeId: string, expectedErrorStatus: number): void {
+  expect(b.getNodeById(nodeId).errorStatus).toEqual(expectedErrorStatus);
 }
 
-function checkErrorEdge(b: OriginalGraph, edgeKey: string, expectError: boolean): void {
-  expect(b.getEdgeByKey(edgeKey).isError).toEqual(expectError);
+function checkErrorEdge(b: OriginalGraph, edgeKey: string, expectedErrorStatus: number): void {
+  expect(b.getEdgeByKey(edgeKey).errorStatus).toEqual(expectedErrorStatus);
 }

@@ -5,7 +5,7 @@ import {
   calculateLayerNumbersFirstOccuringPath,
   introduceIntermediateNodesAndEdges,
 } from '../model/horizontal-grouping';
-import { OriginalGraph, createOriginalGraph } from '../model/error-flow';
+import { ERROR_STATUS_SUCCESS, OriginalGraph, createOriginalGraph } from '../model/error-flow';
 import { LayoutBase } from '../model/layout-base';
 import { Point, Line } from './graphics';
 import { NodeLayoutBuilder } from './node-layout';
@@ -25,7 +25,7 @@ function lsForGroup(t: LabelGroupTestSegmentBase): LayoutLineSegment {
   const endPoint: Point = new Point(t.endX, 0);
   const line = new Line(startPoint, endPoint);
   return {
-    isError: false,
+    errorStatus: ERROR_STATUS_SUCCESS,
     isFirstLineSegment: false,
     isLastLineSegment: false,
     key: t.edgeKey,
@@ -79,7 +79,7 @@ function addNode(id: string, text: string, g: OriginalGraph): void {
     id,
     text,
     // Dummy value
-    isError: false,
+    errorStatus: ERROR_STATUS_SUCCESS,
   });
 }
 
@@ -89,7 +89,7 @@ function connect(idFrom: string, idTo: string, g: OriginalGraph): void {
     to: g.getNodeById(idTo),
     // Dummy values
     text: createText(),
-    isError: false,
+    errorStatus: ERROR_STATUS_SUCCESS,
   });
 }
 
