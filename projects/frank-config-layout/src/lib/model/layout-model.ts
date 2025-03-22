@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+import { getRange } from '../util/util';
 import { Graph, Connection } from './graph';
 import { WithLayerNumber } from './horizontal-grouping';
 import { LayoutBase } from './layout-base';
@@ -26,8 +27,12 @@ export class LayoutPosition {
   ) {}
 
   get key(): string {
-    return `${this.layer}-${this.position}`;
+    return layoutPositionKey(this.layer, this.position);
   }
+}
+
+export function layoutPositionKey(layer: number, position: number): string {
+  return `${layer}-${position}`;
 }
 
 export const DIRECTION_IN = 0;
@@ -246,6 +251,14 @@ export class LayoutModel {
     } else {
       throw new Error(`No connector available for key ${connectorKey}`);
     }
+  }
+
+  adjacentLayers(layerNumber: number): number[] {
+    return [layerNumber - 1, layerNumber + 1].filter((aj) => aj >= 0 && aj < this.numLayers);
+  }
+
+  get allPositions(): LayoutPosition[] {
+    return getRange(0, this.numLayers).flatMap((layer) => this.getPositionsOfLayer(layer));
   }
 
   getPositionsOfLayer(layer: number): LayoutPosition[] {

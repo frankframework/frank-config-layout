@@ -36,6 +36,10 @@ export function keyFor(idFrom: string, idTo: string): string {
   return `${idFrom}-${idTo}`;
 }
 
+export function getConnectedIdsOfKey(key: string): string[] {
+  return key.split('-');
+}
+
 /*
  * A set of nodes of type T and a set of connections of type U
  *
@@ -90,6 +94,11 @@ export class Graph<T extends WithId, U extends Connection<T>> {
 
   get nodes(): readonly T[] {
     return this._nodes;
+  }
+
+  // Todo: unit test
+  hasNode(id: string): boolean {
+    return this._nodesById.has(id);
   }
 
   getNodeById(id: string): T {
