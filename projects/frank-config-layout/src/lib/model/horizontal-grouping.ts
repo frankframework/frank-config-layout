@@ -17,7 +17,7 @@
 import { getRange } from '../util/util';
 import { Text } from './text';
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow';
-import { Graph, NodeOrEdge, Connection, WithId } from './graph';
+import { Graph, NodeOrEdge, Connection, WithId, getKey, keyFor } from './graph';
 
 export interface WithLayerNumber extends WithId {
   layer: number;
@@ -60,19 +60,35 @@ export function createGraphForLayers(): GraphForLayers {
   return new Graph<NodeForLayers, EdgeForLayers>();
 }
 
+export interface OriginalEdgeWithIntermediateEdges extends OriginalEdge {
+  readonly intermediateEdgeKeys: string[];
+}
+
+export type OriginalGraphReferencingIntermediates = Graph<OriginalNode, OriginalEdgeWithIntermediateEdges>;
+
+export interface IntermediatesCreationResult {
+  intermediate: GraphForLayers;
+  original: OriginalGraphReferencingIntermediates;
+}
+
 export function introduceIntermediateNodesAndEdges(
   original: OriginalGraph,
   nodeIdToLayer: Map<string, number>,
-): GraphForLayers {
+): IntermediatesCreationResult {
+  const extendedOriginal: OriginalGraphReferencingIntermediates = new Graph<
+    OriginalNode,
+    OriginalEdgeWithIntermediateEdges
+  >();
+  const intermediate = createGraphForLayers();
   let intermediateNodeSeq: number = 1;
   const orderedOmittedNodes = original.nodes.filter((n) => !nodeIdToLayer.has(n.id));
   if (orderedOmittedNodes.length > 0) {
     const idsOmittedNodes = orderedOmittedNodes.map((n) => n.id).join(', ');
     throw new Error(`Not all nodes could be grouped into horizontal layers: ${idsOmittedNodes}`);
   }
-  const result = createGraphForLayers();
   for (const n of original.nodes.filter((n) => nodeIdToLayer.has(n.id))) {
-    result.addNode({
+    extendedOriginal.addNode(n);
+    intermediate.addNode({
       id: n.id,
       text: n.text,
       errorStatus: n.errorStatus,
@@ -84,28 +100,34 @@ export function introduceIntermediateNodesAndEdges(
   for (const edge of original.edges
     .filter((e) => nodeIdToLayer.has(e.from.id))
     .filter((e) => nodeIdToLayer.has(e.to.id))) {
-    intermediateNodeSeq = handleEdge(edge, nodeIdToLayer, result, intermediateNodeSeq);
+    intermediateNodeSeq = handleEdge(edge, nodeIdToLayer, extendedOriginal, intermediate, intermediateNodeSeq);
   }
-  return result;
+  return {
+    original: extendedOriginal,
+    intermediate,
+  };
 }
 
 function handleEdge(
   edge: OriginalEdge,
   nodeIdToLayer: Map<string, number>,
-  result: GraphForLayers,
+  extendedOriginal: OriginalGraphReferencingIntermediates,
+  intermediate: GraphForLayers,
   intermediateNodeSeq: number,
 ): number {
   const layerFrom: number = nodeIdToLayer.get(edge.from.id)!;
   const layerTo: number = nodeIdToLayer.get(edge.to.id)!;
+  const intermediateEdgeKeys: string[] = [];
   const passDirection = layerFrom <= layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP;
   if (Math.abs(layerTo - layerFrom) <= 1) {
     // We do not throw an error for edges within the same layer.
     // Maybe a future layering algorithm will allow this.
     // It is not the duty of this function to test the layer
     // assignment algorithm.
-    result.addEdge({
-      from: result.getNodeById(edge.from.id),
-      to: result.getNodeById(edge.to.id),
+    intermediateEdgeKeys.push(getKey(edge));
+    intermediate.addEdge({
+      from: intermediate.getNodeById(edge.from.id),
+      to: intermediate.getNodeById(edge.to.id),
       text: edge.text,
       // TODO: Test this.
       errorStatus: edge.errorStatus,
@@ -127,10 +149,11 @@ function handleEdge(
       };
     });
     for (const intermediateNode of intermediateNodes) {
-      result.addNode(intermediateNode);
+      intermediate.addNode(intermediateNode);
     }
-    result.addEdge({
-      from: result.getNodeById(edge.from.id),
+    intermediateEdgeKeys.push(keyFor(edge.from.id, intermediateNodes[0].id));
+    intermediate.addEdge({
+      from: intermediate.getNodeById(edge.from.id),
       to: intermediateNodes[0],
       text: edge.text,
       errorStatus: edge.errorStatus,
@@ -140,7 +163,8 @@ function handleEdge(
       passDirection,
     });
     for (let i = 1; i < intermediateNodes.length; ++i) {
-      result.addEdge({
+      intermediateEdgeKeys.push(keyFor(intermediateNodes[i - 1].id, intermediateNodes[i].id));
+      intermediate.addEdge({
         from: intermediateNodes[i - 1],
         to: intermediateNodes[i],
         text: edge.text,
@@ -151,9 +175,10 @@ function handleEdge(
         passDirection,
       });
     }
-    result.addEdge({
+    intermediateEdgeKeys.push(keyFor(intermediateNodes.at(-1)!.id, edge.to.id));
+    intermediate.addEdge({
       from: intermediateNodes.at(-1)!,
-      to: result.getNodeById(edge.to.id),
+      to: intermediate.getNodeById(edge.to.id),
       text: edge.text,
       errorStatus: edge.errorStatus,
       isFirstSegment: false,
@@ -162,6 +187,11 @@ function handleEdge(
       passDirection,
     });
   }
+  const extendedOriginalEdge: OriginalEdgeWithIntermediateEdges = {
+    ...edge,
+    intermediateEdgeKeys,
+  };
+  extendedOriginal.addEdge(extendedOriginalEdge);
   return intermediateNodeSeq;
 }
 

@@ -97,7 +97,7 @@ function getSimpleGraph(): GraphForLayers {
   m.set('N1', 1);
   m.set('N2', 1);
   m.set('End', 2);
-  return introduceIntermediateNodesAndEdges(g, m);
+  return introduceIntermediateNodesAndEdges(g, m).intermediate;
 }
 
 function getGraphWithConflictAndIntermediate(nodeIdToLayer: Map<string, number>): GraphForLayers {
@@ -111,7 +111,7 @@ function getGraphWithConflictAndIntermediate(nodeIdToLayer: Map<string, number>)
   connect('N1', 'End', g);
   // Introduces intermediate node
   connect('End', 'S2', g);
-  return introduceIntermediateNodesAndEdges(g, nodeIdToLayer);
+  return introduceIntermediateNodesAndEdges(g, nodeIdToLayer).intermediate;
 }
 
 function withConflictAndIntermediate(): Map<string, number> {

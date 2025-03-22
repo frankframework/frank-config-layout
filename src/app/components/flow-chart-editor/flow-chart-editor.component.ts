@@ -136,7 +136,7 @@ export class FlowChartEditorComponent {
     const layerMap: Map<string, number> = calculateLayerNumbers(graph, algorithm);
     let graphWithLayers: GraphForLayers;
     try {
-      graphWithLayers = introduceIntermediateNodesAndEdges(graph, layerMap);
+      graphWithLayers = introduceIntermediateNodesAndEdges(graph, layerMap).intermediate;
     } catch (error) {
       alert(`Could not assign layers to nodes: ${error}`);
       return { model: null, error: (error as Error).message };

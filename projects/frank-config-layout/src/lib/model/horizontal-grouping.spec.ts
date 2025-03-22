@@ -12,6 +12,7 @@ import {
   EdgeForLayers,
   LAYERS_FIRST_OCCURING_PATH,
   LAYERS_LONGEST_PATH,
+  IntermediatesCreationResult,
 } from './horizontal-grouping';
 
 function newNode(id: string): OriginalNode {
@@ -236,7 +237,7 @@ function getSimplePlusDisjointEdge(): OriginalGraph {
 
 describe('Assigning layers and introducing intermediate nodes and edges', () => {
   it('Downward lines', () => {
-    const instance: GraphForLayers = getInstanceDownwardLinks();
+    const instance: GraphForLayers = getInstanceDownwardLinks().intermediate;
     expect(instance.nodes.map((n) => n.id)).toEqual([
       'N0',
       'N1',
@@ -296,7 +297,7 @@ describe('Assigning layers and introducing intermediate nodes and edges', () => 
   });
 
   it('Upward lines', () => {
-    const instance: GraphForLayers = getInstanceUpwardLinks();
+    const instance: GraphForLayers = getInstanceUpwardLinks().intermediate;
     expect(instance.nodes.map((n) => n.id)).toEqual([
       'N0A',
       'N0B',
@@ -361,9 +362,19 @@ describe('Assigning layers and introducing intermediate nodes and edges', () => 
       }
     }
   });
+
+  it('Can augment original edges with intermediate edge keys', () => {
+    const extendedOriginal = getInstanceDownwardLinks().original;
+    expect(extendedOriginal.getEdgeByKey('N0-N1')!.intermediateEdgeKeys).toEqual(['N0-N1']);
+    expect(extendedOriginal.getEdgeByKey('N0-N3')!.intermediateEdgeKeys).toEqual([
+      'N0-intermediate2',
+      'intermediate2-intermediate3',
+      'intermediate3-N3',
+    ]);
+  });
 });
 
-function getInstanceDownwardLinks(): GraphForLayers {
+function getInstanceDownwardLinks(): IntermediatesCreationResult {
   const g = createOriginalGraph();
   g.addNode(newNode('N0'));
   g.addNode(newNode('N1'));
@@ -381,7 +392,7 @@ function getInstanceDownwardLinks(): GraphForLayers {
   return introduceIntermediateNodesAndEdges(g, m);
 }
 
-function getInstanceUpwardLinks(): GraphForLayers {
+function getInstanceUpwardLinks(): IntermediatesCreationResult {
   const g = createOriginalGraph();
   g.addNode(newNode('N0A'));
   g.addNode(newNode('N0B'));

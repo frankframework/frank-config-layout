@@ -32,7 +32,7 @@ export function getKey<T extends WithId>(c: Connection<T>): string {
   return keyFor(c.from.id, c.to.id);
 }
 
-function keyFor(idFrom: string, idTo: string): string {
+export function keyFor(idFrom: string, idTo: string): string {
   return `${idFrom}-${idTo}`;
 }
 

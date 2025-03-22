@@ -66,7 +66,7 @@ export class Mermaid2svgService {
     const g: OriginalGraph = findErrorFlow(b);
     let numNodeVisits = 0;
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits);
-    const gl: GraphForLayers = introduceIntermediateNodesAndEdges(g, nodeIdToLayer);
+    const gl: GraphForLayers = introduceIntermediateNodesAndEdges(g, nodeIdToLayer).intermediate;
     let lb: LayoutBase;
     const numLayers = Math.max(...gl.nodes.map((n) => n.layer)) + 1;
     try {
