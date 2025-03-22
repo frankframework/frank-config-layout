@@ -19,7 +19,11 @@ import { Text } from './text';
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow';
 import { Graph, NodeOrEdge, Connection, WithId } from './graph';
 
-export interface NodeForLayers extends WithId {
+export interface WithLayerNumber extends WithId {
+  layer: number;
+}
+
+export interface NodeForLayers extends WithId, WithLayerNumber {
   readonly id: string;
   readonly text: string;
   readonly errorStatus: number;

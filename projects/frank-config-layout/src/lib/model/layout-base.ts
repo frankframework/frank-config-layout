@@ -14,8 +14,9 @@
    limitations under the License.
 */
 
+import { Graph, Connection } from './graph';
+import { WithLayerNumber } from './horizontal-grouping';
 import { LayerCalculationNode, LayerCalculation } from '../util/layer-calculation';
-import { GraphForLayers } from './horizontal-grouping';
 
 // On ordering of nodes in nodes and edges in vertically-stacked layers.
 // These are numbered from top to bottom. Within each layer, the nodes are
@@ -30,7 +31,11 @@ import { GraphForLayers } from './horizontal-grouping';
 //
 
 export class LayoutBase {
-  static create(sequence: string[], g: GraphForLayers, numLayers: number): LayoutBase {
+  static create<T extends WithLayerNumber, U extends Connection<T>>(
+    sequence: string[],
+    g: Graph<T, U>,
+    numLayers: number,
+  ): LayoutBase {
     const nodeIdToLayer: Map<string, number> = new Map();
     for (const node of g.nodes) {
       nodeIdToLayer.set(node.id, node.layer);
@@ -102,9 +107,9 @@ export class LayoutBase {
   }
 }
 
-function orderNodesByLabelButPreserveOrderWithinEachLayer(
+function orderNodesByLabelButPreserveOrderWithinEachLayer<T extends WithLayerNumber, U extends Connection<T>>(
   sequence: string[],
-  g: GraphForLayers,
+  g: Graph<T, U>,
   numLayers: number,
 ): string[][] {
   const nodesByLayer: string[][] = [];

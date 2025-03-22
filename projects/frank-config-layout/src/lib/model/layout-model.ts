@@ -14,12 +14,9 @@
    limitations under the License.
 */
 
-import { Graph, WithId, Connection } from './graph';
+import { Graph, Connection } from './graph';
+import { WithLayerNumber } from './horizontal-grouping';
 import { LayoutBase } from './layout-base';
-
-interface WithLayerNumber extends WithId {
-  layerNumber: number;
-}
 
 export class LayoutPosition {
   constructor(
@@ -33,8 +30,8 @@ export class LayoutPosition {
   }
 }
 
-const DIRECTION_IN = 0;
-const DIRECTION_OUT = 1;
+export const DIRECTION_IN = 0;
+export const DIRECTION_OUT = 1;
 
 export class LayoutConnector {
   constructor(
@@ -45,7 +42,8 @@ export class LayoutConnector {
   ) {}
 
   get key(): string {
-    return `${this.referencePosition.layer}-${this.referencePosition.position}-${this.connectorSeq}`;
+    // There can be at most two edges betweeen two nodes, one for each possible direction.
+    return `${this.referencePosition.id}-${this.direction}-${this.relatedId}`;
   }
 }
 
@@ -78,6 +76,7 @@ class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
     this.buildConnectors();
     this.buildConnectionsFromEdges();
     return new LayoutModel(
+      this.lb.numLayers,
       this.positionsByKey,
       this.connectorsByKey,
       this.positionsOfLayer,
@@ -100,11 +99,16 @@ class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
   }
 
   private relatePositions(): void {
-    this.apply((referencePositionObject, otherLayerNumber) => {
-      const otherIds = this.lb.getConnections(referencePositionObject.id, otherLayerNumber).entries();
-      for (const positionInOther in otherIds) {
+    this.forEachPositionAndAdjacentLayerCombi((referencePositionObject, otherLayerNumber) => {
+      const positionsInOther: number[] = this.lb.getConnections(referencePositionObject.id, otherLayerNumber);
+      for (const positionInOther of positionsInOther) {
         const relatedPositionObjectKey = `${otherLayerNumber}-${positionInOther}`;
-        const relatedPositionObject = this.positionsByKey.get(relatedPositionObjectKey)!;
+        const relatedPositionObject: LayoutPosition | undefined = this.positionsByKey.get(relatedPositionObjectKey);
+        if (relatedPositionObject === undefined) {
+          throw new Error(
+            `Expected that a position object exists for key=${relatedPositionObjectKey}, on behalf of rerence ${referencePositionObject.id}`,
+          );
+        }
         if (!this.relatedPositions.has(referencePositionObject.key)) {
           this.relatedPositions.set(referencePositionObject.key, new Map<number, LayoutPosition[]>());
         }
@@ -119,9 +123,13 @@ class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
     });
   }
 
-  private apply(action: (referencePositionObject: LayoutPosition, otherLayerNumber: number) => void): void {
+  private forEachPositionAndAdjacentLayerCombi(
+    action: (referencePositionObject: LayoutPosition, otherLayerNumber: number) => void,
+  ): void {
     for (let layerNumber = 0; layerNumber < this.lb.numLayers; ++layerNumber) {
-      const otherLayerNumbers: number[] = layerNumber === 0 ? [1] : [layerNumber - 1, layerNumber + 1];
+      const otherLayerNumbers: number[] = [layerNumber - 1, layerNumber + 1].filter(
+        (otherLayerNumber) => otherLayerNumber >= 0 && otherLayerNumber < this.lb.numLayers,
+      );
       for (const positionObject of this.positionsOfLayer[layerNumber]) {
         for (const otherLayerNumber of otherLayerNumbers) {
           action(positionObject, otherLayerNumber);
@@ -131,11 +139,9 @@ class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
   }
 
   private buildConnectors(): void {
-    this.apply((referencePositionObject, otherLayerNumber) => {
+    this.forEachPositionAndAdjacentLayerCombi((referencePositionObject, otherLayerNumber) => {
       let seq = 0;
-      for (const relatedPositionObject of this.relatedPositions
-        .get(referencePositionObject.key)!
-        .get(otherLayerNumber)!) {
+      for (const relatedPositionObject of this.getRelatedPositionObjects(referencePositionObject, otherLayerNumber)) {
         const idRef = referencePositionObject.id;
         const idRel = relatedPositionObject.id;
         const edgesInOut: C[] = [this.g.searchEdge(idRel, idRef), this.g.searchEdge(idRef, idRel)].filter(
@@ -167,11 +173,18 @@ class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
     });
   }
 
+  private getRelatedPositionObjects(referencePositionObject: LayoutPosition, otherLayer: number): LayoutPosition[] {
+    const raw: LayoutPosition[] | undefined = this.relatedPositions.get(referencePositionObject.key)?.get(otherLayer);
+    return raw === undefined ? [] : raw;
+  }
+
   private buildConnectionsFromEdges(): void {
-    this.apply((referencePositionObject, otherLayerNumber: number): void => {
-      for (const connector of this.connectorsOfPosition.get(referencePositionObject.key)!.get(otherLayerNumber)!) {
+    this.forEachPositionAndAdjacentLayerCombi((referencePositionObject, otherLayerNumber: number): void => {
+      for (const connector of this.getConnectors(referencePositionObject, otherLayerNumber)) {
         const reversedConnector: LayoutConnector = this.reversedConnector(connector);
         let edgeKey: string;
+        // This will add the edge two times, one time for each connector.
+        // But on both occasions the same will happen.
         if (connector.direction === DIRECTION_IN) {
           edgeKey = `${connector.relatedId}-${connector.referencePosition.id}`;
           this.connectionsByEdgeKey.set(edgeKey, { from: reversedConnector, to: connector });
@@ -183,22 +196,23 @@ class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
     });
   }
 
+  private getConnectors(referencePositionObject: LayoutPosition, otherLayer: number): LayoutConnector[] {
+    const raw: LayoutConnector[] | undefined = this.connectorsOfPosition
+      .get(referencePositionObject.key)
+      ?.get(otherLayer);
+    return raw === undefined ? [] : raw;
+  }
+
   private reversedConnector(connector: LayoutConnector): LayoutConnector {
-    const relatedPosition = this.positionOfId.get(connector.relatedId)!;
     const reversedDirection = connector.direction === DIRECTION_IN ? DIRECTION_OUT : DIRECTION_IN;
-    for (const reverseConnector of this.connectorsOfPosition
-      .get(relatedPosition.key)!
-      .get(connector.referencePosition.layer)!) {
-      if (
-        reverseConnector.relatedId === connector.referencePosition.id &&
-        reverseConnector.direction === reversedDirection
-      ) {
-        return reverseConnector;
-      }
+    const reversedConnectorKey = `${connector.relatedId}-${reversedDirection}-${connector.referencePosition.id}`;
+    const reverseConnector: LayoutConnector | undefined = this.connectorsByKey.get(reversedConnectorKey);
+    if (reverseConnector === undefined) {
+      throw new Error(
+        `Expected that there exists a reverse connector for connector (layer=${connector.referencePosition.layer}, position=${connector.referencePosition.position}, id=${connector.referencePosition.id}, connectorSeq=${connector.connectorSeq}, direction=${connector.direction}, relatedId=${connector.relatedId})`,
+      );
     }
-    throw new Error(
-      `Expected that there exists a reverse connector for connector (layer=${connector.referencePosition.layer}, position=${connector.referencePosition.position}, id=${connector.referencePosition.id}, connectorSeq=${connector.connectorSeq}, direction=${connector.direction}, relatedId=${connector.relatedId})`,
-    );
+    return reverseConnector;
   }
 }
 
@@ -208,6 +222,7 @@ export class LayoutModel {
   }
 
   constructor(
+    readonly numLayers: number,
     private positionsByKey: Map<string, LayoutPosition>,
     private connectorsByKey: Map<string, LayoutConnector>,
     private positionsOfLayers: LayoutPosition[][],
@@ -218,32 +233,48 @@ export class LayoutModel {
   ) {}
 
   getPosition(positionKey: string): LayoutPosition {
-    return this.positionsByKey.get(positionKey)!;
+    if (this.positionsByKey.has(positionKey)) {
+      return this.positionsByKey.get(positionKey)!;
+    } else {
+      throw new Error(`No position available for key ${positionKey}`);
+    }
   }
 
   getConnector(connectorKey: string): LayoutConnector {
-    return this.connectorsByKey.get(connectorKey)!;
+    if (this.connectorsByKey.has(connectorKey)) {
+      return this.connectorsByKey.get(connectorKey)!;
+    } else {
+      throw new Error(`No connector available for key ${connectorKey}`);
+    }
   }
 
   getPositionsOfLayer(layer: number): LayoutPosition[] {
+    if (layer < 0 || layer >= this.numLayers) {
+      throw new Error(`Layer number out of bounds: ${layer}`);
+    }
     return [...this.positionsOfLayers[layer]];
   }
 
-  getPositionOfId(id: string): LayoutPosition {
-    return this.positionOfId.get(id)!;
+  getPositionOfId(id: string): LayoutPosition | undefined {
+    return this.positionOfId.get(id);
   }
 
   getRelatedPositions(referencePosition: LayoutPosition, toLayer: number): LayoutPosition[] {
-    const relatedPositionsByLayer: Map<number, LayoutPosition[]> = this.relatedPositions.get(referencePosition.key)!;
-    return relatedPositionsByLayer.has(toLayer) ? [...relatedPositionsByLayer.get(toLayer)!] : [];
+    const raw: LayoutPosition[] | undefined = this.relatedPositions.get(referencePosition.key)?.get(toLayer);
+    return raw === undefined ? [] : [...raw];
   }
 
   getConnectorsOfPosition(referencePosition: LayoutPosition, toLayer: number): LayoutConnector[] {
-    const connectorsByLayer: Map<number, LayoutConnector[]> = this.connectorsOfPosition.get(referencePosition.key)!;
-    return connectorsByLayer.has(toLayer) ? [...connectorsByLayer.get(toLayer)!] : [];
+    const raw: LayoutConnector[] | undefined = this.connectorsOfPosition.get(referencePosition.key)?.get(toLayer);
+    return raw === undefined ? [] : [...raw];
   }
 
   getConnection(edgeKey: string): LayoutConnection {
-    return this.connectionsByEdgeKey.get(edgeKey)!;
+    const raw: LayoutConnection | undefined = this.connectionsByEdgeKey.get(edgeKey);
+    if (raw === undefined) {
+      throw new Error(`No connection known for edge key ${edgeKey}`);
+    } else {
+      return raw;
+    }
   }
 }
