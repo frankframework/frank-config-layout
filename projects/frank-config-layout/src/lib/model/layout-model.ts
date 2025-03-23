@@ -222,10 +222,6 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
 }
 
 export class LayoutModel {
-  static create<T extends WithLayerNumber, C extends Connection<T>>(lb: LayoutBase, g: Graph<T, C>): LayoutModel {
-    return new LayoutModelBuilder(lb, g).run();
-  }
-
   constructor(
     readonly numLayers: number,
     private positionsByKey: Map<string, LayoutPosition>,
@@ -266,6 +262,10 @@ export class LayoutModel {
       throw new Error(`Layer number out of bounds: ${layer}`);
     }
     return [...this.positionsOfLayers[layer]];
+  }
+
+  hasId(id: string): boolean {
+    return this.positionOfId.has(id);
   }
 
   getPositionOfId(id: string): LayoutPosition | undefined {

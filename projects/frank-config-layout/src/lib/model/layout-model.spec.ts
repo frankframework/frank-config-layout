@@ -1,7 +1,14 @@
 import { Connection, Graph } from './graph';
 import { WithLayerNumber } from './horizontal-grouping';
 import { LayoutBase } from './layout-base';
-import { LayoutModel, LayoutPosition, DIRECTION_IN, DIRECTION_OUT, LayoutConnector } from './layout-model';
+import {
+  LayoutModel,
+  LayoutPosition,
+  DIRECTION_IN,
+  DIRECTION_OUT,
+  LayoutConnector,
+  LayoutModelBuilder,
+} from './layout-model';
 
 type TestGraph = Graph<WithLayerNumber, Connection<WithLayerNumber>>;
 
@@ -99,6 +106,23 @@ describe('LayoutModel', () => {
     const connectorLookup = instance.getConnector(connector.key);
     expect(connectorLookup).toBe(connector);
   });
+
+  it('When a node has been omitted in the LayoutBase, it is not in so that the playground can omit nodes', () => {
+    const instance: LayoutModel = getInstanceOmittingNodes();
+    expect(instance.allPositions.map((po) => po.id)).toEqual(['S2', 'S3', 'E1', 'E2']);
+    expect(instance.hasId('S1')).toEqual(false);
+    expect(instance.hasId('S2')).toEqual(true);
+    expect(instance.allPositions.map((po) => po.position)).toEqual([0, 1, 0, 1]);
+    const positionE1: LayoutPosition = instance.getPositionOfId('E1')!;
+    const positionS2: LayoutPosition = instance.getPositionOfId('S2')!;
+    expect(instance.getRelatedPositions(positionE1, 0).length).toEqual(0);
+    expect(instance.getRelatedPositions(positionS2, 1).map((po) => po.id)).toEqual(['E2']);
+    expect(instance.getConnectorsOfPosition(positionE1, 0).length).toEqual(0);
+    const connectorsS2: LayoutConnector[] = instance.getConnectorsOfPosition(positionS2, 1);
+    expect(connectorsS2.length).toEqual(1);
+    expect(connectorsS2[0].referencePosition.id).toEqual('S2');
+    expect(connectorsS2[0].relatedId).toEqual('E2');
+  });
 });
 
 function getInstance(): LayoutModel {
@@ -112,7 +136,7 @@ function getInstance(): LayoutModel {
   g.addEdge(newEdge(g.getNodeById('E1'), g.getNodeById('S1')));
   g.addEdge(newEdge(g.getNodeById('S2'), g.getNodeById('E2')));
   const lb = LayoutBase.create(['S1', 'S2', 'S3', 'E1', 'E2'], g, 2);
-  return LayoutModel.create(lb, g);
+  return new LayoutModelBuilder(lb, g).run();
 }
 
 function getInstanceRelateDifferentPositionIndexes(): LayoutModel {
@@ -125,7 +149,22 @@ function getInstanceRelateDifferentPositionIndexes(): LayoutModel {
   g.addEdge(newEdge(g.getNodeById('S1'), g.getNodeById('E2')));
   g.addEdge(newEdge(g.getNodeById('E1'), g.getNodeById('S1')));
   const lb = LayoutBase.create(['S1', 'S2', 'S3', 'E1', 'E2'], g, 2);
-  return LayoutModel.create(lb, g);
+  return new LayoutModelBuilder(lb, g).run();
+}
+
+function getInstanceOmittingNodes(): LayoutModel {
+  const g: TestGraph = new Graph<WithLayerNumber, Connection<WithLayerNumber>>();
+  g.addNode(newNode('S1', 0));
+  g.addNode(newNode('S2', 0));
+  g.addNode(newNode('S3', 0));
+  g.addNode(newNode('E1', 1));
+  g.addNode(newNode('E2', 1));
+  g.addEdge(newEdge(g.getNodeById('S1'), g.getNodeById('E1')));
+  g.addEdge(newEdge(g.getNodeById('E1'), g.getNodeById('S1')));
+  g.addEdge(newEdge(g.getNodeById('S2'), g.getNodeById('E2')));
+  // S1 has been omitted.
+  const lb = LayoutBase.create(['S2', 'S3', 'E1', 'E2'], g, 2);
+  return new LayoutModelBuilder(lb, g).run();
 }
 
 function newNode(id: string, layer: number): WithLayerNumber {

@@ -34,7 +34,6 @@ import {
 } from '../model/layout-model';
 import { HorizontalConflictResolver } from './horizontal-conflict';
 import { getRange } from '../util/util';
-import { getXCoords } from './edge-connection-points';
 import { getConnectedIdsOfKey, getKey } from '../model/graph';
 import { Box, DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
 
@@ -189,11 +188,20 @@ export class LayoutBuilder {
     this.forEachPositionAndAdjacentLayerCombi((po, adjacentLayer) => {
       const connectors: LayoutConnector[] = this.model.getConnectorsOfPosition(po, adjacentLayer);
       const toDivide = Interval.createFromCenterSize(this.nodeXById.get(po.id)!, this.widthOfNodeBox(po.id));
-      const xCoords: number[] = getXCoords(toDivide, connectors.length, this.d.boxConnectorAreaPerc);
+      const xCoords: number[] = this.getXCoords(toDivide, connectors.length, this.d.boxConnectorAreaPerc);
       for (const [seq, x] of xCoords.entries()) {
         this.connectorX.set(connectors[seq].key, x);
       }
     });
+  }
+
+  private getXCoords(toDivide: Interval, count: number, boxConnectorAreaPerc: number): number[] {
+    const availableSize = Math.max(Math.round((toDivide.size * boxConnectorAreaPerc) / 100), 1);
+    const available = Interval.createFromCenterSize(toDivide.center, availableSize);
+    if (count === 1) {
+      return [available.center];
+    }
+    return getRange(0, count).map((i) => Math.round(available.minValue + (i * (availableSize - 1)) / (count - 1)));
   }
 
   private forEachPositionAndAdjacentLayerCombi(action: (po: LayoutPosition, aj: number) => void): void {
@@ -264,9 +272,12 @@ export class LayoutBuilder {
   private getLayoutLineSegmentsFor(originalEdge: OriginalEdgeWithIntermediateEdges): LayoutLineSegment[] {
     const result: LineSegmentBase[] = [];
     const direction: number = this.getDirectionOfOriginalEdge(originalEdge);
-    let isFirst = true;
-    for (const intermediateEdgeKey of originalEdge.intermediateEdgeKeys) {
-      if (this.d.intermediateLayerPassedByVerticalLine && !isFirst) {
+    const shownIntermediateEdgeKeys = originalEdge.intermediateEdgeKeys.filter((iek) => {
+      getConnectedIdsOfKey(iek).every((nodeId) => this.model.hasId(nodeId));
+    });
+    for (const intermediateEdgeKey of shownIntermediateEdgeKeys) {
+      const fromIsIntermediate = getConnectedIdsOfKey(intermediateEdgeKey)[0] !== originalEdge.from.id;
+      if (this.d.intermediateLayerPassedByVerticalLine && fromIsIntermediate) {
         const intermediateNodeId = getConnectedIdsOfKey(intermediateEdgeKey)[0];
         const intermediateNode = this.model.getPositionOfId(intermediateNodeId)!;
         result.push({
@@ -276,7 +287,6 @@ export class LayoutBuilder {
           maxLayerNumber: intermediateNode.layer,
         });
       }
-      isFirst = false;
       const connection: LayoutConnection = this.model.getConnection(intermediateEdgeKey);
       const layerNumbers = [connection.from.referencePosition.layer, connection.to.referencePosition.layer];
       result.push({
