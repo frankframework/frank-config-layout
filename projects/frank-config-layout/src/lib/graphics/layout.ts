@@ -273,7 +273,7 @@ export class LayoutBuilder {
     const result: LineSegmentBase[] = [];
     const direction: number = this.getDirectionOfOriginalEdge(originalEdge);
     const shownIntermediateEdgeKeys = originalEdge.intermediateEdgeKeys.filter((iek) => {
-      getConnectedIdsOfKey(iek).every((nodeId) => this.model.hasId(nodeId));
+      return getConnectedIdsOfKey(iek).every((nodeId) => this.model.hasId(nodeId));
     });
     for (const intermediateEdgeKey of shownIntermediateEdgeKeys) {
       const fromIsIntermediate = getConnectedIdsOfKey(intermediateEdgeKey)[0] !== originalEdge.from.id;
