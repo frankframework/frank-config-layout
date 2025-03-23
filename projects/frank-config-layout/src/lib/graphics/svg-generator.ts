@@ -15,14 +15,14 @@
 */
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
-import { Layout, LayoutLineSegment, PlacedNode, EdgeLabel } from './edge-layout';
+import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from '../graphics/layout';
 
 export function generateSvg(layout: Layout, edgeLabelFontSize: number): string {
   return (
     openSvg(layout.width, layout.height) +
     renderDefs(edgeLabelFontSize) +
     renderNodes(layout.nodes.map((n) => n as PlacedNode)) +
-    renderEdges(layout.getLayoutLineSegments().map((e) => e as LayoutLineSegment)) +
+    renderEdges(layout.layoutLineSegments) +
     renderLabels(layout.edgeLabels) +
     closeSvg()
   );
@@ -112,10 +112,7 @@ function renderDefs(fontSize: number): string {
 }
 
 function renderNodes(nodes: readonly PlacedNode[]): string {
-  return nodes
-    .filter((n) => !n.isIntermediate)
-    .map((n) => renderOriginalNode(n))
-    .join('');
+  return nodes.map((n) => renderOriginalNode(n)).join('');
 }
 
 function renderOriginalNode(n: PlacedNode): string {

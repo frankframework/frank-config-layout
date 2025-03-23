@@ -211,42 +211,6 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     <polyline class="line error" points="351,265 244,360" marker-end="url(#arrow)"/>
   </g>
   <g text-anchor="middle" dominant-baseline="middle">
-    <g transform="translate(108, 193)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
-    </g>
-    <g transform="translate(188, 193)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            failure
-          </div>
-        </div>
-      </foreignObject>
-    </g>
-    <g transform="translate(96, 313)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
-    </g>
-    <g transform="translate(327, 193)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
-    </g>
     <g transform="translate(88, 73)">
       <foreignObject style="width:49px; height:13px">
         <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
@@ -266,6 +230,42 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       </foreignObject>
     </g>
     <g transform="translate(248, 73)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(108, 193)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(188, 193)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            failure
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(327, 193)">
+      <foreignObject style="width:49px; height:13px">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
+          <div class="label-text-box" >
+            success
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g transform="translate(96, 313)">
       <foreignObject style="width:49px; height:13px">
         <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
           <div class="label-text-box" >

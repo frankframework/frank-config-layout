@@ -17,7 +17,7 @@
 */
 
 import { EdgeLabelDimensions } from './lib/graphics/edge-label-layouter';
-import { NodeAndEdgeDimensions } from './lib/graphics/edge-layout';
+import { NodeAndEdgeDimensions } from './lib/graphics/layout';
 import { Mermaid2svgService } from './lib/mermaid2svg';
 
 export interface Dimensions extends NodeAndEdgeDimensions, EdgeLabelDimensions {}
@@ -100,6 +100,8 @@ export {
   introduceIntermediateNodesAndEdges,
   calculateLayerNumbers,
   createGraphForLayers,
+  OriginalGraphReferencingIntermediates,
+  IntermediatesCreationResult,
   NodeForLayers,
   EdgeForLayers,
   GraphForLayers,
@@ -114,6 +116,6 @@ export {
   calculateNumCrossingsChangesFromAligning,
   minimizeNumCrossings,
 } from './lib/model/layout-base';
-export { NodeLayoutBuilder } from './lib/graphics/node-layout';
 export { getDerivedEdgeLabelDimensions } from './lib/graphics/edge-label-layouter';
-export { Layout, PlacedNode, EdgeLabel } from './lib/graphics/edge-layout';
+export { LayoutModel, LayoutModelBuilder } from './lib/model/layout-model';
+export { LayoutBuilder, Layout, PlacedNode, EdgeLabel, getNumCrossingLines } from './lib/graphics/layout';

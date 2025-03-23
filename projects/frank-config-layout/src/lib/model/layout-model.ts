@@ -57,7 +57,7 @@ export interface LayoutConnection {
   to: LayoutConnector;
 }
 
-class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
+export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<T>> {
   private positionsByKey = new Map<string, LayoutPosition>();
   private connectorsByKey = new Map<string, LayoutConnector>();
   private positionsOfLayer: LayoutPosition[][] = [];
