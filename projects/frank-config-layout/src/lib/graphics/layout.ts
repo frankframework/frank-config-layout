@@ -299,13 +299,14 @@ export class LayoutBuilder {
 
   private getLayoutLineSegmentsFor(originalEdge: OriginalEdgeWithIntermediateEdges): LayoutLineSegment[] {
     const result: LineSegmentBase[] = [];
-    const direction: number = this.getDirectionOfOriginalEdge(originalEdge);
     const shownIntermediateEdgeKeys = originalEdge.intermediateEdgeKeys.filter((iek) => {
       return getConnectedIdsOfKey(iek).every((nodeId) => this.model.hasId(nodeId));
     });
     for (const intermediateEdgeKey of shownIntermediateEdgeKeys) {
+      const connection: LayoutConnection = this.model.getConnection(intermediateEdgeKey);
       const fromIsIntermediate = getConnectedIdsOfKey(intermediateEdgeKey)[0] !== originalEdge.from.id;
       if (this.d.intermediateLayerPassedByVerticalLine && fromIsIntermediate) {
+        const direction: number = this.getDirectionOf(connection);
         const intermediateNodeId = getConnectedIdsOfKey(intermediateEdgeKey)[0];
         const intermediateNode = this.model.getPositionOfId(intermediateNodeId)!;
         result.push({
@@ -315,7 +316,6 @@ export class LayoutBuilder {
           maxLayerNumber: intermediateNode.layer,
         });
       }
-      const connection: LayoutConnection = this.model.getConnection(intermediateEdgeKey);
       const layerNumbers = [connection.from.referencePosition.layer, connection.to.referencePosition.layer];
       result.push({
         key: intermediateEdgeKey,
@@ -333,10 +333,10 @@ export class LayoutBuilder {
     });
   }
 
-  private getDirectionOfOriginalEdge(originalEdge: OriginalEdgeWithIntermediateEdges): number {
-    const layerFrom = this.model.getPositionOfId(originalEdge.from.id)!.layer;
-    const layerTo = this.model.getPositionOfId(originalEdge.to.id)!.layer;
-    return layerFrom < layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP;
+  private getDirectionOf(connection: LayoutConnection): number {
+    return connection.from.referencePosition.layer < connection.to.referencePosition.layer
+      ? PASS_DIRECTION_DOWN
+      : PASS_DIRECTION_UP;
   }
 
   private getLineSegmentIntermediateNode(intermediateNode: LayoutPosition, direction: number): Line {
