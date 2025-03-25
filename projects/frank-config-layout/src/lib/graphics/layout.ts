@@ -284,8 +284,14 @@ export class LayoutBuilder {
 
   private calculateLayoutLineSegments(): void {
     for (const originalEdge of this.og.edges) {
-      const startConnector = this.model.getConnection(originalEdge.intermediateEdgeKeys[0]).from;
-      this.originalEdgesByConnector.set(startConnector.key, getKey(originalEdge));
+      const firstIntermediateEdgeKey = originalEdge.intermediateEdgeKeys[0];
+      const firstSegmentIsNotOmitted = getConnectedIdsOfKey(firstIntermediateEdgeKey).every((nodeId) => {
+        return this.model.hasId(nodeId);
+      });
+      if (firstSegmentIsNotOmitted) {
+        const startConnector = this.model.getConnection(firstIntermediateEdgeKey).from;
+        this.originalEdgesByConnector.set(startConnector.key, getKey(originalEdge));
+      }
       const lineSegments: LayoutLineSegment[] = this.getLayoutLineSegmentsFor(originalEdge);
       this.layoutLineSegmentsByOriginalEdge.set(getKey(originalEdge), lineSegments);
     }
