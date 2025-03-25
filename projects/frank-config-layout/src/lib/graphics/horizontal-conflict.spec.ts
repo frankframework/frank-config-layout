@@ -1,4 +1,4 @@
-import { HorizontalConflictResolver } from './horizontal-conflict';
+import { defaultPredecessorDecorator, HorizontalConflictResolver } from './horizontal-conflict';
 import { Interval } from '../util/interval';
 
 describe('HorizontalConflictResolver AreaGroup', () => {
@@ -71,6 +71,45 @@ function xCoordCalculation(sizes: number[], predecessorXCoords: Map<number, numb
     (p) => predecessorXCoords.get(p)!,
   );
 }
+
+describe('defaultPredecessorDecorator - make up predecessors if none are provided by caller', () => {
+  it('If the caller provides predecessors then these taken', () => {
+    expect(
+      defaultPredecessorDecorator(
+        0,
+        1,
+        () => [5, 10],
+        () => 1000,
+      ),
+    ).toEqual([5, 10]);
+  });
+
+  it('If the caller provides a predecessor for the left, then a predecessor is made up from that', () => {
+    const predecessorsOfLeft = [100, 50];
+    expect(
+      defaultPredecessorDecorator(
+        1,
+        2,
+        (p) => (p === 1 ? [] : predecessorsOfLeft),
+        () => 3,
+      ),
+      // The coordinate of the rightmost predecessor to the left plus the size
+    ).toEqual([103]);
+  });
+
+  it('If the caller provides a predecessor for the right, then a predecessor is made up from that', () => {
+    const predecessorsOfRight = [50, 100];
+    expect(
+      defaultPredecessorDecorator(
+        0,
+        2,
+        (p) => (p === 0 ? [] : predecessorsOfRight),
+        () => 3,
+      ),
+      // The coordinate of the leftmost predecessor to the right minus the size
+    ).toEqual([47]);
+  });
+});
 
 describe('HorizontalConflictResolver integration', () => {
   it('If positions of area groups are consecutive, then no error', () => {
