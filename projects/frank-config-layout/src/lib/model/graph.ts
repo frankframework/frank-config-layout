@@ -128,9 +128,10 @@ export class Graph<T extends WithId, U extends Connection<T>> {
   parseNodeOrEdgeId(id: string): NodeOrEdge<T, U> {
     if (id.includes('-')) {
       if (this._edgesByKey.has(id)) {
+        const optionalEdge = this.getEdgeByKey(id);
         return {
           optionalNode: undefined,
-          optionalEdge: this.getEdgeByKey(id),
+          optionalEdge,
         };
       } else {
         return {
