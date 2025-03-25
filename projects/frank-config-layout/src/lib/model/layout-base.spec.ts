@@ -46,10 +46,10 @@ function getOtherLayoutBase(): LayoutBase {
   connect('N1', 'E3', g);
   connect('N2', 'E1', g);
   connect('N3', 'E2', g);
-  return LayoutBase.create(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g, 3);
+  return LayoutBase.create(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g);
 }
 
-function getSimpleLayoutBase(): LayoutBase {
+function getSimpleGraphForLayers(): GraphForLayers {
   const g = createGraphForLayers();
   addNode('Start', 0, g);
   addNode('N1', 1, g);
@@ -59,7 +59,10 @@ function getSimpleLayoutBase(): LayoutBase {
   connect('Start', 'N2', g);
   connect('N1', 'End', g);
   connect('N2', 'End', g);
-  return LayoutBase.create(['Start', 'N1', 'N2', 'End'], g, 3);
+  return g;
+}
+function getSimpleLayoutBase(): LayoutBase {
+  return LayoutBase.create(['Start', 'N1', 'N2', 'End'], getSimpleGraphForLayers());
 }
 
 function getSimpleLayoutBaseFromOtherSequence(): LayoutBase {
@@ -72,7 +75,7 @@ function getSimpleLayoutBaseFromOtherSequence(): LayoutBase {
   connect('Start', 'N2', g);
   connect('N1', 'End', g);
   connect('N2', 'End', g);
-  return LayoutBase.create(['Start', 'N1', 'N2', 'End'], g, 3);
+  return LayoutBase.create(['Start', 'N1', 'N2', 'End'], g);
 }
 
 function checkSimpleModel(instance: LayoutBase): void {
@@ -108,7 +111,7 @@ function getOtherLayoutBaseFromOtherSequence(): LayoutBase {
   connect('N1', 'E3', g);
   connect('N2', 'E1', g);
   connect('N3', 'E2', g);
-  return LayoutBase.create(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g, 3);
+  return LayoutBase.create(['S1', 'S2', 'N1', 'N2', 'N3', 'E1', 'E2', 'E3'], g);
 }
 
 function checkOtherModel(instance: LayoutBase): void {
@@ -140,6 +143,17 @@ describe('LayoutBase', () => {
     checkSimpleModel(instance);
   });
 
+  it('When all nodes of a layer are omitted from the initial sequence then the layers are re-numbered', () => {
+    const g: GraphForLayers = getSimpleGraphForLayers();
+    const instance = LayoutBase.create(['End', 'Start'], g);
+    expect(instance.numLayers).toEqual(2);
+    expect(instance.getIdsOfLayer(0)).toEqual(['Start']);
+    expect(instance.getIdsOfLayer(1)).toEqual(['End']);
+    expect(instance.getSequence()).toEqual(['Start', 'End']);
+    expect(instance.getConnections('Start', 1)).toEqual([]);
+    expect(instance.getConnections('End', 0)).toEqual([]);
+  });
+
   it('When a graph does not sort its nodes by layer then the LayoutBase is still correct', () => {
     const instance = getSimpleLayoutBaseFromOtherSequence();
     checkSimpleModel(instance);
@@ -165,7 +179,7 @@ describe('Operations on LayoutBase', () => {
     addNode('E2', 1, g);
     connect('S1', 'E1', g);
     connect('S2', 'E2', g);
-    const lb = LayoutBase.create(['S1', 'S2', 'E1', 'E2'], g, 2);
+    const lb = LayoutBase.create(['S1', 'S2', 'E1', 'E2'], g);
     expect(getNumCrossings(lb)).toEqual(0);
   });
 
@@ -177,7 +191,7 @@ describe('Operations on LayoutBase', () => {
     addNode('E2', 1, g);
     connect('S1', 'E2', g);
     connect('S2', 'E1', g);
-    const lb = LayoutBase.create(['S1', 'S2', 'E1', 'E2'], g, 2);
+    const lb = LayoutBase.create(['S1', 'S2', 'E1', 'E2'], g);
     expect(getNumCrossings(lb)).toEqual(1);
   });
 
@@ -232,7 +246,7 @@ describe('Operations on LayoutBase', () => {
         }
       }
       const sequence: string[] = g.nodes.map((n) => n.id);
-      const lb = LayoutBase.create(sequence, g, 3);
+      const lb = LayoutBase.create(sequence, g);
       alignFromLayer(lb, alignmentLayer);
       const expectedSequenceOfLetters = alignmentCase[alignmentLayer];
       for (let testLayer = 0; testLayer <= 2; ++testLayer) {

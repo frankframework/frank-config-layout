@@ -58,8 +58,7 @@ export class NodeSequenceEditor {
     readonly graph: GraphForLayers,
   ) {
     const initialSequence: string[] = graph.nodes.map((n) => n.id);
-    const numLayers = Math.max(...graph.nodes.map((n) => n.layer)) + 1;
-    this.sequence = LayoutBase.create(initialSequence, graph, numLayers).getSequence();
+    this.sequence = LayoutBase.create(initialSequence, graph).getSequence();
     this.layerStartPositions = calculateLayerStartPositions(
       this.sequence.map((os) => os!),
       graph,
@@ -180,7 +179,7 @@ export class NodeSequenceEditor {
       .filter((n) => n !== null)
       .map((n) => n as NodeForLayers)
       .map((n) => n.id!);
-    return LayoutBase.create(shownSequence, this.graph, this.getNumLayers());
+    return LayoutBase.create(shownSequence, this.graph);
   }
 
   updatePositionsOfShownNodes(lb: LayoutBase): number[] {

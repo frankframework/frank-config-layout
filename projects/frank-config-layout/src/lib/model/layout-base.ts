@@ -31,16 +31,9 @@ import { LayerCalculationNode, LayerCalculation } from '../util/layer-calculatio
 //
 
 export class LayoutBase {
-  static create<T extends WithLayerNumber, U extends Connection<T>>(
-    sequence: string[],
-    g: Graph<T, U>,
-    numLayers: number,
-  ): LayoutBase {
-    const nodeIdToLayer: Map<string, number> = new Map();
-    for (const node of g.nodes) {
-      nodeIdToLayer.set(node.id, node.layer);
-    }
-    const nodesByLayer: string[][] = orderNodesByLabelButPreserveOrderWithinEachLayer(sequence, g, numLayers);
+  static create<T extends WithLayerNumber, U extends Connection<T>>(sequence: string[], g: Graph<T, U>): LayoutBase {
+    const nodeIdToLayer: Map<string, number> = assignLayerNumbersToShownNodes(sequence, g);
+    const nodesByLayer: string[][] = orderNodesByLabelButPreserveOrderWithinEachLayer(sequence, nodeIdToLayer);
     const connectedIds: Map<string, Set<string>> = new Map();
     for (const id of sequence) {
       connectedIds.set(id, new Set());
@@ -51,14 +44,13 @@ export class LayoutBase {
         connectedIds.get(edge.to.id)!.add(edge.from.id);
       }
     }
-    return new LayoutBase(nodesByLayer, connectedIds, nodeIdToLayer, numLayers);
+    return new LayoutBase(nodesByLayer, connectedIds, nodeIdToLayer);
   }
 
   constructor(
     private nodesByLayer: string[][],
     readonly connectedIds: Map<string, Set<string>>,
     readonly nodeIdToLayer: Map<string, number>,
-    readonly numLayers: number,
   ) {}
 
   clone(): LayoutBase {
@@ -67,7 +59,11 @@ export class LayoutBase {
       const newRow = [...row];
       copyNodesByLayer.push(newRow);
     }
-    return new LayoutBase(copyNodesByLayer, this.connectedIds, this.nodeIdToLayer, this.numLayers);
+    return new LayoutBase(copyNodesByLayer, this.connectedIds, this.nodeIdToLayer);
+  }
+
+  get numLayers(): number {
+    return this.nodesByLayer.length;
   }
 
   getSequence(): string[] {
@@ -107,21 +103,45 @@ export class LayoutBase {
   }
 }
 
-function orderNodesByLabelButPreserveOrderWithinEachLayer<T extends WithLayerNumber, U extends Connection<T>>(
+function assignLayerNumbersToShownNodes<T extends WithLayerNumber, U extends Connection<T>>(
   sequence: string[],
   g: Graph<T, U>,
-  numLayers: number,
+): Map<string, number> {
+  const usedOriginalLayerNumberSet = new Set<number>();
+  for (const shownId of sequence) {
+    usedOriginalLayerNumberSet.add(g.getNodeById(shownId).layer);
+  }
+  const usedOriginalLayerNumbers: number[] = [...usedOriginalLayerNumberSet];
+  usedOriginalLayerNumbers.sort();
+  const oldToNew = new Map<number, number>();
+  for (const [newLayer, oldLayer] of usedOriginalLayerNumbers.entries()) {
+    oldToNew.set(oldLayer, newLayer);
+  }
+  const result = new Map<string, number>();
+  for (const shownId of sequence) {
+    const shownNode = g.getNodeById(shownId);
+    const oldLayerNumber = shownNode.layer;
+    const newLayerNumber = oldToNew.get(oldLayerNumber)!;
+    result.set(shownId, newLayerNumber);
+  }
+  return result;
+}
+
+function orderNodesByLabelButPreserveOrderWithinEachLayer(
+  sequence: string[],
+  shownIdToLayerNumber: Map<string, number>,
 ): string[][] {
+  const numShownLayers: number = Math.max(...shownIdToLayerNumber.values()) + 1;
   const nodesByLayer: string[][] = [];
   // Do not work wity Array().fill().
   // That fills every element with the *same* list
   // If you then update one row, the other
   // row get secretly updated too.
-  for (let layerNumber = 0; layerNumber < numLayers; ++layerNumber) {
+  for (let layerNumber = 0; layerNumber < numShownLayers; ++layerNumber) {
     nodesByLayer.push([]);
   }
   for (const id of sequence) {
-    const layer: number = g.getNodeById(id).layer;
+    const layer: number = shownIdToLayerNumber.get(id)!;
     nodesByLayer[layer].push(id);
   }
   return nodesByLayer;

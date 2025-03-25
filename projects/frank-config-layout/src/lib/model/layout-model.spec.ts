@@ -135,7 +135,7 @@ function getInstance(): LayoutModel {
   g.addEdge(newEdge(g.getNodeById('S1'), g.getNodeById('E1')));
   g.addEdge(newEdge(g.getNodeById('E1'), g.getNodeById('S1')));
   g.addEdge(newEdge(g.getNodeById('S2'), g.getNodeById('E2')));
-  const lb = LayoutBase.create(['S1', 'S2', 'S3', 'E1', 'E2'], g, 2);
+  const lb = LayoutBase.create(['S1', 'S2', 'S3', 'E1', 'E2'], g);
   return new LayoutModelBuilder(lb, g).run();
 }
 
@@ -148,7 +148,7 @@ function getInstanceRelateDifferentPositionIndexes(): LayoutModel {
   g.addNode(newNode('E2', 1));
   g.addEdge(newEdge(g.getNodeById('S1'), g.getNodeById('E2')));
   g.addEdge(newEdge(g.getNodeById('E1'), g.getNodeById('S1')));
-  const lb = LayoutBase.create(['S1', 'S2', 'S3', 'E1', 'E2'], g, 2);
+  const lb = LayoutBase.create(['S1', 'S2', 'S3', 'E1', 'E2'], g);
   return new LayoutModelBuilder(lb, g).run();
 }
 
@@ -163,7 +163,7 @@ function getInstanceOmittingNodes(): LayoutModel {
   g.addEdge(newEdge(g.getNodeById('E1'), g.getNodeById('S1')));
   g.addEdge(newEdge(g.getNodeById('S2'), g.getNodeById('E2')));
   // S1 has been omitted.
-  const lb = LayoutBase.create(['S2', 'S3', 'E1', 'E2'], g, 2);
+  const lb = LayoutBase.create(['S2', 'S3', 'E1', 'E2'], g);
   return new LayoutModelBuilder(lb, g).run();
 }
 

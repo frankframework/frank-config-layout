@@ -68,12 +68,10 @@ export class Mermaid2svgService {
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits);
     const intermediates: IntermediatesCreationResult = introduceIntermediateNodesAndEdges(g, nodeIdToLayer);
     let lb: LayoutBase;
-    const numLayers = Math.max(...intermediates.intermediate.nodes.map((n) => n.layer)) + 1;
     try {
       lb = LayoutBase.create(
         intermediates.intermediate.nodes.map((n) => n.id),
         intermediates.intermediate,
-        numLayers,
       );
     } catch (error) {
       throw error;
