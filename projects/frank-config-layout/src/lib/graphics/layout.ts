@@ -17,7 +17,7 @@
 */
 
 import { Line, LineRelation, Point, relateLines } from './graphics';
-import { Interval } from '../util/interval';
+import { Interval, splitRange } from '../util/interval';
 import {
   NodeForLayers,
   OriginalEdgeWithIntermediateEdges,
@@ -117,13 +117,21 @@ export class LayoutBuilder {
     };
   }
 
+  // The basic idea is to take the widest layer and align x-coordinates from there.
+  // However, NodeSequenceEditor can omit so many nodes of a layer that no
+  // connections remain to align x-coordinates with.
+  //
+  // We fix that by doing the calculation separately for each group of
+  // layers that is independent.
   private calculateNodeX(): number {
-    const widestLayerNumber = this.calculateInitialNodeX();
-    for (let layer = widestLayerNumber - 1; layer >= 0; --layer) {
-      this.initializeXFrom(layer, layer + 1);
-    }
-    for (let layer = widestLayerNumber + 1; layer < this.model.numLayers; ++layer) {
-      this.initializeXFrom(layer, layer - 1);
+    const connectedLayerGroups: Interval[] = splitRange(this.model.numLayers, (layerNumber) => {
+      const allRelatedPositionsInNext: LayoutPosition[] = this.model.getPositionsOfLayer(layerNumber).flatMap((po) => {
+        return this.model.getRelatedPositions(po, layerNumber + 1);
+      });
+      return allRelatedPositionsInNext.length > 0;
+    });
+    for (const connectedLayerGroup of connectedLayerGroups) {
+      this.calculateNodeXForConnectedLayers(connectedLayerGroup);
     }
     const allXIntervals: Interval[] = this.model.allPositions.map((po) =>
       Interval.createFromCenterSize(this.nodeXById.get(po.id)!, this.widthOfNode(po.id)),
@@ -136,19 +144,33 @@ export class LayoutBuilder {
     return maxX - minX + 1;
   }
 
-  private calculateInitialNodeX(): number {
-    const layerWidths: number[] = [];
-    for (let layerNumber = 0; layerNumber < this.model.numLayers; ++layerNumber) {
-      let cursor = 0;
-      for (const positionObject of this.model.getPositionsOfLayer(layerNumber)) {
-        const width = this.widthOfNode(positionObject.id);
-        this.nodeXById.set(positionObject.id, Interval.createFromMinSize(cursor, width).center);
-        cursor += width;
-      }
-      layerWidths.push(cursor);
+  private calculateNodeXForConnectedLayers(layers: Interval): void {
+    const widestLayerNumber = this.calculateInitialNodeX(layers);
+    for (let layer = widestLayerNumber - 1; layer >= layers.minValue; --layer) {
+      this.initializeXFrom(layer, layer + 1);
     }
-    const maxWidth = Math.max(...layerWidths);
-    return layerWidths.indexOf(maxWidth);
+    for (let layer = widestLayerNumber + 1; layer <= layers.maxValue; ++layer) {
+      this.initializeXFrom(layer, layer - 1);
+    }
+  }
+
+  private calculateInitialNodeX(layers: Interval): number {
+    const layerNumberByWidth = new Map<number, number>();
+    for (let layerNumber = layers.minValue; layerNumber <= layers.maxValue; ++layerNumber) {
+      layerNumberByWidth.set(this.calculateInitialNodeXOfSingleLayer(layerNumber), layerNumber);
+    }
+    const maxWidth = Math.max(...layerNumberByWidth.keys());
+    return layerNumberByWidth.get(maxWidth)!;
+  }
+
+  private calculateInitialNodeXOfSingleLayer(layerNumber: number): number {
+    let cursor = 0;
+    for (const positionObject of this.model.getPositionsOfLayer(layerNumber)) {
+      const width = this.widthOfNode(positionObject.id);
+      this.nodeXById.set(positionObject.id, Interval.createFromMinSize(cursor, width).center);
+      cursor += width;
+    }
+    return cursor;
   }
 
   private widthOfNode(id: string): number {
