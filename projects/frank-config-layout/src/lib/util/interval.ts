@@ -87,3 +87,15 @@ export class Interval {
     return true;
   }
 }
+
+export function splitRange(count: number, nextAcceptor: (current: number, next: number) => boolean): Interval[] {
+  const result: Interval[] = [];
+  let curMin = 0;
+  for (let n = 0; n < count; ++n) {
+    if (n === count - 1 || !nextAcceptor(n, n + 1)) {
+      result.push(Interval.createFromMinMax(curMin, n));
+      curMin = n + 1;
+    }
+  }
+  return result;
+}
