@@ -65,7 +65,10 @@ export class HorizontalConflictResolver {
       ),
     );
     const theSize: number = positions.map((p) => this.sizeFunction(p)).reduce((acc, curSize) => acc + curSize, 0);
-    return new AreaGroup(Interval.createFromCenterSize(center, theSize), [...positions].sort());
+    return new AreaGroup(
+      Interval.createFromCenterSize(center, theSize),
+      [...positions].sort((a, b) => a - b),
+    );
   }
 
   private joinSortedConflicts(inputConflicts: Conflict[]): Conflict[] {

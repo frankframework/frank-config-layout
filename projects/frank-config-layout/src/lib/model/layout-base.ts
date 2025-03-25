@@ -112,7 +112,7 @@ function assignLayerNumbersToShownNodes<T extends WithLayerNumber, U extends Con
     usedOriginalLayerNumberSet.add(g.getNodeById(shownId).layer);
   }
   const usedOriginalLayerNumbers: number[] = [...usedOriginalLayerNumberSet];
-  usedOriginalLayerNumbers.sort();
+  usedOriginalLayerNumbers.sort((a, b) => a - b);
   const oldToNew = new Map<number, number>();
   for (const [newLayer, oldLayer] of usedOriginalLayerNumbers.entries()) {
     oldToNew.set(oldLayer, newLayer);
