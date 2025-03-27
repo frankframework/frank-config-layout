@@ -35,7 +35,8 @@ import {
 import { HorizontalConflictResolver } from './horizontal-conflict';
 import { getRange } from '../util/util';
 import { getConnectedIdsOfKey, getKey } from '../model/graph';
-import { Box, DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
+import { Box } from './box';
+import { DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
 
 export interface NodeAndEdgeDimensions {
   nodeWidth: number;

@@ -131,6 +131,16 @@ export class Line {
     }
     return LineRelation.CROSS;
   }
+
+  integerPointAtY(y: number): Point {
+    if (this.endPoint.y === this.startPoint.y) {
+      throw new Error('Cannot use an y-coordinate to find a point on a horizontal line');
+    }
+    const yspan = this.endPoint.y - this.startPoint.y;
+    const ratio = (y - this.startPoint.y) / yspan;
+    const x = Math.round(this.startPoint.x + ratio * (this.endPoint.x - this.startPoint.x));
+    return new Point(x, y);
+  }
 }
 
 const LINE_LENGTH_DEGENERATE_THRESHOLD = 0.01;
