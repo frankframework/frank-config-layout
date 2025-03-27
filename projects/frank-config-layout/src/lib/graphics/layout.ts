@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/filename-case */
-
 /*
    Copyright 2025 WeAreFrank!
 

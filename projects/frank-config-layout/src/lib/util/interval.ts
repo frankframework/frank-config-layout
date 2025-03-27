@@ -99,3 +99,22 @@ export function splitRange(count: number, nextAcceptor: (current: number, next: 
   }
   return result;
 }
+
+export function splitArray<T>(items: T[], nextAcceptor: (curr: T, next: T) => boolean): T[][] {
+  const indexGroups: Interval[] = splitRange(items.length, (currIndex) =>
+    nextAcceptor(items[currIndex], items[currIndex + 1]),
+  );
+  const result: T[][] = [];
+  for (const ig of indexGroups) {
+    result.push(fetchItems(ig, items));
+  }
+  return result;
+}
+
+function fetchItems<T>(indexes: Interval, from: T[]): T[] {
+  const result: T[] = [];
+  for (let index = indexes.minValue; index <= indexes.maxValue; ++index) {
+    result.push(from[index]);
+  }
+  return result;
+}
