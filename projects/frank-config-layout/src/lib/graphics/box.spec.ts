@@ -47,24 +47,23 @@ describe('LineChecker', () => {
     return new LayoutModelBuilder(lb, intermediates.intermediate).run();
   })();
 
-  const simpleLineChecker = new LineChecker(
-    (id) => ['N1', 'N2', 'N3', 'N4', 'N5'].indexOf(id) * 10,
-    () => 100,
-    () => 5,
-    () => 7,
-    () => true,
-  );
+  const simpleLineChecker = new LineChecker({
+    xFunction: (id): number => ['N1', 'N2', 'N3', 'N4', 'N5'].indexOf(id) * 10,
+    yFunction: (): number => 100,
+    widthFunction: (): number => 5,
+    heightFunction: (): number => 7,
+    notIntermediateFunction: (): boolean => true,
+  });
 
-  const intermediateTester = new LineChecker(
-    (id) => ['N1', 'N2', 'N3', 'N4', 'N5'].indexOf(id) * 10,
-    () => 100,
-    () => 5,
-    () => 7,
-    (id) => (id === 'N3' ? true : false),
-  );
+  const intermediateTester = new LineChecker({
+    xFunction: (id): number => ['N1', 'N2', 'N3', 'N4', 'N5'].indexOf(id) * 10,
+    yFunction: (): number => 100,
+    widthFunction: (): number => 5,
+    heightFunction: (): number => 7,
+    notIntermediateFunction: (id: string): boolean => (id === 'N3' ? true : false),
+  });
 
   it('When a node has non-intermediate nodes to its left and its right, two obstacles are returned', () => {
-    console.log('START');
     const obstacles: Line[] = simpleLineChecker.obstaclesOfPassingId('N3', model);
     expect(obstacles.length).toEqual(2);
     const leftObstacle = obstacles[0];
@@ -74,7 +73,6 @@ describe('LineChecker', () => {
     expect(leftObstacle.startPoint.y).toEqual(97);
     expect(leftObstacle.endPoint.x).toEqual(12);
     expect(leftObstacle.endPoint.y).toEqual(103);
-    console.log('END');
   });
 
   it('When a node is the left-most, only an obstacle to its right is returned', () => {
