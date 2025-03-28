@@ -38,13 +38,31 @@ export class Box {
 }
 
 export class LineChecker {
-  constructor(
-    private xFunction: (id: string) => number,
-    private yFunction: (id: string) => number,
-    private widthFunction: (id: string) => number,
-    private heightFunction: (id: string) => number,
-    private notIntermediateFunction: (id: string) => boolean,
-  ) {}
+  private xFunction: (id: string) => number;
+  private yFunction: (id: string) => number;
+  private widthFunction: (id: string) => number;
+  private heightFunction: (id: string) => number;
+  private notIntermediateFunction: (id: string) => boolean;
+
+  constructor({
+    xFunction,
+    yFunction,
+    widthFunction,
+    heightFunction,
+    notIntermediateFunction,
+  }: {
+    xFunction: (id: string) => number;
+    yFunction: (id: string) => number;
+    widthFunction: (id: string) => number;
+    heightFunction: (id: string) => number;
+    notIntermediateFunction: (id: string) => boolean;
+  }) {
+    this.xFunction = xFunction;
+    this.yFunction = yFunction;
+    this.widthFunction = widthFunction;
+    this.heightFunction = heightFunction;
+    this.notIntermediateFunction = notIntermediateFunction;
+  }
 
   createBox(id: string): Box {
     const horizontalBox: Interval = Interval.createFromCenterSize(this.xFunction(id), this.widthFunction(id));
@@ -66,7 +84,6 @@ export class LineChecker {
 
   obstaclesOfPassingId(id: string, model: LayoutModel): Line[] {
     const po: LayoutPosition = model.getPositionOfId(id)!;
-    console.log(`Layout position: id=${po.id}, layer=${po.layer}, position=${po.position}`);
     const layerPositionObjects: LayoutPosition[] = model.getPositionsOfLayer(po.layer);
     let leftObstacle: Line | undefined = undefined;
     for (let leftPosition = po.position - 1; leftPosition >= 0; --leftPosition) {

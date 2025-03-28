@@ -1,4 +1,4 @@
-import { Interval, splitRange } from './interval';
+import { Interval, splitArray, splitRange } from './interval';
 
 describe('Interval', () => {
   it('Creating invalid interval fails', () => {
@@ -158,5 +158,20 @@ describe('splitRange', () => {
     expect(result[1].maxValue).toEqual(1);
     expect(result[2].minValue).toEqual(2);
     expect(result[2].maxValue).toEqual(2);
+  });
+
+  it('When splitArray sees consecutive elements that do not join, then they go to different groups', () => {
+    const result: string[][] = splitArray(['aap', 'noot'], (curr, next) => curr.at(-1) === next.charAt(0));
+    expect(result.length).toEqual(2);
+    expect(result[0][0]).toEqual('aap');
+    expect(result[1][0]).toEqual('noot');
+  });
+
+  it('When splitArray sees consecutive elements that join, then they go in the same group', () => {
+    const result: string[][] = splitArray(['aap', 'pa'], (curr, next) => curr.at(-1) === next.at(0));
+    expect(result.length).toEqual(1);
+    expect(result[0].length).toEqual(2);
+    expect(result[0][0]).toEqual('aap');
+    expect(result[0][1]).toEqual('pa');
   });
 });

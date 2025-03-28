@@ -68,11 +68,27 @@ export class StraightenedLine {
 }
 
 export class StraightenedLineSegmentsBuilder {
-  constructor(
-    readonly notIntermediateFunction: (id: string) => boolean,
-    readonly lineFactory: (edgeKey: string) => Line,
-    readonly layerPassageFactory: ((id: string) => Line) | undefined,
-  ) {}
+  private notIntermediateFunction: (id: string) => boolean;
+  private lineFactory: (edgeKey: string) => Line;
+  private layerPassageFactory: ((id: string, direction: number) => Line) | undefined;
+  private directionCalculator: (edgeKey: string) => number;
+
+  constructor({
+    notIntermediateFunction,
+    lineFactory,
+    layerPassageFactory,
+    directionCalculator,
+  }: {
+    notIntermediateFunction: (id: string) => boolean;
+    lineFactory: (edgeKey: string) => Line;
+    layerPassageFactory: ((id: string, direction: number) => Line) | undefined;
+    directionCalculator: (edgeKey: string) => number;
+  }) {
+    this.notIntermediateFunction = notIntermediateFunction;
+    this.lineFactory = lineFactory;
+    this.layerPassageFactory = layerPassageFactory;
+    this.directionCalculator = directionCalculator;
+  }
 
   run(edgeKeys: string[]): StraightenedLine[][] {
     const connectedShownEdgeGroups = splitArray(
@@ -88,16 +104,66 @@ export class StraightenedLineSegmentsBuilder {
 
   handleEdgeGroup(edgeKeys: string[]): StraightenedLine[] {
     const result: StraightenedLine[] = [];
+    let direction: number | undefined = undefined;
+    let isFirst = true;
     for (const edgeKey of edgeKeys) {
       const connectedIds: string[] = getConnectedIdsOfKey(edgeKey);
-      let isFirst = true;
       if (this.layerPassageFactory !== undefined && !this.notIntermediateFunction(connectedIds[0]) && !isFirst) {
-        const line: Line = this.layerPassageFactory(connectedIds[0]);
+        const line: Line = this.layerPassageFactory(connectedIds[0], direction!);
         result.push(StraightenedLine.create(connectedIds[0], connectedIds[0], line));
       }
       isFirst = false;
+      direction = this.directionCalculator(edgeKey);
       result.push(StraightenedLine.create(connectedIds[0], connectedIds[1], this.lineFactory(edgeKey)));
     }
     return result;
+  }
+}
+
+export function straighten(
+  segments: StraightenedLine[],
+  lineChecker: (forId: string, line: Line) => boolean,
+): StraightenedLine[] {
+  const result: StraightenedLine[] = [];
+  let index = 0;
+  while (index < segments.length) {
+    console.log(`index=${index}`);
+    const next = segments[index];
+    let handled = false;
+    if (next.isLayerPassage()) {
+      const replacements = next.toReplaceMeAsLayerPassage(result.at(-1)!, segments[index + 1]);
+      if (replacements.every((replacement) => lineChecker(next.idStart, replacement.line))) {
+        result.pop();
+        for (const replacement of replacements) {
+          console.log(`Replacement: ${replacement.idStart}, ${replacement.idEnd}`);
+          joinAdd(result, replacement, lineChecker);
+        }
+        index += 2;
+        handled = true;
+      }
+    }
+    if (!handled) {
+      joinAdd(result, next, lineChecker);
+      ++index;
+    }
+  }
+  return result;
+}
+
+function joinAdd(
+  existingSegments: StraightenedLine[],
+  newSegment: StraightenedLine,
+  lineChecker: (id: string, line: Line) => boolean,
+): void {
+  if (existingSegments.length === 0) {
+    existingSegments.push(newSegment);
+  } else {
+    const joined: StraightenedLine = existingSegments.at(-1)!.toJoinedWith(newSegment);
+    if ([joined.idStart, joined.idEnd, ...joined.replacedNodes].every((id) => lineChecker(id, joined.line))) {
+      existingSegments.pop();
+      existingSegments.push(joined);
+    } else {
+      existingSegments.push(newSegment);
+    }
   }
 }
