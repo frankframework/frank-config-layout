@@ -55,6 +55,7 @@ export function getFactoryDimensions(): Dimensions {
     edgeLabelFontSize: 10,
     preferredVertDistanceFromOrigin: 30,
     strictlyKeepLabelOutOfBox: false,
+    lineTransgressionPerc: 100,
   };
 }
 

@@ -40,6 +40,7 @@ export interface NodeAndEdgeDimensions {
   nodeBoxHeight: number;
   boxConnectorAreaPerc: number;
   intermediateLayerPassedByVerticalLine: boolean;
+  lineTransgressionPerc: number;
 }
 
 export interface LayoutLineSegment {
@@ -81,13 +82,15 @@ export class LayoutBuilder {
   private connectorY = new Map<string, number>();
   private layoutLineSegmentsByOriginalEdge = new Map<string, LayoutLineSegment[]>();
   private originalEdgesByConnector = new Map<string, string>();
-
+  private lineThrougIntermediateNodeAllowance: number;
   constructor(
     private model: LayoutModel,
     private og: OriginalGraphReferencingIntermediates,
     private d: NodeAndEdgeDimensions,
     private derivedEdgeLabelDimensions: DerivedEdgeLabelDimensions,
-  ) {}
+  ) {
+    this.lineThrougIntermediateNodeAllowance = Math.round((d.intermediateWidth * d.lineTransgressionPerc) / 100);
+  }
 
   run(): Layout {
     const width: number = this.calculateNodeX();
@@ -274,7 +277,8 @@ export class LayoutBuilder {
   private calculateLayoutLineSegments(): void {
     const lineChecker = new LineChecker({
       nodeBoxFunction: (id): Box => this.getNodeBox(id),
-      nodeWidthFunction: (id): Interval => Interval.createFromCenterSize(this.nodeXById.get(id)!, this.widthOfNode(id)),
+      nodeWidthFunction: (id): Interval =>
+        Interval.createFromCenterSize(this.nodeXById.get(id)!, this.lineThrougIntermediateNodeAllowance),
       notIntermediateFunction: (id: string): boolean => this.og.hasNode(id),
     });
     for (const originalEdge of this.og.edges) {
@@ -354,12 +358,12 @@ export class LayoutBuilder {
   private straighten(segmentGroups: StraightenedLine[][], lineChecker: LineChecker): StraightenedLine[][] {
     return segmentGroups.map((segments) => {
       return straighten(segments, (id, line) => {
-        // const isInBounds: boolean = lineChecker.lineIsInBoundsForId(id, line);
+        const isInBounds: boolean = lineChecker.lineIsInBoundsForId(id, line);
         const obstacles: Line[] = lineChecker.obstaclesOfPassingId(id, this.model);
         const noObstaclesCrossed = obstacles.every(
           (obstacle) => relateLines(obstacle, line) === LineRelation.UNRELATED,
         );
-        return noObstaclesCrossed;
+        return isInBounds && noObstaclesCrossed;
       });
     });
   }

@@ -58,6 +58,13 @@
             [ngClass]="editDimensions.intermediateLayerPassedByVerticalLine !== lastPosted.intermediateLayerPassedByVerticalLine ? 'changed' : ''"/></td>
         </tr>
         <tr>
+          <td>Line through intermediate node transgression %:</td>
+          <td><input
+            [(ngModel)]="editDimensions.lineTransgressionPerc" type="number" minValue="1"
+            [ngClass]="editDimensions.lineTransgressionPerc !== lastPosted.lineTransgressionPerc ? 'changed' : ''" />
+          </td>
+        </tr>
+        <tr>
           <td>Edge label font size:</td>
           <td><input
             [(ngModel)]="editDimensions.edgeLabelFontSize" type="number"
