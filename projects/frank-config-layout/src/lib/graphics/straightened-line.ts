@@ -145,7 +145,6 @@ export function straighten(
   const result: StraightenedLine[] = [];
   let index = 0;
   while (index < segments.length) {
-    console.log(`index=${index}`);
     const next = segments[index];
     let handled = false;
     if (next.isLayerPassage()) {
@@ -153,7 +152,6 @@ export function straighten(
       if (replacements.every((replacement) => lineChecker(next.idStart, replacement.line))) {
         result.pop();
         for (const replacement of replacements) {
-          console.log(`Replacement: ${replacement.idStart}, ${replacement.idEnd}`);
           joinAdd(result, replacement, lineChecker);
         }
         index += 2;

@@ -354,12 +354,12 @@ export class LayoutBuilder {
   private straighten(segmentGroups: StraightenedLine[][], lineChecker: LineChecker): StraightenedLine[][] {
     return segmentGroups.map((segments) => {
       return straighten(segments, (id, line) => {
-        const isInBounds: boolean = lineChecker.lineIsInBoundsForId(id, line);
+        // const isInBounds: boolean = lineChecker.lineIsInBoundsForId(id, line);
         const obstacles: Line[] = lineChecker.obstaclesOfPassingId(id, this.model);
         const noObstaclesCrossed = obstacles.every(
           (obstacle) => relateLines(obstacle, line) === LineRelation.UNRELATED,
         );
-        return isInBounds && noObstaclesCrossed;
+        return noObstaclesCrossed;
       });
     });
   }

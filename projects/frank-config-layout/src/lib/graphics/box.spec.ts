@@ -31,6 +31,22 @@ describe('Box', () => {
     expect(result.endPoint.x).toEqual(18);
     expect(result.endPoint.y).toEqual(20);
   });
+
+  it('Top bound calculated correctly', () => {
+    const result = instance.topBound;
+    expect(result.startPoint.x).toEqual(12);
+    expect(result.startPoint.y).toEqual(10);
+    expect(result.endPoint.x).toEqual(18);
+    expect(result.endPoint.y).toEqual(10);
+  });
+
+  it('Bottom calculated correctly', () => {
+    const result = instance.bottomBound;
+    expect(result.startPoint.x).toEqual(12);
+    expect(result.startPoint.y).toEqual(20);
+    expect(result.endPoint.x).toEqual(18);
+    expect(result.endPoint.y).toEqual(20);
+  });
 });
 
 describe('LineChecker', () => {
@@ -72,44 +88,35 @@ describe('LineChecker', () => {
     notIntermediateFunction: (id: string): boolean => (id === 'N3' ? true : false),
   });
 
-  it('When a node has non-intermediate nodes to its left and its right, two obstacles are returned', () => {
+  it('When a node has non-intermediate nodes to its left and its right, the bounds from two obstacles are returned', () => {
     const obstacles: Line[] = simpleLineChecker.obstaclesOfPassingId('N3', model);
-    expect(obstacles.length).toEqual(2);
-    const leftObstacle = obstacles[0];
-    expect(leftObstacle.startPoint.x).toEqual(12);
-    expect(leftObstacle.startPoint.y).toEqual(97);
-    expect(leftObstacle.endPoint.x).toEqual(12);
-    expect(leftObstacle.endPoint.y).toEqual(103);
+    expect(obstacles.length).toEqual(8);
+    checkLines({ minIdx: 0, maxIdx: 3, minX: 8, maxX: 12, minY: 97, maxY: 103, lines: obstacles });
+    checkLines({ minIdx: 4, maxIdx: 7, minX: 28, maxX: 32, minY: 97, maxY: 103, lines: obstacles });
   });
 
-  it('When a node is the left-most, only an obstacle to its right is returned', () => {
+  it('When a node is the left-most, only obstacles to its right are returned', () => {
     const obstacles: Line[] = simpleLineChecker.obstaclesOfPassingId('N1', model);
-    expect(obstacles.length).toEqual(1);
-    expect(obstacles[0].startPoint.x).toEqual(8);
-    expect(obstacles[0].startPoint.y).toEqual(97);
-    expect(obstacles[0].endPoint.x).toEqual(8);
-    expect(obstacles[0].endPoint.y).toEqual(103);
+    expect(obstacles.length).toEqual(4);
+    checkLines({ minIdx: 0, maxIdx: 3, minX: 8, maxX: 12, minY: 97, maxY: 103, lines: obstacles });
   });
 
-  it('When a node is the right-most, only an obstacle to its left is returned', () => {
+  it('When a node is the right-most, only obstacles to its left are returned', () => {
     const obstacles: Line[] = simpleLineChecker.obstaclesOfPassingId('N5', model);
-    expect(obstacles.length).toEqual(1);
-    expect(obstacles[0].startPoint.x).toEqual(32);
-    expect(obstacles[0].startPoint.y).toEqual(97);
-    expect(obstacles[0].endPoint.x).toEqual(32);
-    expect(obstacles[0].endPoint.y).toEqual(103);
+    expect(obstacles.length).toEqual(4);
+    checkLines({ minIdx: 0, maxIdx: 3, minX: 28, maxX: 32, minY: 97, maxY: 103, lines: obstacles });
   });
 
-  it('When all nodes to the left are intermediate, then only a right boundary is returned', () => {
+  it('When all nodes to the left are intermediate, then only right boundaries are returned', () => {
     const obstacles: Line[] = intermediateTester.obstaclesOfPassingId('N2', model);
-    expect(obstacles.length).toEqual(1);
-    expect(obstacles[0].startPoint.x).toEqual(18);
+    expect(obstacles.length).toEqual(4);
+    checkLines({ minIdx: 0, maxIdx: 3, minX: 18, maxX: 22, minY: 97, maxY: 103, lines: obstacles });
   });
 
-  it('When all nodes to the right are intermediate, then only a left boundary is returned', () => {
+  it('When all nodes to the right are intermediate, then only left boundaries are returned', () => {
     const obstacles: Line[] = intermediateTester.obstaclesOfPassingId('N4', model);
-    expect(obstacles.length).toEqual(1);
-    expect(obstacles[0].startPoint.x).toEqual(22);
+    expect(obstacles.length).toEqual(4);
+    checkLines({ minIdx: 0, maxIdx: 3, minX: 18, maxX: 22, minY: 97, maxY: 103, lines: obstacles });
   });
 
   it('When a line passes through the horizontal interval of a node then lineIsInBoundsForId returns true', () => {
@@ -131,4 +138,33 @@ function addNode(id: string, gl: OriginalGraph): void {
     errorStatus: ERROR_STATUS_SUCCESS,
   };
   gl.addNode(n);
+}
+
+function checkLines({
+  minIdx,
+  maxIdx,
+  minX,
+  maxX,
+  minY,
+  maxY,
+  lines,
+}: {
+  minIdx: number;
+  maxIdx: number;
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  lines: Line[];
+}): void {
+  const selected: Line[] = [];
+  for (let idx = minIdx; idx <= maxIdx; ++idx) {
+    selected.push(lines[idx]);
+  }
+  const allX = selected.flatMap((line) => [line.startPoint.x, line.endPoint.x]);
+  const allY = selected.flatMap((line) => [line.startPoint.y, line.endPoint.y]);
+  expect(Math.min(...allX)).toEqual(minX);
+  expect(Math.max(...allX)).toEqual(maxX);
+  expect(Math.min(...allY)).toEqual(minY);
+  expect(Math.max(...allY)).toEqual(maxY);
 }

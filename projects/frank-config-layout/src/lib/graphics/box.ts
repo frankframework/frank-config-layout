@@ -35,6 +35,22 @@ export class Box {
     const endPoint = new Point(this.horizontalBox.maxValue, this.verticalBox.maxValue);
     return new Line(startPoint, endPoint);
   }
+
+  get topBound(): Line {
+    const startPoint = new Point(this.horizontalBox.minValue, this.verticalBox.minValue);
+    const endPoint = new Point(this.horizontalBox.maxValue, this.verticalBox.minValue);
+    return new Line(startPoint, endPoint);
+  }
+
+  get bottomBound(): Line {
+    const startPoint = new Point(this.horizontalBox.minValue, this.verticalBox.maxValue);
+    const endPoint = new Point(this.horizontalBox.maxValue, this.verticalBox.maxValue);
+    return new Line(startPoint, endPoint);
+  }
+
+  get allBounds(): Line[] {
+    return [this.leftBound, this.rightBound, this.topBound, this.bottomBound];
+  }
 }
 
 export class LineChecker {
@@ -66,8 +82,7 @@ export class LineChecker {
     const lineMinY = Math.min(line.startPoint.y, line.endPoint.y);
     const lineMaxY = Math.max(line.startPoint.y, line.endPoint.y);
     const y = this.getY(id);
-    // TODO: Is this check valid?
-    if (!Interval.createFromMinMax(lineMinY, lineMaxY).contains(y)) {
+    if (Interval.createFromMinMax(lineMinY, lineMaxY).toIntersected(this.nodeBoxFunction(id).verticalBox) === null) {
       throw new Error('Layer mismatch when checking whether a line passes through the bounds of an intermediate node');
     }
     const x = line.integerPointAtY(y).x;
@@ -77,22 +92,22 @@ export class LineChecker {
   obstaclesOfPassingId(id: string, model: LayoutModel): Line[] {
     const po: LayoutPosition = model.getPositionOfId(id)!;
     const layerPositionObjects: LayoutPosition[] = model.getPositionsOfLayer(po.layer);
-    let leftObstacle: Line | undefined = undefined;
+    let leftObstacles: Line[] | undefined = undefined;
     for (let leftPosition = po.position - 1; leftPosition >= 0; --leftPosition) {
       const leftId: string = layerPositionObjects[leftPosition].id;
       if (this.notIntermediateFunction(leftId)) {
-        leftObstacle = this.nodeBoxFunction(leftId).rightBound;
+        leftObstacles = this.nodeBoxFunction(leftId).allBounds;
         break;
       }
     }
-    let rightObstacle: Line | undefined = undefined;
+    let rightObstacles: Line[] | undefined = undefined;
     for (let rightPosition = po.position + 1; rightPosition < layerPositionObjects.length; ++rightPosition) {
       const rightId: string = layerPositionObjects[rightPosition].id;
       if (this.notIntermediateFunction(rightId)) {
-        rightObstacle = this.nodeBoxFunction(rightId).leftBound;
+        rightObstacles = this.nodeBoxFunction(rightId).allBounds;
         break;
       }
     }
-    return [leftObstacle, rightObstacle].filter((obs) => obs !== undefined);
+    return [leftObstacles, rightObstacles].filter((obss) => obss !== undefined).flat();
   }
 }
