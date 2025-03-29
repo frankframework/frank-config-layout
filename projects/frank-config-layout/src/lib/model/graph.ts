@@ -96,7 +96,6 @@ export class Graph<T extends WithId, U extends Connection<T>> {
     return this._nodes;
   }
 
-  // Todo: unit test
   hasNode(id: string): boolean {
     return this._nodesById.has(id);
   }

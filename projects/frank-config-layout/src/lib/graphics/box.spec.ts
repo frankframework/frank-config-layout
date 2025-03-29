@@ -47,19 +47,28 @@ describe('LineChecker', () => {
     return new LayoutModelBuilder(lb, intermediates.intermediate).run();
   })();
 
+  const nodeIdToCenter = new Map<string, number>([
+    ['N1', 0],
+    ['N2', 10],
+    ['N3', 20],
+    ['N4', 30],
+    ['N5', 40],
+  ]);
   const simpleLineChecker = new LineChecker({
-    xFunction: (id): number => ['N1', 'N2', 'N3', 'N4', 'N5'].indexOf(id) * 10,
-    yFunction: (): number => 100,
-    widthFunction: (): number => 5,
-    heightFunction: (): number => 7,
+    nodeBoxFunction: (id): Box => {
+      const centerX: number = nodeIdToCenter.get(id)!;
+      return new Box(Interval.createFromCenterSize(centerX, 5), Interval.createFromCenterSize(100, 7));
+    },
+    nodeWidthFunction: (id): Interval => Interval.createFromCenterSize(nodeIdToCenter.get(id)!, 5),
     notIntermediateFunction: (): boolean => true,
   });
 
   const intermediateTester = new LineChecker({
-    xFunction: (id): number => ['N1', 'N2', 'N3', 'N4', 'N5'].indexOf(id) * 10,
-    yFunction: (): number => 100,
-    widthFunction: (): number => 5,
-    heightFunction: (): number => 7,
+    nodeBoxFunction: (id): Box => {
+      const centerX: number = nodeIdToCenter.get(id)!;
+      return new Box(Interval.createFromCenterSize(centerX, 5), Interval.createFromCenterSize(100, 7));
+    },
+    nodeWidthFunction: (id): Interval => Interval.createFromCenterSize(nodeIdToCenter.get(id)!, 5),
     notIntermediateFunction: (id: string): boolean => (id === 'N3' ? true : false),
   });
 
@@ -67,8 +76,6 @@ describe('LineChecker', () => {
     const obstacles: Line[] = simpleLineChecker.obstaclesOfPassingId('N3', model);
     expect(obstacles.length).toEqual(2);
     const leftObstacle = obstacles[0];
-    expect(simpleLineChecker.createBox('N3').horizontalBox.center).toEqual(20);
-    expect(simpleLineChecker.createBox('N3').verticalBox.center).toEqual(100);
     expect(leftObstacle.startPoint.x).toEqual(12);
     expect(leftObstacle.startPoint.y).toEqual(97);
     expect(leftObstacle.endPoint.x).toEqual(12);

@@ -65,6 +65,24 @@ export class StraightenedLine {
     ]);
     return [first, second];
   }
+
+  // TODO: Test
+  split(pointFunction: (id: string, line: Line) => Point): StraightenedLine[] {
+    if (this.replacedNodes.length === 0) {
+      return [this];
+    } else {
+      const newPoints: Point[] = this.replacedNodes.map((replaced) => pointFunction(replaced, this.line));
+      const startPoints = [this.line.startPoint, ...newPoints];
+      const endPoints = [...newPoints, this.line.endPoint];
+      const startIds = [this.idStart, ...this.replacedNodes];
+      const endIds = [...this.replacedNodes, this.idEnd];
+      const result: StraightenedLine[] = [];
+      for (const [i, startPoint] of startPoints.entries()) {
+        result.push(StraightenedLine.create(startIds[i], endIds[i], new Line(startPoint, endPoints[i])));
+      }
+      return result;
+    }
+  }
 }
 
 export class StraightenedLineSegmentsBuilder {

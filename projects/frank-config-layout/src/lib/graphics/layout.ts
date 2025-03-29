@@ -23,18 +23,13 @@ import {
   PASS_DIRECTION_DOWN,
   PASS_DIRECTION_UP,
 } from '../model/horizontal-grouping';
-import {
-  LayoutConnection,
-  LayoutConnector,
-  LayoutModel,
-  LayoutPosition,
-  layoutPositionKey,
-} from '../model/layout-model';
+import { LayoutConnector, LayoutModel, LayoutPosition, layoutPositionKey } from '../model/layout-model';
 import { HorizontalConflictResolver } from './horizontal-conflict';
 import { getRange } from '../util/util';
-import { getConnectedIdsOfKey, getKey } from '../model/graph';
-import { Box } from './box';
+import { getConnectedIdsOfKey, getKey, keyFor } from '../model/graph';
+import { Box, LineChecker } from './box';
 import { DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
+import { straighten, StraightenedLine, StraightenedLineSegmentsBuilder } from './straightened-line';
 
 export interface NodeAndEdgeDimensions {
   nodeWidth: number;
@@ -47,16 +42,11 @@ export interface NodeAndEdgeDimensions {
   intermediateLayerPassedByVerticalLine: boolean;
 }
 
-interface LineSegmentBase {
+export interface LayoutLineSegment {
   readonly key: string;
   readonly line: Line;
   readonly minLayerNumber: number;
   readonly maxLayerNumber: number;
-}
-
-export interface LayoutLineSegment extends LineSegmentBase {
-  readonly key: string;
-  readonly line: Line;
   readonly errorStatus: number;
   readonly isLastLineSegment: boolean;
 }
@@ -282,6 +272,11 @@ export class LayoutBuilder {
   }
 
   private calculateLayoutLineSegments(): void {
+    const lineChecker = new LineChecker({
+      nodeBoxFunction: (id): Box => this.getNodeBox(id),
+      nodeWidthFunction: (id): Interval => Interval.createFromCenterSize(this.nodeXById.get(id)!, this.widthOfNode(id)),
+      notIntermediateFunction: (id: string): boolean => this.og.hasNode(id),
+    });
     for (const originalEdge of this.og.edges) {
       const firstIntermediateEdgeKey = originalEdge.intermediateEdgeKeys[0];
       const firstSegmentIsNotOmitted = getConnectedIdsOfKey(firstIntermediateEdgeKey).every((nodeId) => {
@@ -291,54 +286,52 @@ export class LayoutBuilder {
         const startConnector = this.model.getConnection(firstIntermediateEdgeKey).from;
         this.originalEdgesByConnector.set(startConnector.key, getKey(originalEdge));
       }
-      const lineSegments: LayoutLineSegment[] = this.getLayoutLineSegmentsFor(originalEdge);
+      const lineSegments: LayoutLineSegment[] = this.getLayoutLineSegmentsFor(originalEdge, lineChecker);
       this.layoutLineSegmentsByOriginalEdge.set(getKey(originalEdge), lineSegments);
     }
   }
 
-  private getLayoutLineSegmentsFor(originalEdge: OriginalEdgeWithIntermediateEdges): LayoutLineSegment[] {
-    const result: LineSegmentBase[] = [];
+  private getNodeBox(id: string): Box {
+    const horizontalBox = Interval.createFromCenterSize(this.nodeXById.get(id)!, this.widthOfNodeBox(id));
+    const layer: number = this.model.getPositionOfId(id)!.layer;
+    const verticalBox = Interval.createFromCenterSize(this.layerY[layer], this.heightOfNodeBox(id));
+    return new Box(horizontalBox, verticalBox);
+  }
+
+  private getLayoutLineSegmentsFor(
+    originalEdge: OriginalEdgeWithIntermediateEdges,
+    lineChecker: LineChecker,
+  ): LayoutLineSegment[] {
     const shownIntermediateEdgeKeys = originalEdge.intermediateEdgeKeys.filter((iek) => {
       return getConnectedIdsOfKey(iek).every((nodeId) => this.model.hasId(nodeId));
     });
-    for (const intermediateEdgeKey of shownIntermediateEdgeKeys) {
-      const connection: LayoutConnection = this.model.getConnection(intermediateEdgeKey);
-      const fromIsIntermediate = getConnectedIdsOfKey(intermediateEdgeKey)[0] !== originalEdge.from.id;
-      if (this.d.intermediateLayerPassedByVerticalLine && fromIsIntermediate) {
-        const direction: number = this.getDirectionOf(connection);
-        const intermediateNodeId = getConnectedIdsOfKey(intermediateEdgeKey)[0];
-        const intermediateNode = this.model.getPositionOfId(intermediateNodeId)!;
-        result.push({
-          key: `pass-${intermediateNodeId}`,
-          line: this.getLineSegmentIntermediateNode(intermediateNode, direction),
-          minLayerNumber: intermediateNode.layer,
-          maxLayerNumber: intermediateNode.layer,
-        });
-      }
-      const layerNumbers = [connection.from.referencePosition.layer, connection.to.referencePosition.layer];
-      result.push({
-        key: intermediateEdgeKey,
-        line: this.getLineForConnection(connection),
-        minLayerNumber: Math.min(...layerNumbers),
-        maxLayerNumber: Math.max(...layerNumbers),
+    let layerPassageFactory: ((id: string, direction: number) => Line) | undefined = undefined;
+    if (this.d.intermediateLayerPassedByVerticalLine) {
+      layerPassageFactory = (id: string, direction: number): Line => this.getLineSegmentIntermediateNode(id, direction);
+    }
+    let segmentGroups = new StraightenedLineSegmentsBuilder({
+      notIntermediateFunction: (id: string): boolean => this.og.hasNode(id),
+      lineFactory: (edgeKey: string): Line => this.getLine(edgeKey),
+      layerPassageFactory,
+      directionCalculator: (edgeKey: string): number => this.getDirectionOf(edgeKey),
+    }).run(shownIntermediateEdgeKeys);
+    if (this.d.intermediateLayerPassedByVerticalLine) {
+      segmentGroups = this.straighten(segmentGroups, lineChecker).map((segments) => {
+        return segments.flatMap((segment) => segment.split((id, line) => this.pointOnNode(id, line)));
       });
     }
-    return result.map((lsb) => {
-      return {
-        ...lsb,
-        errorStatus: originalEdge.errorStatus,
-        isLastLineSegment: lsb.key === originalEdge.intermediateEdgeKeys.at(-1),
-      };
-    });
+    return segmentGroups.flat().map((segment) => this.getLayoutLineSegment(segment, originalEdge));
   }
 
-  private getDirectionOf(connection: LayoutConnection): number {
+  private getDirectionOf(edgeKey: string): number {
+    const connection = this.model.getConnection(edgeKey);
     return connection.from.referencePosition.layer < connection.to.referencePosition.layer
       ? PASS_DIRECTION_DOWN
       : PASS_DIRECTION_UP;
   }
 
-  private getLineSegmentIntermediateNode(intermediateNode: LayoutPosition, direction: number): Line {
+  private getLineSegmentIntermediateNode(id: string, direction: number): Line {
+    const intermediateNode: LayoutPosition = this.model.getPositionOfId(id)!;
     const x = this.nodeXById.get(intermediateNode.id)!;
     const verticalBox = Interval.createFromCenterSize(
       this.layerY[intermediateNode.layer],
@@ -349,12 +342,45 @@ export class LayoutBuilder {
       : new Line(new Point(x, verticalBox.maxValue), new Point(x, verticalBox.minValue));
   }
 
-  private getLineForConnection(connection: LayoutConnection): Line {
+  private getLine(edgeKey: string): Line {
+    const connection = this.model.getConnection(edgeKey);
     const fromX: number = this.connectorX.get(connection.from.key)!;
     const fromY: number = this.connectorY.get(connection.from.key)!;
     const toX: number = this.connectorX.get(connection.to.key)!;
     const toY: number = this.connectorY.get(connection.to.key)!;
     return new Line(new Point(fromX, fromY), new Point(toX, toY));
+  }
+
+  private straighten(segmentGroups: StraightenedLine[][], lineChecker: LineChecker): StraightenedLine[][] {
+    return segmentGroups.map((segments) => {
+      return straighten(segments, (id, line) => {
+        const isInBounds: boolean = lineChecker.lineIsInBoundsForId(id, line);
+        const obstacles: Line[] = lineChecker.obstaclesOfPassingId(id, this.model);
+        const noObstaclesCrossed = obstacles.every(
+          (obstacle) => relateLines(obstacle, line) === LineRelation.UNRELATED,
+        );
+        return isInBounds && noObstaclesCrossed;
+      });
+    });
+  }
+
+  private pointOnNode(id: string, line: Line): Point {
+    const layer = this.model.getPositionOfId(id)!.layer;
+    const y = this.layerY[layer];
+    return line.integerPointAtY(y);
+  }
+
+  private getLayoutLineSegment(segment: StraightenedLine, oe: OriginalEdgeWithIntermediateEdges): LayoutLineSegment {
+    const poStart = this.model.getPositionOfId(segment.idStart)!;
+    const poEnd = this.model.getPositionOfId(segment.idEnd)!;
+    return {
+      errorStatus: oe.errorStatus,
+      isLastLineSegment: segment.idEnd === oe.to.id,
+      key: keyFor(segment.idStart, segment.idEnd),
+      line: segment.line,
+      minLayerNumber: Math.min(poStart.layer, poEnd.layer),
+      maxLayerNumber: Math.max(poStart.layer, poEnd.layer),
+    };
   }
 
   private flattenLayoutLineSegments(): LayoutLineSegment[] {

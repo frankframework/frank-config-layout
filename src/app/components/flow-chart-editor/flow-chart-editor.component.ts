@@ -162,7 +162,6 @@ export class FlowChartEditorComponent {
   updateDrawing(): void {
     const layout = FlowChartEditorComponent.model2layout(this.layoutModel!, this.dimensions, this.originalGraph!);
     this.numCrossingLines = getNumCrossingLines(layout.layoutLineSegments);
-    // TODO: Properly fill selected property
     const rectangles: Rectangle[] = layout.nodes
       .map((n) => n as PlacedNode)
       .map((n) => {

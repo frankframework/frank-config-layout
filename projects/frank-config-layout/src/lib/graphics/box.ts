@@ -38,48 +38,40 @@ export class Box {
 }
 
 export class LineChecker {
-  private xFunction: (id: string) => number;
-  private yFunction: (id: string) => number;
-  private widthFunction: (id: string) => number;
-  private heightFunction: (id: string) => number;
+  private nodeBoxFunction: (id: string) => Box;
+  private nodeWidthFunction: (id: string) => Interval;
   private notIntermediateFunction: (id: string) => boolean;
 
   constructor({
-    xFunction,
-    yFunction,
-    widthFunction,
-    heightFunction,
+    // Dimensions of the shown box
+    nodeBoxFunction,
+    // The horizontal space of the node
+    nodeWidthFunction,
     notIntermediateFunction,
   }: {
-    xFunction: (id: string) => number;
-    yFunction: (id: string) => number;
-    widthFunction: (id: string) => number;
-    heightFunction: (id: string) => number;
+    nodeBoxFunction: (id: string) => Box;
+    nodeWidthFunction: (id: string) => Interval;
     notIntermediateFunction: (id: string) => boolean;
   }) {
-    this.xFunction = xFunction;
-    this.yFunction = yFunction;
-    this.widthFunction = widthFunction;
-    this.heightFunction = heightFunction;
+    this.nodeBoxFunction = nodeBoxFunction;
+    this.nodeWidthFunction = nodeWidthFunction;
     this.notIntermediateFunction = notIntermediateFunction;
   }
 
-  createBox(id: string): Box {
-    const horizontalBox: Interval = Interval.createFromCenterSize(this.xFunction(id), this.widthFunction(id));
-    const verticalBox: Interval = Interval.createFromCenterSize(this.yFunction(id), this.heightFunction(id));
-    return new Box(horizontalBox, verticalBox);
+  private getY(id: string): number {
+    return this.nodeBoxFunction(id).verticalBox.center;
   }
 
   lineIsInBoundsForId(id: string, line: Line): boolean {
     const lineMinY = Math.min(line.startPoint.y, line.endPoint.y);
     const lineMaxY = Math.max(line.startPoint.y, line.endPoint.y);
-    const box = this.createBox(id);
-    if (Interval.createFromMinMax(lineMinY, lineMaxY).toIntersected(box.verticalBox) === null) {
+    const y = this.getY(id);
+    // TODO: Is this check valid?
+    if (!Interval.createFromMinMax(lineMinY, lineMaxY).contains(y)) {
       throw new Error('Layer mismatch when checking whether a line passes through the bounds of an intermediate node');
     }
-    const y = box.verticalBox.center;
     const x = line.integerPointAtY(y).x;
-    return box.horizontalBox.contains(x);
+    return this.nodeWidthFunction(id).contains(x);
   }
 
   obstaclesOfPassingId(id: string, model: LayoutModel): Line[] {
@@ -89,7 +81,7 @@ export class LineChecker {
     for (let leftPosition = po.position - 1; leftPosition >= 0; --leftPosition) {
       const leftId: string = layerPositionObjects[leftPosition].id;
       if (this.notIntermediateFunction(leftId)) {
-        leftObstacle = this.createBox(leftId).rightBound;
+        leftObstacle = this.nodeBoxFunction(leftId).rightBound;
         break;
       }
     }
@@ -97,7 +89,7 @@ export class LineChecker {
     for (let rightPosition = po.position + 1; rightPosition < layerPositionObjects.length; ++rightPosition) {
       const rightId: string = layerPositionObjects[rightPosition].id;
       if (this.notIntermediateFunction(rightId)) {
-        rightObstacle = this.createBox(rightId).leftBound;
+        rightObstacle = this.nodeBoxFunction(rightId).leftBound;
         break;
       }
     }

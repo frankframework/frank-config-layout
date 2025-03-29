@@ -129,7 +129,7 @@ function handleEdge(
       from: intermediate.getNodeById(edge.from.id),
       to: intermediate.getNodeById(edge.to.id),
       text: edge.text,
-      // TODO: Test this.
+      // TODO: Remove these.
       errorStatus: edge.errorStatus,
       isFirstSegment: true,
       isLastSegment: true,
