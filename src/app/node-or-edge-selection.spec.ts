@@ -6,7 +6,6 @@ import {
   LayoutBase,
   createGraphForLayers,
   GraphForLayers,
-  PASS_DIRECTION_DOWN,
   ERROR_STATUS_SUCCESS,
 } from 'frank-config-layout';
 
@@ -183,18 +182,13 @@ function checkEdgeStartN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: Nod
 }
 
 function newNode(id: string, layer: number, g: GraphForLayers): void {
-  g.addNode({ id, layer, text: '', errorStatus: ERROR_STATUS_SUCCESS, isIntermediate: false });
+  g.addNode({ id, layer, text: '', errorStatus: ERROR_STATUS_SUCCESS });
 }
 
 function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    errorStatus: ERROR_STATUS_SUCCESS,
-    isIntermediate: false,
     text: createText(),
-    isFirstSegment: false,
-    isLastSegment: false,
-    passDirection: PASS_DIRECTION_DOWN,
   });
 }

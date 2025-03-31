@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
 import { NodeSequenceEditor } from '../../node-sequence-editor';
-import { createText, GraphForLayers, createGraphForLayers, PASS_DIRECTION_DOWN, ERROR_STATUS_SUCCESS } from 'frank-config-layout';
+import { createText, GraphForLayers, createGraphForLayers, ERROR_STATUS_SUCCESS } from 'frank-config-layout';
 
 describe('SequenceEditorComponent', () => {
   let component: SequenceEditorComponent;
@@ -43,19 +43,14 @@ describe('SequenceEditorComponent', () => {
 });
 
 function addNode(id: string, layer: number, g: GraphForLayers): void {
-  g.addNode({ id, layer, errorStatus: ERROR_STATUS_SUCCESS, isIntermediate: false, text: '' });
+  g.addNode({ id, layer, errorStatus: ERROR_STATUS_SUCCESS, text: '' });
 }
 
 function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    errorStatus: ERROR_STATUS_SUCCESS,
-    isIntermediate: false,
     text: createText(),
-    isFirstSegment: false,
-    isLastSegment: false,
-    passDirection: PASS_DIRECTION_DOWN,
   });
 }
 
