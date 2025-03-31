@@ -1,5 +1,5 @@
 import { createText } from './text';
-import { GraphForLayers, PASS_DIRECTION_DOWN, createGraphForLayers } from './horizontal-grouping';
+import { GraphForLayers, createGraphForLayers } from './horizontal-grouping';
 import { LayoutBase, getNumCrossings, alignFromLayer, NumCrossingsJudgement } from './layout-base';
 import { ERROR_STATUS_SUCCESS } from './error-flow';
 
@@ -8,7 +8,6 @@ function addNode(id: string, layer: number, g: GraphForLayers): void {
     id,
     layer,
     // These are dummy
-    isIntermediate: true,
     text: '',
     errorStatus: ERROR_STATUS_SUCCESS,
   });
@@ -19,12 +18,7 @@ function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
     // These are dummy
-    errorStatus: ERROR_STATUS_SUCCESS,
-    isFirstSegment: true,
-    isIntermediate: true,
-    isLastSegment: true,
     text: createText(),
-    passDirection: PASS_DIRECTION_DOWN,
   });
 }
 

@@ -28,8 +28,6 @@ export interface NodeForLayers extends WithId, WithLayerNumber {
   readonly text: string;
   readonly errorStatus: number;
   readonly layer: number;
-  readonly isIntermediate: boolean;
-  readonly passDirection?: number;
 }
 
 export type OptionalNodeForLayers = NodeForLayers | null;
@@ -38,11 +36,6 @@ export interface EdgeForLayers extends Connection<NodeForLayers> {
   readonly from: NodeForLayers;
   readonly to: NodeForLayers;
   readonly text: Text;
-  readonly errorStatus: number;
-  readonly isIntermediate: boolean;
-  readonly isFirstSegment: boolean;
-  readonly isLastSegment: boolean;
-  readonly passDirection: number;
 }
 
 export type OptionalEdgeForLayers = EdgeForLayers | null;
@@ -93,8 +86,6 @@ export function introduceIntermediateNodesAndEdges(
       text: n.text,
       errorStatus: n.errorStatus,
       layer: nodeIdToLayer.get(n.id)!,
-      isIntermediate: false,
-      passDirection: undefined,
     });
   }
   for (const edge of original.edges
@@ -118,7 +109,6 @@ function handleEdge(
   const layerFrom: number = nodeIdToLayer.get(edge.from.id)!;
   const layerTo: number = nodeIdToLayer.get(edge.to.id)!;
   const intermediateEdgeKeys: string[] = [];
-  const passDirection = layerFrom <= layerTo ? PASS_DIRECTION_DOWN : PASS_DIRECTION_UP;
   if (Math.abs(layerTo - layerFrom) <= 1) {
     // We do not throw an error for edges within the same layer.
     // Maybe a future layering algorithm will allow this.
@@ -129,23 +119,14 @@ function handleEdge(
       from: intermediate.getNodeById(edge.from.id),
       to: intermediate.getNodeById(edge.to.id),
       text: edge.text,
-      // TODO: Remove these.
-      errorStatus: edge.errorStatus,
-      isFirstSegment: true,
-      isLastSegment: true,
-      isIntermediate: false,
-      passDirection,
     });
   } else {
     const intermediateNodes: NodeForLayers[] = getIntermediateLayers(layerFrom, layerTo).map((layer) => {
       return {
         id: `intermediate${intermediateNodeSeq++}`,
         text: '',
-        // TODO: Test this.
         errorStatus: edge.errorStatus,
         layer,
-        isIntermediate: true,
-        passDirection,
       };
     });
     for (const intermediateNode of intermediateNodes) {
@@ -156,11 +137,6 @@ function handleEdge(
       from: intermediate.getNodeById(edge.from.id),
       to: intermediateNodes[0],
       text: edge.text,
-      errorStatus: edge.errorStatus,
-      isFirstSegment: true,
-      isLastSegment: false,
-      isIntermediate: true,
-      passDirection,
     });
     for (let i = 1; i < intermediateNodes.length; ++i) {
       intermediateEdgeKeys.push(keyFor(intermediateNodes[i - 1].id, intermediateNodes[i].id));
@@ -168,11 +144,6 @@ function handleEdge(
         from: intermediateNodes[i - 1],
         to: intermediateNodes[i],
         text: edge.text,
-        errorStatus: edge.errorStatus,
-        isFirstSegment: false,
-        isLastSegment: false,
-        isIntermediate: true,
-        passDirection,
       });
     }
     intermediateEdgeKeys.push(keyFor(intermediateNodes.at(-1)!.id, edge.to.id));
@@ -180,11 +151,6 @@ function handleEdge(
       from: intermediateNodes.at(-1)!,
       to: intermediate.getNodeById(edge.to.id),
       text: edge.text,
-      errorStatus: edge.errorStatus,
-      isFirstSegment: false,
-      isLastSegment: true,
-      isIntermediate: true,
-      passDirection,
     });
   }
   const extendedOriginalEdge: OriginalEdgeWithIntermediateEdges = {
