@@ -65,6 +65,13 @@
           </td>
         </tr>
         <tr>
+          <td>Node cross safe margin (one-side):</td>
+          <td><input
+            [(ngModel)]="editDimensions.boxCrossProtectionMargin" type="number" minValue="0"
+            [ngClass]="editDimensions.boxCrossProtectionMargin !== lastPosted.boxCrossProtectionMargin ? 'changed' : ''" />
+          </td>
+        </tr>
+        <tr>
           <td>Edge label font size:</td>
           <td><input
             [(ngModel)]="editDimensions.edgeLabelFontSize" type="number"

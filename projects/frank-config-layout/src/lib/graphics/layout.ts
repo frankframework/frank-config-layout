@@ -40,6 +40,7 @@ export interface NodeAndEdgeDimensions {
   nodeBoxHeight: number;
   boxConnectorAreaPerc: number;
   intermediateLayerPassedByVerticalLine: boolean;
+  boxCrossProtectionMargin: number;
   lineTransgressionPerc: number;
 }
 
@@ -276,7 +277,7 @@ export class LayoutBuilder {
 
   private calculateLayoutLineSegments(): void {
     const lineChecker = new LineChecker({
-      nodeBoxFunction: (id): Box => this.getNodeBox(id),
+      nodeBoxFunction: (id): Box => this.getCrossSafeBox(id),
       nodeWidthFunction: (id): Interval =>
         Interval.createFromCenterSize(this.nodeXById.get(id)!, this.lineThrougIntermediateNodeAllowance),
       notIntermediateFunction: (id: string): boolean => this.og.hasNode(id),
@@ -295,11 +296,15 @@ export class LayoutBuilder {
     }
   }
 
-  private getNodeBox(id: string): Box {
-    const horizontalBox = Interval.createFromCenterSize(this.nodeXById.get(id)!, this.widthOfNodeBox(id));
+  private getCrossSafeBox(id: string): Box {
+    const horizontalBox = Interval.createFromCenterSize(this.nodeXById.get(id)!, this.getCrossSafeWidth(id));
     const layer: number = this.model.getPositionOfId(id)!.layer;
     const verticalBox = Interval.createFromCenterSize(this.layerY[layer], this.heightOfNodeBox(id));
     return new Box(horizontalBox, verticalBox);
+  }
+
+  private getCrossSafeWidth(id: string): number {
+    return this.og.hasNode(id) ? this.d.nodeBoxWidth + 2 * this.d.boxCrossProtectionMargin : 1;
   }
 
   private getLayoutLineSegmentsFor(

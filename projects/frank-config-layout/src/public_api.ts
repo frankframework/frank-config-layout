@@ -51,11 +51,12 @@ export function getFactoryDimensions(): Dimensions {
     nodeWidth: 175,
     nodeBoxWidth: 160,
     boxConnectorAreaPerc: 50,
-    intermediateLayerPassedByVerticalLine: false,
+    intermediateLayerPassedByVerticalLine: true,
+    lineTransgressionPerc: 200,
+    boxCrossProtectionMargin: 5,
     edgeLabelFontSize: 10,
     preferredVertDistanceFromOrigin: 30,
-    strictlyKeepLabelOutOfBox: false,
-    lineTransgressionPerc: 100,
+    strictlyKeepLabelOutOfBox: true,
   };
 }
 
