@@ -148,8 +148,15 @@ export function straighten(
     const next = segments[index];
     let handled = false;
     if (next.isLayerPassage()) {
-      const replacements = next.toReplaceMeAsLayerPassage(result.at(-1)!, segments[index + 1]);
-      if (replacements.every((replacement) => lineChecker(next.idStart, replacement.line))) {
+      const segmentBefore = result.at(-1)!;
+      const replacements = next.toReplaceMeAsLayerPassage(segmentBefore, segments[index + 1]);
+      // The first segment to be replaced may already be a join. We have to check for every
+      // node replaced by it.
+      const firstReplacementOk: boolean = [...segmentBefore.replacedNodes, next.idStart].every((id) =>
+        lineChecker(id, replacements[0].line),
+      );
+      const secondReplacementOk: boolean = lineChecker(next.idStart, replacements[1].line);
+      if (firstReplacementOk && secondReplacementOk) {
         result.pop();
         for (const replacement of replacements) {
           joinAdd(result, replacement, lineChecker);

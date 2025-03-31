@@ -220,7 +220,7 @@ describe('Straighten', () => {
     expect(result[0].line.endPoint.y).toEqual(20);
   });
 
-  it('When straightened lines do not stay within bounds and when boundaries are hit, then then original segments are kept', () => {
+  it('When straightened lines do not stay within bounds or when boundaries are hit, then the original segments are kept', () => {
     const segments: StraightenedLine[] = [
       StraightenedLine.create('Start', 'i1', new Line(new Point(0, 0), new Point(1, 9))),
       StraightenedLine.create('i1', 'i1', new Line(new Point(1, 9), new Point(1, 11))),
@@ -261,6 +261,29 @@ describe('Straighten', () => {
     ).toEqual([
       [0, 0, 1, 10],
       [1, 10, 0, 20],
+    ]);
+  });
+
+  it('When splitting an upstream layer passage line segment causes a node crossing downstream then the layer passage stays', () => {
+    const segments: StraightenedLine[] = [
+      StraightenedLine.create('Start', 'i1', new Line(new Point(0, 0), new Point(1, 9))),
+      StraightenedLine.create('i1', 'i1', new Line(new Point(1, 9), new Point(1, 11))),
+      StraightenedLine.create('i1', 'i2', new Line(new Point(1, 11), new Point(1, 19))),
+      StraightenedLine.create('i2', 'i2', new Line(new Point(1, 19), new Point(1, 21))),
+      StraightenedLine.create('i2', 'End', new Line(new Point(1, 21), new Point(0, 30))),
+    ];
+    const result: StraightenedLine[] = straighten(segments, (id, line) => {
+      return id === 'i1'
+        ? (line.startPoint.x != 0 && line.endPoint.x != 0) || Math.abs(line.endPoint.y - line.startPoint.y) < 20
+        : true;
+    });
+    expect(
+      result
+        .map((segment) => segment.line)
+        .map((line) => [line.startPoint.x, line.startPoint.y, line.endPoint.x, line.endPoint.y]),
+    ).toEqual([
+      [0, 0, 1, 19],
+      [1, 19, 0, 30],
     ]);
   });
 });
