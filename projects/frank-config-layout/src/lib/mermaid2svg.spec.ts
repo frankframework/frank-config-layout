@@ -14,6 +14,7 @@ const dimeisions: Dimensions = {
   preferredVertDistanceFromOrigin: 30,
   strictlyKeepLabelOutOfBox: false,
   lineTransgressionPerc: 100,
+  boxCrossProtectionMargin: 0,
 };
 
 const input = `Start("My start"):::normal
