@@ -13,7 +13,9 @@ const dimeisions: Dimensions = {
   edgeLabelFontSize: 10,
   preferredVertDistanceFromOrigin: 30,
   strictlyKeepLabelOutOfBox: false,
+  lineTransgressionPerc: 100,
 };
+
 const input = `Start("My start"):::normal
 N1("Node 1"):::normal
 N2("Node 2"):::normal
