@@ -1,7 +1,27 @@
 ALGORITHMS
 ==========
 
-This document explains the algorithms applied by Frank config layout.
+This document explains the algorithms applied by Frank config layout. Here is the table of contents:
+
+- [Counting line crosses](#counting-line-crosses)
+  - [Exact determination whether two lines cross](#exact-determination-whether-two-lines-cross)
+  - [Why x, y coordinates are not so important](#why-x-y-coordinates-are-not-so-important)
+  - [Counting crossings with adjacent layers](#counting-crossings-with-adjacent-layers)
+  - [Evaluating node swaps](#evaluating-node-swaps)
+
+# Overview
+
+We start with the big picture: the following steps are taken to transform an input file to an SVG image:
+
+* The input file uses the syntax of Mermaid. Frank config layout parses it into a data structure that represents the nodes and the edges (a graph).
+* Frank config layout establishes which nodes and which edges belong to the error flow - these are styled differently in the result (file [error-flow.ts](./projects/frank-config-layout/src/lib/model/error-flow.ts)).
+* The nodes are grouped into horizontal layers that are stacked vertically (file [horizontal-grouping.ts](./projects/frank-config-layout/src/lib/model/horizontal-grouping.ts)).
+* Within each layer, the nodes are sorted so that the number of edge crosses is minimized (file [layout-base.ts](./projects/frank-config-layout/src/lib/model/layout-base.ts)).
+* The positions of the nodes are calculated.
+* The positions of the edges are calculated.
+* The positions of the edge labels (e.g. success, failure) are calculated.
+
+The algorithm aims to minimize the number of line crosses. To do this, the number of line crosses has to be calculated. Doing this is the subject of the next section.
 
 # Counting line crosses
 
@@ -53,6 +73,41 @@ The **n(i)** we maintain while visiting the edges allows us to calculate the num
 
 ### Evaluating node swaps
 
+Currently this subsection is not applied in Frank config layout. It may be applied in some future version.
+
 When developing a layout, the layout may be improved by swapping two adjacent layers within an horizontal layer. Many of such swaps have to be considered, so a fast algorithm is useful.
 
 We consider the change of the number of crossings when two adjacent nodes in layer A are swapped. We consider two arbitrary lines. If none of them visits one of the swapped nodes in A, then their crossing status is unchanged. If the first visits a swapped node in A and the second does not, then the second's node on layer A is either before or after all swapped nodes. The crossing status is not changed. So only lines starting from a swapped node have to be counted. The above algorithm should be applied only with the two swapped nodes in layer A. When this is done before and after swapping, the difference is the change of the total number of crossings.
+
+# Establishing layers
+
+Before assigning x- and y-coordinates to nodes, they are grouped into horizontal layers that are stacked vertically. This is done in such a way that no edge connects nodes in the same layer. We want to avoid horizontal line segments because they are likely to cross other nodes.
+
+Two algorithms are in the code base to establish layers: the first occurring path algorithm and the longest path algorithm. The former is the easiest to explain while the latter is the one we really need. We start by explaining the former.
+
+The first occurring path algorithm starts with the nodes that have no incoming edges. They are put on a queue. The algorithm then repeats the following steps until the queue is empty:
+
+* Take the first node from the front of the queue.
+* If the node has no predecessor, assign it layer number 0.
+* Otherwise:
+	* Consider all incoming edges for which the start node already has a layer number. The candidate layer number is the maximum of these layer numbers incremented by one.
+	* Consider all outgoing edges for which the end node already has a layer number. Increment the candidate layer number until there is no collision with a successor layer number.
+	* Assign the resulting candidate layer number to the node.
+* Enqueue all successors that do not have a layer number to the end of the queue.
+* Dequeue the current node.
+
+This algorithm succeeds in preventing horizontal edges, but it has a serious drawback. The node that users consider to be the end of the flowchart does not necessarily appear at the bottom of the flowchart. This flaw has been corrected by introducing the longest path algorithm.
+
+The longest path algorithm introduces recursion. Its merits can best be analyzed by assuming that the edges do not make cycles. Under that assumption, the longest path to each node is calculated. The longest path to a node can be found by considering the longest paths to all predecessors. Take the predecessor that has the longest path leaving from a start node and increment that path with the final edge leading to the current node. This longest path determines the layer number to be assigned. The recursion ensures that the longest paths to the predecessors are available to evaluate the current node.
+
+The longest path algorithm is very concise; see its code in function `calculateLayerNumbersLongestPath()` in file [horizontal-grouping.ts](./projects/frank-config-layout/src/lib/model/horizontal-grouping.ts). Let us analyze how this behaves on the simple case shown below:
+
+![longest-path.jpg](./pictures/longest-path.jpg)
+
+There is a node Start that is connected to N1 and N2. There is an additinal connection from N1 to N2. Because of this, we want layer number 2 for node N2. Is this achieved?
+
+The algorithm starts its recursion at node Start. When it visits N1 next, it assigns layer number 1 to N1. Then the thread coming from N1 visits N2. Of course, layer number 2 is assigned. The recursion ends here because N2 has no successors. The thread that is still in Start visits N2. The recursion stops because the candidate layer number of 1 is lower than the already-assigned layer number 2. The same result is achieved when node N2 is visited before N1. Then layer number 1 is assigned to N2 first. The recursion coming from N1 then reassigns the layer number of N2 to be 2.
+
+The correct operation of the longest path algorithm, provided there are no cycles, can be explained as follows. For some node $N$, each predecessor has a longest path that does not include $N$ -- otherwise we would have a cycle. The algorithm may visit each predecessor multiple times. On some of these occasions, the predecessor is visited from a thread belonging to a longest path. That thread assigns the maximum layer number to $N$. Other threads visiting $N$ try lower layer numbers and are stopped.
+
+The assumption that there are no cycles does not necessarily apply for real Frank configurations. If there are cycles, the algorithm will still assign a layer number to every node connected to a start node. In this case, the assigned layer numbers are not necessarily based on the longest path. If in the figure node N2 would also be connected to node N1, the algorithm would possibly assign layer number 1 to N2 and layer number 2 to N1. We accept this limitation of the longest path algorithm.
