@@ -58,6 +58,10 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
         stroke: #ec4758;
       }
 
+      .line.mixed {
+        stroke: #FFDE59;
+      }
+
       .rect-text-wrapper {
         position: relative;
         display: flex;

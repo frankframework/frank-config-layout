@@ -18,7 +18,7 @@
     </defs>
     <g *ngFor="let rectangle of drawing.rectangles" (click)="handleShapeClicked(rectangle.id)">
       <rect class="rectangle"
-        [class.errorOutline]="rectangle.isError"
+        [class.errorOutline]="rectangle.errorStatus === ERROR_STATUS_ERROR"
         [attr.x]="rectangle.x"
         [attr.y]="rectangle.y"
         [attr.width]="rectangle.width"
@@ -50,7 +50,8 @@
         attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
         [attr.marker-end]="line.arrow ? 'url(#arrow)' : null"
         id="{{line.id}}"
-        [class.error]="line.isError"/>
+        [class.error]="line.errorStatus === ERROR_STATUS_ERROR"
+        [class.mixed]="line.errorStatus === ERROR_STATUS_MIXED"/>
       <polyline class="line-hover-padding"
         attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
         [class.selected]="line.selected"/>

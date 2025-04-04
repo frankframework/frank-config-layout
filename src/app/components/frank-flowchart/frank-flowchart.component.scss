@@ -51,6 +51,10 @@ svg {
   &.error {
     stroke: #ec4758;
   }
+
+  &.mixed {
+    stroke: #FFDE59;
+  }
 }
 
 g {
