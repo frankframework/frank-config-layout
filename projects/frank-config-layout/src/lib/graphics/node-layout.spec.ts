@@ -3,7 +3,7 @@ import { GraphForLayers, introduceIntermediateNodesAndEdges, createGraphForLayer
 import { LayoutBase } from '../model/layout-base';
 import { NodeSpacingDimensions, NodeLayout, NodeLayoutBuilder } from './node-layout';
 import { createText } from '../model/text';
-import { createOriginalGraph, OriginalGraph } from '../model/error-flow';
+import { createOriginalGraph, ERROR_STATUS_SUCCESS, OriginalGraph } from '../model/error-flow';
 
 describe('NodeLayoutBuilder', () => {
   it('Simple model', () => {
@@ -136,7 +136,7 @@ function addNode(id: string, g: OriginalGraph): void {
   g.addNode({
     id,
     // These are dummy
-    isError: false,
+    errorStatus: ERROR_STATUS_SUCCESS,
     text: '',
   });
 }
@@ -146,7 +146,7 @@ function connect(idFrom: string, idTo: string, g: OriginalGraph): void {
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
     // These are dummy
-    isError: false,
+    errorStatus: ERROR_STATUS_SUCCESS,
     text: createText(),
   });
 }

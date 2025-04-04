@@ -1,18 +1,32 @@
 <div>
+  <div>
+    <button (click)="bestSequence()">Best sequence</button>
+  </div>
+  <br />
   <div id="tabs">
-    <button *ngFor="let tab of TABS"
+    <button
+      *ngFor="let tab of TABS"
       class="tab"
-      [class.selected] = "activeTab === tab.id"
+      [class.selected]="activeTab === tab.id"
       id="tab.id"
-      (click)="selectTab(tab.id)">{{ tab.caption }}</button>
+      (click)="selectTab(tab.id)"
+    >
+      {{ tab.caption }}
+    </button>
   </div>
   <div *ngIf="activeTab === 'MANUAL'">
-    <div id="showTextContainer"><label>Show node text</label><input type="checkbox" [checked]="showText" (click)="onNewCaptionChoice()"/></div>
+    <div id="showTextContainer">
+      <label>Show node text</label><input type="checkbox" [checked]="showText" (click)="onNewCaptionChoice()" />
+    </div>
     <table *ngIf="manualView.header.length > 0" cdkDropList (cdkDropListDropped)="drop($event)">
       <thead>
         <th></th>
-        <th *ngFor="let headerCell of manualView.header" [ngClass]="getManualClass(headerCell)" (click)="selectNode(headerCell.position)">
-          {{ headerCell.nodeId === null ? "\<empty\>" : headerCell.nodeId}}
+        <th
+          *ngFor="let headerCell of manualView.header"
+          [ngClass]="getManualClass(headerCell)"
+          (click)="selectNode(headerCell.position)"
+        >
+          {{ headerCell.nodeId === null ? '\<empty\>' : headerCell.nodeId }}
         </th>
       </thead>
       <tr *ngFor="let row of manualView.body" cdkDrag>
@@ -28,20 +42,21 @@
             <button (click)="omit(row.header.position)">X</button>
           </div>
         </th>
-        <td *ngFor="let cell of row.cells" [ngClass]="getManualClass(cell)" (click)="selectCell(cell.fromPosition, cell.toPosition)">
-          <div
-            [ngClass]="getCellClass(cell)"
-            (click)="selectCell(cell.fromPosition, cell.toPosition)">
-          </div>
+        <td
+          *ngFor="let cell of row.cells"
+          [ngClass]="getManualClass(cell)"
+          (click)="selectCell(cell.fromPosition, cell.toPosition)"
+        >
+          <div [ngClass]="getCellClass(cell)" (click)="selectCell(cell.fromPosition, cell.toPosition)"></div>
         </td>
       </tr>
     </table>
-    <div *ngIf="manualView.header.length == 0" class="placeholder">No Mermaid loaded yet</div>
+    <div *ngIf="manualView.header.length === 0" class="placeholder">No Mermaid loaded yet</div>
   </div>
   <div id="algorithm" *ngIf="activeTab === 'ALGORITHM'">
     <table>
       <tr>
-        <td>Omitted nodes: </td>
+        <td>Omitted nodes:</td>
         <td id="algorithmOmittedNodes">{{ algorithmView.omittedNodes }}</td>
       </tr>
       <tr>
@@ -56,13 +71,17 @@
         <th># nodes</th>
         <th>Align from layer</th>
       </thead>
-      <tr *ngFor="let layer of algorithmView.layers"
-        [ngClass] = "getBackgroundClass(layer)">
+      <tr *ngFor="let layer of algorithmView.layers" [ngClass]="getBackgroundClass(layer)">
         <th>{{ layer.layerNumber }}</th>
         <td>{{ layer.numNodes }}</td>
-        <td><button
-          [ngClass] = "layer.numCrossingsChangeByAligningFromJudgement"
-          (click)="onAlignFromLayer(layer.layerNumber)">A: {{layer.numCrossingsChangeByAligningFrom }}</button></td>
+        <td>
+          <button
+            [ngClass]="layer.numCrossingsChangeByAligningFromJudgement"
+            (click)="onAlignFromLayer(layer.layerNumber)"
+          >
+            A: {{ layer.numCrossingsChangeByAligningFrom }}
+          </button>
+        </td>
       </tr>
     </table>
   </div>
