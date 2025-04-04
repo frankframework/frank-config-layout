@@ -15,6 +15,7 @@
 */
 
 import { NumbersAroundZero } from '../util/util';
+import { Box } from './box';
 import { Interval } from '../util/interval';
 import { Line, Point } from './graphics';
 
@@ -40,11 +41,6 @@ export function getDerivedEdgeLabelDimensions(d: EdgeLabelDimensions): DerivedEd
   };
 }
 
-export interface Box {
-  readonly horizontalBox: Interval;
-  readonly verticalBox: Interval;
-}
-
 export class EdgeLabelLayouter {
   private boxes: Box[] = [];
 
@@ -63,16 +59,15 @@ export class EdgeLabelLayouter {
         continue;
       }
       const candidateCenter: Point = this.pointAt(vdist, line);
-      const candidateBox: Box = {
-        horizontalBox: Interval.createFromCenterSize(
-          candidateCenter.x,
-          numCharactersOnLine * this.derivedDimensions.estCharacterWidth,
-        ),
-        verticalBox: Interval.createFromCenterSize(
-          candidateCenter.y,
-          numTextLines * this.derivedDimensions.estLabelLineHeight,
-        ),
-      };
+      const horizontalBox = Interval.createFromCenterSize(
+        candidateCenter.x,
+        numCharactersOnLine * this.derivedDimensions.estCharacterWidth,
+      );
+      const verticalBox = Interval.createFromCenterSize(
+        candidateCenter.y,
+        numTextLines * this.derivedDimensions.estLabelLineHeight,
+      );
+      const candidateBox = new Box(horizontalBox, verticalBox);
       if (this.derivedDimensions.strictlyKeepLabelOutOfBox && candidateBox.verticalBox.contains(line.startPoint.y)) {
         // The label would intersect with the box from which the line originates.
         // Next vdistSource.
@@ -97,21 +92,8 @@ export class EdgeLabelLayouter {
   }
 
   private pointAt(vdist: number, line: Line): Point {
-    if (line.endPoint.y > line.startPoint.y) {
-      const yspan = line.endPoint.y - line.startPoint.y;
-      const y = line.startPoint.y + vdist;
-      const ratio = vdist / yspan;
-      const x = Math.round(line.startPoint.x + ratio * (line.endPoint.x - line.startPoint.x));
-      return new Point(x, y);
-    } else if (line.endPoint.y < line.startPoint.y) {
-      const yspan = line.startPoint.y - line.endPoint.y;
-      const y = line.startPoint.y - vdist;
-      const ratio = vdist / yspan;
-      const x = Math.round(line.startPoint.x + ratio * (line.endPoint.x - line.startPoint.x));
-      return new Point(x, y);
-    } else {
-      throw new Error('Cannot map edge labels on horizontal line');
-    }
+    const y: number = line.endPoint.y > line.startPoint.y ? line.startPoint.y + vdist : line.startPoint.y - vdist;
+    return line.integerPointAtY(y);
   }
 
   private boxesIntersect(first: Box, second: Box): boolean {

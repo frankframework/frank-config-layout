@@ -32,11 +32,16 @@ import {
   GraphForLayers,
   Dimensions,
   getFactoryDimensions,
-  NodeLayoutBuilder,
   getDerivedEdgeLabelDimensions,
   Layout,
   PlacedNode,
+  OriginalGraphReferencingIntermediates,
+  LayoutModel,
+  LayoutModelBuilder,
+  LayoutBuilder,
+  getNumCrossingLines,
 } from 'frank-config-layout';
+import { IntermediatesCreationResult } from 'frank-config-layout';
 
 export interface NodeSequenceEditorOrError {
   model: NodeSequenceEditor | null;
@@ -67,6 +72,7 @@ export class FlowChartEditorComponent {
 
   mermaidText: string = '';
   committedMermaidText = '';
+  originalGraph: OriginalGraphReferencingIntermediates | null = null;
   layoutModel: NodeSequenceEditor | null = null;
   selectionInModel: NodeOrEdgeSelection = new NodeOrEdgeSelection();
   showNodeTextInDrawing: boolean = true;
@@ -136,7 +142,9 @@ export class FlowChartEditorComponent {
     const layerMap: Map<string, number> = calculateLayerNumbers(graph, algorithm);
     let graphWithLayers: GraphForLayers;
     try {
-      graphWithLayers = introduceIntermediateNodesAndEdges(graph, layerMap);
+      const intermediates: IntermediatesCreationResult = introduceIntermediateNodesAndEdges(graph, layerMap);
+      graphWithLayers = intermediates.intermediate;
+      this.originalGraph = intermediates.original;
     } catch (error) {
       alert(`Could not assign layers to nodes: ${error}`);
       return { model: null, error: (error as Error).message };
@@ -152,28 +160,25 @@ export class FlowChartEditorComponent {
   }
 
   updateDrawing(): void {
-    const layout = FlowChartEditorComponent.model2layout(this.layoutModel!, this.dimensions);
-    this.numCrossingLines = layout.getNumCrossingLines();
-    // TODO: Properly fill selected property
+    const layout = FlowChartEditorComponent.model2layout(this.layoutModel!, this.dimensions, this.originalGraph!);
+    this.numCrossingLines = getNumCrossingLines(layout.layoutLineSegments);
     const rectangles: Rectangle[] = layout.nodes
       .map((n) => n as PlacedNode)
-      // No box around intermediate node
-      .filter((n) => !n.isIntermediate)
       .map((n) => {
         return {
           id: n.id,
-          x: n.left,
-          y: n.top,
-          width: n.width,
-          height: n.height,
-          centerX: n.centerX,
-          centerY: n.centerY,
+          x: n.horizontalBox.minValue,
+          y: n.verticalBox.minValue,
+          width: n.horizontalBox.size,
+          height: n.verticalBox.size,
+          centerX: n.horizontalBox.center,
+          centerY: n.verticalBox.center,
           text: getCaption(n, this.choiceShowNodeTextInDrawing),
           selected: this.selectionInModel.isNodeHighlightedInDrawing(n.id, this.layoutModel!),
           errorStatus: n.errorStatus,
         };
       });
-    const lines: Line[] = layout.getLayoutLineSegments().map((lls) => {
+    const lines: Line[] = layout.layoutLineSegments.map((lls) => {
       return {
         id: lls.key,
         x1: lls.line.startPoint.x,
@@ -195,14 +200,18 @@ export class FlowChartEditorComponent {
     };
   }
 
-  static model2layout(model: NodeSequenceEditor, inDimensions: Dimensions): Layout {
-    const builder = new NodeLayoutBuilder(
-      model.getShownNodesLayoutBase(),
-      model.getGraph() as GraphForLayers,
+  static model2layout(
+    model: NodeSequenceEditor,
+    inDimensions: Dimensions,
+    originalGraph: OriginalGraphReferencingIntermediates,
+  ): Layout {
+    const layoutModel: LayoutModel = new LayoutModelBuilder(model.getShownNodesLayoutBase(), model.graph).run();
+    return new LayoutBuilder(
+      layoutModel,
+      originalGraph,
       inDimensions,
-    );
-    const nodeLayout = builder.run();
-    return new Layout(nodeLayout, inDimensions, getDerivedEdgeLabelDimensions(inDimensions));
+      getDerivedEdgeLabelDimensions(inDimensions),
+    ).run();
   }
 
   onNewDimensions(d: Dimensions): void {

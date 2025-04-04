@@ -14,10 +14,9 @@
    limitations under the License.
 */
 
-import { Layout } from './graphics/edge-layout';
+import { LayoutBuilder, Layout } from './graphics/layout';
 import { getGraphFromMermaid, MermaidGraph } from './parsing/mermaid-parser';
 import { LayoutBase, minimizeNumCrossings } from './model/layout-base';
-import { NodeLayoutBuilder } from './graphics/node-layout';
 import { generateSvg } from './graphics/svg-generator';
 import { AsynchronousCache } from './util/asynchronous-cache';
 import { sha256 } from './util/hash';
@@ -26,9 +25,10 @@ import { findErrorFlow, OriginalGraph } from './model/error-flow';
 import {
   introduceIntermediateNodesAndEdges,
   calculateLayerNumbersLongestPath,
-  GraphForLayers,
+  IntermediatesCreationResult,
 } from './model/horizontal-grouping';
 import { SvgResult, Dimensions } from '../public_api';
+import { LayoutModel, LayoutModelBuilder } from './model/layout-model';
 
 export class Mermaid2svgService {
   private cache = new AsynchronousCache<SvgResult>();
@@ -66,22 +66,24 @@ export class Mermaid2svgService {
     const g: OriginalGraph = findErrorFlow(b);
     let numNodeVisits = 0;
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits);
-    const gl: GraphForLayers = introduceIntermediateNodesAndEdges(g, nodeIdToLayer);
+    const intermediates: IntermediatesCreationResult = introduceIntermediateNodesAndEdges(g, nodeIdToLayer);
     let lb: LayoutBase;
-    const numLayers = Math.max(...gl.nodes.map((n) => n.layer)) + 1;
     try {
       lb = LayoutBase.create(
-        gl.nodes.map((n) => n.id),
-        gl,
-        numLayers,
+        intermediates.intermediate.nodes.map((n) => n.id),
+        intermediates.intermediate,
       );
     } catch (error) {
       throw error;
     }
     lb = minimizeNumCrossings(lb);
-    const nodeLayoutBuiler = new NodeLayoutBuilder(lb, gl, this.dimensions);
-    const nodeLayout = nodeLayoutBuiler.run();
-    const layout = new Layout(nodeLayout, this.dimensions, getDerivedEdgeLabelDimensions(this.dimensions));
+    const layoutModel: LayoutModel = new LayoutModelBuilder(lb, intermediates.intermediate).run();
+    const layout: Layout = new LayoutBuilder(
+      layoutModel,
+      intermediates.original,
+      this.dimensions,
+      getDerivedEdgeLabelDimensions(this.dimensions),
+    ).run();
     return {
       svg: generateSvg(layout, this.dimensions.edgeLabelFontSize),
       numNodes: g.nodes.length,

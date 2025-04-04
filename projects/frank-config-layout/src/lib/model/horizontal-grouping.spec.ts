@@ -1,17 +1,15 @@
 import { createText } from './text';
 import { OriginalNode, OriginalGraph, createOriginalGraph, ERROR_STATUS_SUCCESS } from './error-flow';
-import { getKey } from './graph';
 import {
   calculateLayerNumbers,
   introduceIntermediateNodesAndEdges,
-  PASS_DIRECTION_DOWN,
-  PASS_DIRECTION_UP,
   calculateLayerNumbersLongestPath,
   calculateLayerNumbersFirstOccuringPath,
   GraphForLayers,
   EdgeForLayers,
   LAYERS_FIRST_OCCURING_PATH,
   LAYERS_LONGEST_PATH,
+  IntermediatesCreationResult,
 } from './horizontal-grouping';
 
 function newNode(id: string): OriginalNode {
@@ -236,7 +234,7 @@ function getSimplePlusDisjointEdge(): OriginalGraph {
 
 describe('Assigning layers and introducing intermediate nodes and edges', () => {
   it('Downward lines', () => {
-    const instance: GraphForLayers = getInstanceDownwardLinks();
+    const instance: GraphForLayers = getInstanceDownwardLinks().intermediate;
     expect(instance.nodes.map((n) => n.id)).toEqual([
       'N0',
       'N1',
@@ -248,55 +246,29 @@ describe('Assigning layers and introducing intermediate nodes and edges', () => 
     ]);
     // Edges with intermediates are N0 --> N2 and N0 --> N3
     expect(instance.nodes.map((n) => n.layer)).toEqual([0, 1, 2, 3, 1, 1, 2]);
-    expect(instance.nodes.map((n) => n.isIntermediate)).toEqual([false, false, false, false, true, true, true]);
-    expect(instance.getNodeById('intermediate1').passDirection).toEqual(PASS_DIRECTION_DOWN);
-    expect(instance.getNodeById('intermediate2').passDirection).toEqual(PASS_DIRECTION_DOWN);
-    expect(instance.getNodeById('intermediate3').passDirection).toEqual(PASS_DIRECTION_DOWN);
     let edge: EdgeForLayers = instance.edges[0];
     expect(edge.from.id).toBe('N0');
     expect(edge.to.id).toBe('N1');
-    expect(edge.isIntermediate).toBe(false);
-    expect(edge.isFirstSegment).toEqual(true);
-    expect(edge.isLastSegment).toEqual(true);
     edge = instance.edges[1];
     expect(edge.from.id).toBe('N0');
     expect(edge.to.id).toBe('intermediate1');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(true);
-    expect(edge.isLastSegment).toEqual(false);
     edge = instance.edges[2];
     expect(edge.from.id).toBe('intermediate1');
     expect(edge.to.id).toBe('N2');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(false);
-    expect(edge.isLastSegment).toEqual(true);
     edge = instance.edges[3];
     expect(edge.from.id).toBe('N0');
     expect(edge.to.id).toBe('intermediate2');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(true);
-    expect(edge.isLastSegment).toEqual(false);
     edge = instance.edges[4];
     expect(edge.from.id).toBe('intermediate2');
     expect(edge.to.id).toBe('intermediate3');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(false);
-    expect(edge.isLastSegment).toEqual(false);
     edge = instance.edges[5];
     expect(edge.from.id).toBe('intermediate3');
     expect(edge.to.id).toBe('N3');
-    expect(edge.isIntermediate).toBe(true);
     expect(instance.edges.length).toBe(6);
-    expect(edge.isFirstSegment).toEqual(false);
-    expect(edge.isLastSegment).toEqual(true);
-    // All edges go down
-    for (const edge of instance.edges) {
-      expect(edge.passDirection).toEqual(PASS_DIRECTION_DOWN);
-    }
   });
 
   it('Upward lines', () => {
-    const instance: GraphForLayers = getInstanceUpwardLinks();
+    const instance: GraphForLayers = getInstanceUpwardLinks().intermediate;
     expect(instance.nodes.map((n) => n.id)).toEqual([
       'N0A',
       'N0B',
@@ -308,62 +280,42 @@ describe('Assigning layers and introducing intermediate nodes and edges', () => 
       'intermediate3',
     ]);
     expect(instance.nodes.map((n) => n.layer)).toEqual([0, 0, 1, 2, 3, 1, 2, 1]);
-    expect(instance.getNodeById('intermediate1').passDirection).toEqual(PASS_DIRECTION_UP);
-    expect(instance.getNodeById('intermediate2').passDirection).toEqual(PASS_DIRECTION_UP);
-    expect(instance.getNodeById('intermediate3').passDirection).toEqual(PASS_DIRECTION_UP);
     let edge = instance.edges[0];
     expect(edge.from.id).toBe('N0A');
     expect(edge.to.id).toBe('N0B');
-    expect(edge.isIntermediate).toBe(false);
-    expect(edge.isFirstSegment).toEqual(true);
-    expect(edge.isLastSegment).toEqual(true);
     edge = instance.edges[1];
     expect(edge.from.id).toBe('N1');
     expect(edge.to.id).toBe('N0A');
-    expect(edge.isIntermediate).toBe(false);
-    expect(edge.isFirstSegment).toEqual(true);
-    expect(edge.isLastSegment).toEqual(true);
     edge = instance.edges[2];
     expect(edge.from.id).toBe('N2');
     expect(edge.to.id).toBe('intermediate1');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(true);
-    expect(edge.isLastSegment).toEqual(false);
     edge = instance.edges[3];
     expect(edge.from.id).toBe('intermediate1');
     expect(edge.to.id).toBe('N0A');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(false);
-    expect(edge.isLastSegment).toEqual(true);
     edge = instance.edges[4];
     expect(edge.from.id).toBe('N3');
     expect(edge.to.id).toBe('intermediate2');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(true);
-    expect(edge.isLastSegment).toEqual(false);
     edge = instance.edges[5];
     expect(edge.from.id).toBe('intermediate2');
     expect(edge.to.id).toBe('intermediate3');
-    expect(edge.isIntermediate).toBe(true);
-    expect(edge.isFirstSegment).toEqual(false);
-    expect(edge.isLastSegment).toEqual(false);
     edge = instance.edges[6];
     expect(edge.from.id).toBe('intermediate3');
     expect(edge.to.id).toBe('N0A');
-    expect(edge.isIntermediate).toBe(true);
     expect(instance.edges.length).toBe(7);
-    expect(edge.isFirstSegment).toEqual(false);
-    expect(edge.isLastSegment).toEqual(true);
-    // All edges go up
-    for (const edge of instance.edges) {
-      if (getKey(edge) !== 'N0A-N0B') {
-        expect(edge.passDirection).toEqual(PASS_DIRECTION_UP);
-      }
-    }
+  });
+
+  it('Can augment original edges with intermediate edge keys', () => {
+    const extendedOriginal = getInstanceDownwardLinks().original;
+    expect(extendedOriginal.getEdgeByKey('N0-N1')!.intermediateEdgeKeys).toEqual(['N0-N1']);
+    expect(extendedOriginal.getEdgeByKey('N0-N3')!.intermediateEdgeKeys).toEqual([
+      'N0-intermediate2',
+      'intermediate2-intermediate3',
+      'intermediate3-N3',
+    ]);
   });
 });
 
-function getInstanceDownwardLinks(): GraphForLayers {
+function getInstanceDownwardLinks(): IntermediatesCreationResult {
   const g = createOriginalGraph();
   g.addNode(newNode('N0'));
   g.addNode(newNode('N1'));
@@ -381,7 +333,7 @@ function getInstanceDownwardLinks(): GraphForLayers {
   return introduceIntermediateNodesAndEdges(g, m);
 }
 
-function getInstanceUpwardLinks(): GraphForLayers {
+function getInstanceUpwardLinks(): IntermediatesCreationResult {
   const g = createOriginalGraph();
   g.addNode(newNode('N0A'));
   g.addNode(newNode('N0B'));

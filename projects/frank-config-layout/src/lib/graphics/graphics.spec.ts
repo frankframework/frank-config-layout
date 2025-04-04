@@ -122,4 +122,31 @@ describe('Line tests', () => {
       expect(relateLines(vertical, horizontal)).toBe(expectedResult);
     });
   }
+
+  it('When line goes down, integerPointAtY finds the right point', () => {
+    // x changes by 10, y changes by 100
+    const instance = new Line(new Point(10, 20), new Point(20, 120));
+    // 20 further than start y, so x should be 2 further
+    const result: Point = instance.integerPointAtY(40);
+    expect(result.x).toEqual(12);
+    expect(result.y).toEqual(40);
+  });
+
+  it('When line goes up, integerPointAtY finds the right point', () => {
+    // x changes by 10, y changes by -100
+    const instance = new Line(new Point(10, 20), new Point(20, -80));
+    // -20 further than start y, so x should be 2 further
+    const result: Point = instance.integerPointAtY(0);
+    expect(result.x).toEqual(12);
+    expect(result.y).toEqual(0);
+  });
+
+  it('When line goes down, integerPointAtY rounds the returned point', () => {
+    // x changes by 10, y changes by 30
+    const instance = new Line(new Point(10, 20), new Point(20, 50));
+    // 10 further than start y, so x should be round(10 / 3) = 3
+    const result: Point = instance.integerPointAtY(30);
+    expect(result.x).toEqual(13);
+    expect(result.y).toEqual(30);
+  });
 });

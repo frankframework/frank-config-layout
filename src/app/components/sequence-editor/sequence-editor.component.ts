@@ -138,10 +138,10 @@ export class SequenceEditorComponent implements OnInit, OnDestroy {
       return;
     }
     const item: NodeOrEdgeForLayers = context.model!.getGraph().parseNodeOrEdgeId(itemClicked);
-    if (item.optionalEdge !== null) {
+    if (item.optionalEdge !== undefined) {
       context.selectEdgeKey(getKey(item.optionalEdge!));
     }
-    if (item.optionalNode !== null) {
+    if (item.optionalNode !== undefined) {
       context.selectNodeId(item.optionalNode!.id);
     }
   }

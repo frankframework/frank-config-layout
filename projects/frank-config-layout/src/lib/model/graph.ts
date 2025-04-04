@@ -32,8 +32,12 @@ export function getKey<T extends WithId>(c: Connection<T>): string {
   return keyFor(c.from.id, c.to.id);
 }
 
-function keyFor(idFrom: string, idTo: string): string {
+export function keyFor(idFrom: string, idTo: string): string {
   return `${idFrom}-${idTo}`;
+}
+
+export function getConnectedIdsOfKey(key: string): string[] {
+  return key.split('-');
 }
 
 /*
@@ -92,6 +96,10 @@ export class Graph<T extends WithId, U extends Connection<T>> {
     return this._nodes;
   }
 
+  hasNode(id: string): boolean {
+    return this._nodesById.has(id);
+  }
+
   getNodeById(id: string): T {
     if (!this._nodesById.has(id)) {
       throw new Error(`Graph does not have a node with id: ${id}`);
@@ -119,9 +127,10 @@ export class Graph<T extends WithId, U extends Connection<T>> {
   parseNodeOrEdgeId(id: string): NodeOrEdge<T, U> {
     if (id.includes('-')) {
       if (this._edgesByKey.has(id)) {
+        const optionalEdge = this.getEdgeByKey(id);
         return {
           optionalNode: undefined,
-          optionalEdge: this.getEdgeByKey(id),
+          optionalEdge,
         };
       } else {
         return {

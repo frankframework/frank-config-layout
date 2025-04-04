@@ -1,5 +1,6 @@
 import { Line, Point } from '../graphics/graphics';
-import { DerivedEdgeLabelDimensions, EdgeLabelLayouter, Box } from './edge-label-layouter';
+import { Box } from './box';
+import { DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
 
 describe('EdgeLabelLayouter', () => {
   it('When two labels fit next to each other they appear next to each other, downwards', () => {

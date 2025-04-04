@@ -1,4 +1,4 @@
-import { Interval } from './interval';
+import { Interval, splitArray, splitRange } from './interval';
 
 describe('Interval', () => {
   it('Creating invalid interval fails', () => {
@@ -118,5 +118,60 @@ describe('Interval', () => {
     expect(instance.contains(4)).toEqual(true);
     expect(instance.contains(5)).toEqual(true);
     expect(instance.contains(6)).toEqual(false);
+  });
+});
+
+describe('splitRange', () => {
+  it('When all numbers of a range are accepted, they are returned in a single interval', () => {
+    const result: Interval[] = splitRange(2, () => true);
+    expect(result.length).toEqual(1);
+    expect(result[0].minValue).toEqual(0);
+    expect(result[0].maxValue).toEqual(1);
+  });
+
+  it('When a number is not accepted, the range is split (1)', () => {
+    const nextAccepted: boolean[] = [false, true];
+    const result: Interval[] = splitRange(3, (n) => nextAccepted[n]);
+    expect(result.length).toEqual(2);
+    expect(result[0].minValue).toEqual(0);
+    expect(result[0].maxValue).toEqual(0);
+    expect(result[1].minValue).toEqual(1);
+    expect(result[1].maxValue).toEqual(2);
+  });
+
+  it('When a number is not accepted, the range is split (2)', () => {
+    const nextAccepted: boolean[] = [true, false];
+    const result: Interval[] = splitRange(3, (n) => nextAccepted[n]);
+    expect(result.length).toEqual(2);
+    expect(result[0].minValue).toEqual(0);
+    expect(result[0].maxValue).toEqual(1);
+    expect(result[1].minValue).toEqual(2);
+    expect(result[1].maxValue).toEqual(2);
+  });
+
+  it('When no numbers are accepted then singleton intervals are returned', () => {
+    const result: Interval[] = splitRange(3, () => false);
+    expect(result.length).toEqual(3);
+    expect(result[0].minValue).toEqual(0);
+    expect(result[0].maxValue).toEqual(0);
+    expect(result[1].minValue).toEqual(1);
+    expect(result[1].maxValue).toEqual(1);
+    expect(result[2].minValue).toEqual(2);
+    expect(result[2].maxValue).toEqual(2);
+  });
+
+  it('When splitArray sees consecutive elements that do not join, then they go to different groups', () => {
+    const result: string[][] = splitArray(['aap', 'noot'], (curr, next) => curr.at(-1) === next.charAt(0));
+    expect(result.length).toEqual(2);
+    expect(result[0][0]).toEqual('aap');
+    expect(result[1][0]).toEqual('noot');
+  });
+
+  it('When splitArray sees consecutive elements that join, then they go in the same group', () => {
+    const result: string[][] = splitArray(['aap', 'pa'], (curr, next) => curr.at(-1) === next.at(0));
+    expect(result.length).toEqual(1);
+    expect(result[0].length).toEqual(2);
+    expect(result[0][0]).toEqual('aap');
+    expect(result[0][1]).toEqual('pa');
   });
 });

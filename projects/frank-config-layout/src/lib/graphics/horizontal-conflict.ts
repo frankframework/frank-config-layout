@@ -57,9 +57,18 @@ export class HorizontalConflictResolver {
   }
 
   getAreaGroup(positions: number[]): AreaGroup {
-    const center: number = roundedMedian(sortedUniqNumbers(positions.flatMap((p) => this.predecessorXFunction(p))));
+    const center: number = roundedMedian(
+      sortedUniqNumbers(
+        positions.flatMap((p) => {
+          return defaultPredecessorDecorator(p, this.numPositions, this.predecessorXFunction, this.sizeFunction);
+        }),
+      ),
+    );
     const theSize: number = positions.map((p) => this.sizeFunction(p)).reduce((acc, curSize) => acc + curSize, 0);
-    return new AreaGroup(Interval.createFromCenterSize(center, theSize), [...positions].sort());
+    return new AreaGroup(
+      Interval.createFromCenterSize(center, theSize),
+      [...positions].sort((a, b) => a - b),
+    );
   }
 
   private joinSortedConflicts(inputConflicts: Conflict[]): Conflict[] {
@@ -183,5 +192,47 @@ class Conflict implements AbstractPositionsArea {
       this.area.toJoined(conflict.area),
       this.positionInterval.toJoined(conflict.positionInterval),
     );
+  }
+}
+
+export function defaultPredecessorDecorator(
+  position: number,
+  numPositions: number,
+  delegate: PredecessorXFunction,
+  sizeFunction: SizeFunction,
+): number[] {
+  const originalPredecessors = delegate(position);
+  if (originalPredecessors.length > 0) {
+    return originalPredecessors;
+  }
+  let leftPredecessors: number[] = [];
+  for (let leftPosition = position - 1; leftPosition >= 0; --leftPosition) {
+    leftPredecessors = delegate(leftPosition);
+    if (leftPredecessors.length > 0) {
+      break;
+    }
+  }
+  let rightPredecessors: number[] = [];
+  for (let rightPosition = position + 1; rightPosition < numPositions; ++rightPosition) {
+    rightPredecessors = delegate(rightPosition);
+    if (rightPredecessors.length > 0) {
+      break;
+    }
+  }
+  const leftBound: number | undefined = leftPredecessors.length === 0 ? undefined : Math.max(...leftPredecessors);
+  const rightBound: number | undefined = rightPredecessors.length === 0 ? undefined : Math.min(...rightPredecessors);
+  if (leftBound === undefined) {
+    if (rightBound === undefined) {
+      throw new Error('Cannot make up predecessors if no node is connected');
+    } else {
+      return [rightBound - sizeFunction(position)];
+    }
+  } else {
+    // eslint-disable-next-line unicorn/prefer-ternary
+    if (rightBound === undefined) {
+      return [leftBound + sizeFunction(position)];
+    } else {
+      return [roundedMedian([leftBound, rightBound])];
+    }
   }
 }
