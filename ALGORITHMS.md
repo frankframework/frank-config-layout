@@ -128,3 +128,23 @@ The assumption that there are no cycles does not necessarily apply for real Fran
 The layer numbers are used to prevent edges from crossing other nodes. When an edge connects nodes that are not in adjacent layers then no other nodes should be placed in the space needed for the edge. This is achieved by breaking up the edge such that each intermediate edge goes between adjacent layers. This requires intermediate nodes on the layers being crossed. As an example, suppose that there is an edge from node N1 to node N2. Suppose that node N1 is on layer 1 and that node N2 is on layer 3. Then we may introduce a node `intermediate1` on layer 2 and replace the edge by edges N1-intermediate1 and intermediate1-N2. The algorithm can reserve space on layer 2 for node intermediate1 so that no original node on layer 2 will be crossed.
 
 The introduction of intermediate edges and intermediate nodes is done in function `introduceIntermediateNodesAndEdges()` in file [horizontal-grouping.ts](./projects/frank-config-layout/src/lib/model/horizontal-grouping.ts). It returns a new graph `intermediate` for the intermediate edges and the nodes being connected by them. It also returns the original graph (field `original`) with one additional piece of information: for each original edge, the list of intermediate edges is saved.
+
+# Node positions and edge routes
+
+When layers are established and when the nodes (including intermediates) have been sorted within their layers, then x- and y-coordinates can be calculated. A few keypoints of this calculation are explained here.
+
+### X-coordinates of nodes
+
+Calculating the x-coordinates of the nodes (and intermediate nodes) is nontrivial as shown below:
+
+![nodeInMiddle.jpg](./pictures/nodeInMiddle.jpg)
+
+Node N1 is the first in its layer and N2 goes before N3 in the other layer. When x-coordinates would be assigned based on the rank only, then node N1 would appear right above node N2. Instead, we want node N1 to have an x-coordinate corresponding to the middle between node N2 and node N3. Stated more generally, we place nodes in a *subject layer* using the connected nodes that are in a chosen source layer for which x-coordinates have been calculated already. These connected nodes are called the *predecessors* in this context (directions of edges are ignored). The desired x-coordinate of a node is the *median* of the x-coordinates of the predecessors. It is not always possible to assign this x-coordinate without causing node collisions. Assigning alternative x-coordinates when needed is done in file [horizontal-conflict.ts](./projects/frank-config-layout/src/lib/graphics/horizontal-conflict.ts).
+
+### Class LayoutConnector for sorting intermediate edge endpoints
+
+We consider a single node and consider all edges going from or to a fixed adjacent layer. The example below shows a node that has edges to and from three nodes on the layer below it.
+
+![edgesFromNode.jpg](./pictures/edgesFromNode.jpg)
+
+On the chosen node we are considering endpoints that are all on the top or all on the bottom, because every edge connects the top of the lowest node to the bottom of the highest. The positions of the endpoints does not depend on the directions of the edges. We must sort the endpoints based on the x-coordinate of the other endpoint. Actually we do not need the exact x-coordinate - the rank is enough. This sorting is achieved using class LayoutConnector in file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts).
