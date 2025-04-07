@@ -12,6 +12,9 @@ This document explains the algorithms applied by Frank config layout. Here is th
 - [Establishing layers](#establishing-layers)
   - [How layer numbers are assigned](#how-layer-numbers-are-assigned)
   - [Usage of layer numbers](#usage-of-layer-numbers)
+- [Node positions and edge routes](#node-positions-and-edge-routes)
+  - [X-coordinates of nodes](#x-coordinates-of-nodes)
+  - [Class LayoutConnector for sorting intermediate edge endpoints](#class-layoutconnector-for-sorting-intermediate-edge-endpoints)
 
 # Overview
 
