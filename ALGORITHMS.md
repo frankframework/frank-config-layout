@@ -134,7 +134,7 @@ The introduction of intermediate edges and intermediate nodes is done in functio
 
 # Node positions and edge routes
 
-When layers are established and when the nodes (including intermediates) have been sorted within their layers, then x- and y-coordinates can be calculated. A few keypoints of this calculation are explained here.
+When layers have been established and when the nodes (including intermediates) have been sorted within their layers, then x- and y-coordinates can be calculated. A few keypoints of this calculation are explained here.
 
 ### X-coordinates of nodes
 
@@ -150,4 +150,4 @@ We consider a single node and consider all edges going from or to a fixed adjace
 
 ![edgesFromNode.jpg](./pictures/edgesFromNode.jpg)
 
-On the chosen node we are considering endpoints that are all on the top or all on the bottom, because every edge connects the top of the lowest node to the bottom of the highest. The positions of the endpoints does not depend on the directions of the edges. We must sort the endpoints based on the x-coordinate of the other endpoint. Actually we do not need the exact x-coordinate - the rank is enough. This sorting is achieved using class LayoutConnector in file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts).
+On the chosen node we are considering endpoints that are all on the top or all on the bottom, because every edge connects the top of the lowest node and the bottom of the highest. The positions of the endpoints do not depend on the directions of the edges. We must sort the endpoints based on the x-coordinate on the other side. Actually we do not need the exact x-coordinate - the rank is enough. This sorting is achieved using class LayoutConnector in file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts).
