@@ -31,11 +31,15 @@ An important measure for the quality of a layout is the number of edge crosses. 
 
 Consider a picture with two line segments. When this picture is rotated or stretched, the line segments cross in the transformed picture if and only if they do in the original picture. We use this by rotating in such a way that one of the line segments becomes horizontal. To find the matrix to use, assume that one segment points from $(x_{start}, y_{start})$ to $(x_{start} + a, y_{start} + b)$. The direction of the segment is represented by the following vector:
 
-$\bigg(\begin{matrix}a\\b\end{matrix}\bigg)$
+```math
+\bigg(\begin{matrix}a\\b\end{matrix}\bigg)
+```
 
 The rotation we need is the matrix shown below:
 
-$\bigg(\begin{matrix}a & b\\-b & a\end{matrix}\bigg) \bigg(\begin{matrix}a\\b\end{matrix}\bigg) = \bigg(\begin{matrix}a^2 + b^2\\0\end{matrix}\bigg)$
+```math
+\bigg(\begin{matrix}a & b\\-b & a\end{matrix}\bigg) \bigg(\begin{matrix}a\\b\end{matrix}\bigg) = \bigg(\begin{matrix}a^2 + b^2\\0\end{matrix}\bigg)
+```
 
 The shown matrix multiplication demonstrates that the line segment defined above is transformed to a horizontal segment. See https://en.wikipedia.org/wiki/Rotation_matrix to understand that this matrix is indeed a combination of rotating and scaling.
 
