@@ -3,11 +3,15 @@ ALGORITHMS
 
 This document explains the algorithms applied by Frank config layout. Here is the table of contents:
 
+- [Overview](#overview)
 - [Counting line crosses](#counting-line-crosses)
   - [Exact determination whether two lines cross](#exact-determination-whether-two-lines-cross)
   - [Why x, y coordinates are not so important](#why-x-y-coordinates-are-not-so-important)
   - [Counting crossings with adjacent layers](#counting-crossings-with-adjacent-layers)
   - [Evaluating node swaps](#evaluating-node-swaps)
+- [Establishing layers](#establishing-layers)
+  - [How layer numbers are assigned](#how-layer-numbers-are-assigned)
+  - [Usage of layer numbers](#usage-of-layer-numbers)
 
 # Overview
 
@@ -17,9 +21,10 @@ We start with the big picture: the following steps are taken to transform an inp
 * Frank config layout establishes which nodes and which edges belong to the error flow - these are styled differently in the result (file [error-flow.ts](./projects/frank-config-layout/src/lib/model/error-flow.ts)).
 * The nodes are grouped into horizontal layers that are stacked vertically (file [horizontal-grouping.ts](./projects/frank-config-layout/src/lib/model/horizontal-grouping.ts)).
 * Within each layer, the nodes are sorted so that the number of edge crosses is minimized (file [layout-base.ts](./projects/frank-config-layout/src/lib/model/layout-base.ts)).
-* The positions of the nodes are calculated.
-* The positions of the edges are calculated.
-* The positions of the edge labels (e.g. success, failure) are calculated.
+* Calculating positions of nodes and routes of edges is prepared (file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts)).
+* The positions of the nodes and the initial routes of the edges is calculated (file [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
+* The initial routes of the edges is changed to draw them more straight, with less changes of directions when layers are crossed (function `straighten()` in file [straightened-line.ts](./projects/frank-config-layout/src/lib/graphics/straightened-line.ts) called from [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
+* The positions of the edge labels (e.g. success, failure) are calculated (class `EdgeLabelLayouter` of file [edge-label-layouter.ts](./projects/frank-config-layout/src/lib/graphics/edge-label-layouter.ts) called from [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
 
 The algorithm aims to minimize the number of line crosses. To do this, the number of line crosses has to be calculated. Doing this is the subject of the next section.
 
@@ -85,6 +90,8 @@ We consider the change of the number of crossings when two adjacent nodes in lay
 
 # Establishing layers
 
+### How layer numbers are assigned
+
 Before assigning x- and y-coordinates to nodes, they are grouped into horizontal layers that are stacked vertically. This is done in such a way that no edge connects nodes in the same layer. We want to avoid horizontal line segments because they are likely to cross other nodes.
 
 Two algorithms are in the code base to establish layers: the first occurring path algorithm and the longest path algorithm. The former is the easiest to explain while the latter is the one we really need. We start by explaining the former.
@@ -115,3 +122,9 @@ The algorithm starts its recursion at node Start. When it visits N1 next, it ass
 The correct operation of the longest path algorithm, provided there are no cycles, can be explained as follows. For some node $N$, each predecessor has a longest path that does not include $N$ -- otherwise we would have a cycle. The algorithm may visit each predecessor multiple times. On some of these occasions, the predecessor is visited from a thread belonging to a longest path. That thread assigns the maximum layer number to $N$. Other threads visiting $N$ try lower layer numbers and are stopped.
 
 The assumption that there are no cycles does not necessarily apply for real Frank configurations. If there are cycles, the algorithm will still assign a layer number to every node connected to a start node. In this case, the assigned layer numbers are not necessarily based on the longest path. If in the figure node N2 would also be connected to node N1, the algorithm would possibly assign layer number 1 to N2 and layer number 2 to N1. We accept this limitation of the longest path algorithm.
+
+### Usage of layer numbers
+
+The layer numbers are used to prevent edges from crossing other nodes. When an edge connects nodes that are not in adjacent layers then no other nodes should be placed in the space needed for the edge. This is achieved by breaking up the edge such that each intermediate edge goes between adjacent layers. This requires intermediate nodes on the layers being crossed. As an example, suppose that there is an edge from node N1 to node N2. Suppose that node N1 is on layer 1 and that node N2 is on layer 3. Then we may introduce a node `intermediate1` on layer 2 and replace the edge by edges N1-intermediate1 and intermediate1-N2. The algorithm can reserve space on layer 2 for node intermediate1 so that no original node on layer 2 will be crossed.
+
+The introduction of intermediate edges and intermediate nodes is done in function `introduceIntermediateNodesAndEdges()` in file [horizontal-grouping.ts](./projects/frank-config-layout/src/lib/model/horizontal-grouping.ts). It returns a new graph `intermediate` for the intermediate edges and the nodes being connected by them. It also returns the original graph (field `original`) with one additional piece of information: for each original edge, the list of intermediate edges is saved.
