@@ -30,6 +30,9 @@ We start with the big picture: the following steps are taken to transform an inp
 * The initial routes of the edges is changed to draw them more straight, with less changes of directions when layers are crossed (function `straighten()` in file [straightened-line.ts](./projects/frank-config-layout/src/lib/graphics/straightened-line.ts) called from [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
 * The positions of the edge labels (e.g. success, failure) are calculated (class `EdgeLabelLayouter` of file [edge-label-layouter.ts](./projects/frank-config-layout/src/lib/graphics/edge-label-layouter.ts) called from [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
 
+Taking these steps is implemented in function `mermaid2svgStatisticsImpl()` of file [mermaid2svg.ts](./projects/frank-config-layout/src/lib/mermaid2svg.ts).
+
+
 The algorithm aims to minimize the number of line crosses. To do this, the number of line crosses has to be calculated. Doing this is the subject of the next section.
 
 # Counting line crosses
