@@ -15,6 +15,7 @@ This document explains the algorithms applied by Frank config layout. Here is th
 - [Node positions and edge routes](#node-positions-and-edge-routes)
   - [X-coordinates of nodes](#x-coordinates-of-nodes)
   - [Class LayoutConnector for sorting intermediate edge endpoints](#class-layoutconnector-for-sorting-intermediate-edge-endpoints)
+- [Straightening edges](#straightening-edges)
 
 # Overview
 
@@ -122,7 +123,7 @@ There is a node Start that is connected to N1 and N2. There is an additinal conn
 
 The algorithm starts its recursion at node Start. When it visits N1 next, it assigns layer number 1 to N1. Then the thread coming from N1 visits N2. Of course, layer number 2 is assigned. The recursion ends here because N2 has no successors. The thread that is still in Start visits N2. The recursion stops because the candidate layer number of 1 is lower than the already-assigned layer number 2. The same result is achieved when node N2 is visited before N1. Then layer number 1 is assigned to N2 first. The recursion coming from N1 then reassigns the layer number of N2 to be 2.
 
-The correct operation of the longest path algorithm, provided there are no cycles, can be explained as follows. For some node $N$, each predecessor has a longest path that does not include $N$ -- otherwise we would have a cycle. The algorithm may visit each predecessor multiple times. On some of these occasions, the predecessor is visited from a thread belonging to a longest path. That thread assigns the maximum layer number to $N$. Other threads visiting $N$ try lower layer numbers and are stopped.
+The correct operation of the longest path algorithm, provided there are no cycles, can be explained as follows. For some node $N$, each predecessor has a longest path that does not include $N$ - otherwise we would have a cycle. The algorithm may visit each predecessor multiple times. On some of these occasions, the predecessor is visited from a thread belonging to a longest path. That thread assigns the maximum layer number to $N$. Other threads visiting $N$ try lower layer numbers and are stopped.
 
 The assumption that there are no cycles does not necessarily apply for real Frank configurations. If there are cycles, the algorithm will still assign a layer number to every node connected to a start node. In this case, the assigned layer numbers are not necessarily based on the longest path. If in the figure node N2 would also be connected to node N1, the algorithm would possibly assign layer number 1 to N2 and layer number 2 to N1. We accept this limitation of the longest path algorithm.
 
@@ -150,4 +151,24 @@ We consider a single node and consider all edges going from or to a fixed adjace
 
 ![edgesFromNode.jpg](./pictures/edgesFromNode.jpg)
 
-On the chosen node we are considering endpoints that are all on the top or all on the bottom, because every edge connects the top of the lowest node and the bottom of the highest. The positions of the endpoints do not depend on the directions of the edges. We must sort the endpoints based on the x-coordinate on the other side. Actually we do not need the exact x-coordinate - the rank is enough. This sorting is achieved using class LayoutConnector in file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts).
+On the chosen node we are considering endpoints that are all on the top or all on the bottom, because every edge connects the top of the lowest node and the bottom of the highest. We must sort the endpoints based on the x-coordinate on the other side. Actually we do not need the exact x-coordinate - the rank is enough. This sorting is achieved using class LayoutConnector in file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts).
+
+The direction of the edges plays a minor role here because two nodes can be connected by two different edges. In this case these edges have opposite directions. The algorithms sorts the LayoutConnector objects in such a way that two edges between the same two nodes do not cross.
+
+# Straightening edges
+
+After calculating initial routes for the edges, the algorithm reconsiders the edge routes to make them more straight. As stated in [Usage of layer numbers](#usage-of-layer-numbers), original edges are broken up in intermediate edges based on the layer numbers. For each intermediate edge there is a line segment. In addition there are vertical line segments for intermediate nodes to ensure that no node box is crossed.
+
+Straightening a line is done by iterating over the line segments of an original edge. The figure below illustrates an iteration.
+
+![lineJoining.jpg](./pictures/lineJoining.jpg)
+
+Earlier iterations have produced the straight line going to the top junction labeled N2. The two N2 junctions are connected by the vertical line segment created for intermediate node N2.
+
+The algorithm first takes the middle of the vertical line segment joining the N2 junctions - it is shown by an open circle. It is used to produce two dotted line segments. If these dotted line segments are acceptable, the first solid line segment is replaced by the first of these two dotted segments. Otherwise, the dotted segments are rejected and the direction change of the top N2 junction is retained.
+
+Suppose the two dotted line segments are accepted. The algorithm will then construct the dotted line segment joining the top junction and the bottom junction. If that third dotted segment is accepted, all shown line segments are replaced by that line segment. Otherwise, the direction change at the middle point is kept and we have the two dotted line segments having the middle point.
+
+Iterating the line segments is done by function `straighten()` in file [straightened-line.ts](./projects/frank-config-layout/src/lib/graphics/straightened-line.ts). It takes a callback function that can be used to accept or reject line segments. This callback function not only takes a line segment but also a node id. This is why the figure shows a junction labeled N1. The dotted line segments not only change the route related to intermediate node N2, but also the route concerning intermediate node N1.
+
+After straightening the line segments, they are split again so that there is one line segment per intermediate edge. This is done on behalf of the playground that allows the user to select intermediate edges. Splitting straightened lines is not needed for the static SVG.
