@@ -3,11 +3,19 @@ ALGORITHMS
 
 This document explains the algorithms applied by Frank config layout. Here is the table of contents:
 
+- [Overview](#overview)
 - [Counting line crosses](#counting-line-crosses)
   - [Exact determination whether two lines cross](#exact-determination-whether-two-lines-cross)
   - [Why x, y coordinates are not so important](#why-x-y-coordinates-are-not-so-important)
   - [Counting crossings with adjacent layers](#counting-crossings-with-adjacent-layers)
   - [Evaluating node swaps](#evaluating-node-swaps)
+- [Establishing layers](#establishing-layers)
+  - [How layer numbers are assigned](#how-layer-numbers-are-assigned)
+  - [Usage of layer numbers](#usage-of-layer-numbers)
+- [Node positions and edge routes](#node-positions-and-edge-routes)
+  - [X-coordinates of nodes](#x-coordinates-of-nodes)
+  - [Class LayoutConnector for sorting intermediate edge endpoints](#class-layoutconnector-for-sorting-intermediate-edge-endpoints)
+- [Straightening edges](#straightening-edges)
 
 # Overview
 
@@ -17,9 +25,13 @@ We start with the big picture: the following steps are taken to transform an inp
 * Frank config layout establishes which nodes and which edges belong to the error flow - these are styled differently in the result (file [error-flow.ts](./projects/frank-config-layout/src/lib/model/error-flow.ts)).
 * The nodes are grouped into horizontal layers that are stacked vertically (file [horizontal-grouping.ts](./projects/frank-config-layout/src/lib/model/horizontal-grouping.ts)).
 * Within each layer, the nodes are sorted so that the number of edge crosses is minimized (file [layout-base.ts](./projects/frank-config-layout/src/lib/model/layout-base.ts)).
-* The positions of the nodes are calculated.
-* The positions of the edges are calculated.
-* The positions of the edge labels (e.g. success, failure) are calculated.
+* Calculating positions of nodes and routes of edges is prepared (file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts)).
+* The positions of the nodes and the initial routes of the edges is calculated (file [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
+* The initial routes of the edges is changed to draw them more straight, with less changes of directions when layers are crossed (function `straighten()` in file [straightened-line.ts](./projects/frank-config-layout/src/lib/graphics/straightened-line.ts) called from [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
+* The positions of the edge labels (e.g. success, failure) are calculated (class `EdgeLabelLayouter` of file [edge-label-layouter.ts](./projects/frank-config-layout/src/lib/graphics/edge-label-layouter.ts) called from [layout.ts](./projects/frank-config-layout/src/lib/graphics/layout.ts)).
+
+Taking these steps is implemented in function `mermaid2svgStatisticsImpl()` of file [mermaid2svg.ts](./projects/frank-config-layout/src/lib/mermaid2svg.ts).
+
 
 The algorithm aims to minimize the number of line crosses. To do this, the number of line crosses has to be calculated. Doing this is the subject of the next section.
 
@@ -85,6 +97,8 @@ We consider the change of the number of crossings when two adjacent nodes in lay
 
 # Establishing layers
 
+### How layer numbers are assigned
+
 Before assigning x- and y-coordinates to nodes, they are grouped into horizontal layers that are stacked vertically. This is done in such a way that no edge connects nodes in the same layer. We want to avoid horizontal line segments because they are likely to cross other nodes.
 
 Two algorithms are in the code base to establish layers: the first occurring path algorithm and the longest path algorithm. The former is the easiest to explain while the latter is the one we really need. We start by explaining the former.
@@ -112,6 +126,52 @@ There is a node Start that is connected to N1 and N2. There is an additinal conn
 
 The algorithm starts its recursion at node Start. When it visits N1 next, it assigns layer number 1 to N1. Then the thread coming from N1 visits N2. Of course, layer number 2 is assigned. The recursion ends here because N2 has no successors. The thread that is still in Start visits N2. The recursion stops because the candidate layer number of 1 is lower than the already-assigned layer number 2. The same result is achieved when node N2 is visited before N1. Then layer number 1 is assigned to N2 first. The recursion coming from N1 then reassigns the layer number of N2 to be 2.
 
-The correct operation of the longest path algorithm, provided there are no cycles, can be explained as follows. For some node $N$, each predecessor has a longest path that does not include $N$ -- otherwise we would have a cycle. The algorithm may visit each predecessor multiple times. On some of these occasions, the predecessor is visited from a thread belonging to a longest path. That thread assigns the maximum layer number to $N$. Other threads visiting $N$ try lower layer numbers and are stopped.
+The correct operation of the longest path algorithm, provided there are no cycles, can be explained as follows. For some node $N$, each predecessor has a longest path that does not include $N$ - otherwise we would have a cycle. The algorithm may visit each predecessor multiple times. On some of these occasions, the predecessor is visited from a thread belonging to a longest path. That thread assigns the maximum layer number to $N$. Other threads visiting $N$ try lower layer numbers and are stopped.
 
 The assumption that there are no cycles does not necessarily apply for real Frank configurations. If there are cycles, the algorithm will still assign a layer number to every node connected to a start node. In this case, the assigned layer numbers are not necessarily based on the longest path. If in the figure node N2 would also be connected to node N1, the algorithm would possibly assign layer number 1 to N2 and layer number 2 to N1. We accept this limitation of the longest path algorithm.
+
+### Usage of layer numbers
+
+The layer numbers are used to prevent edges from crossing other nodes. When an edge connects nodes that are not in adjacent layers then no other nodes should be placed in the space needed for the edge. This is achieved by breaking up the edge such that each intermediate edge goes between adjacent layers. This requires intermediate nodes on the layers being crossed. As an example, suppose that there is an edge from node N1 to node N2. Suppose that node N1 is on layer 1 and that node N2 is on layer 3. Then we may introduce a node `intermediate1` on layer 2 and replace the edge by edges N1-intermediate1 and intermediate1-N2. The algorithm can reserve space on layer 2 for node intermediate1 so that no original node on layer 2 will be crossed.
+
+The introduction of intermediate edges and intermediate nodes is done in function `introduceIntermediateNodesAndEdges()` in file [horizontal-grouping.ts](./projects/frank-config-layout/src/lib/model/horizontal-grouping.ts). It returns a new graph `intermediate` for the intermediate edges and the nodes being connected by them. It also returns the original graph (field `original`) with one additional piece of information: for each original edge, the list of intermediate edges is saved.
+
+# Node positions and edge routes
+
+When layers have been established and when the nodes (including intermediates) have been sorted within their layers, then x- and y-coordinates can be calculated. A few keypoints of this calculation are explained here.
+
+### X-coordinates of nodes
+
+Calculating the x-coordinates of the nodes (and intermediate nodes) is nontrivial as shown below:
+
+![nodeInMiddle.jpg](./pictures/nodeInMiddle.jpg)
+
+Node N1 is the first in its layer and N2 goes before N3 in the other layer. When x-coordinates would be assigned based on the rank only, then node N1 would appear right above node N2. Instead, we want node N1 to have an x-coordinate corresponding to the middle between node N2 and node N3. Stated more generally, we place nodes in a *subject layer* using the connected nodes that are in a chosen source layer for which x-coordinates have been calculated already. These connected nodes are called the *predecessors* in this context (directions of edges are ignored). The desired x-coordinate of a node is the *median* of the x-coordinates of the predecessors. It is not always possible to assign this x-coordinate without causing node collisions. Assigning alternative x-coordinates when needed is done in file [horizontal-conflict.ts](./projects/frank-config-layout/src/lib/graphics/horizontal-conflict.ts).
+
+### Class LayoutConnector for sorting intermediate edge endpoints
+
+We consider a single node and consider all edges going from or to a fixed adjacent layer. The example below shows a node that has edges to and from three nodes on the layer below it.
+
+![edgesFromNode.jpg](./pictures/edgesFromNode.jpg)
+
+On the chosen node we are considering endpoints that are all on the top or all on the bottom, because every edge connects the top of the lowest node and the bottom of the highest. We must sort the endpoints based on the x-coordinate on the other side. Actually we do not need the exact x-coordinate - the rank is enough. This sorting is achieved using class LayoutConnector in file [layout-model.ts](./projects/frank-config-layout/src/lib/model/layout-model.ts).
+
+The direction of the edges plays a minor role here because two nodes can be connected by two different edges. In this case these edges have opposite directions. The algorithms sorts the LayoutConnector objects in such a way that two edges between the same two nodes do not cross.
+
+# Straightening edges
+
+After calculating initial routes for the edges, the algorithm reconsiders the edge routes to make them more straight. As stated in [Usage of layer numbers](#usage-of-layer-numbers), original edges are broken up in intermediate edges based on the layer numbers. For each intermediate edge there is a line segment. In addition there are vertical line segments for intermediate nodes to ensure that no node box is crossed.
+
+Straightening a line is done by iterating over the line segments of an original edge. The figure below illustrates an iteration.
+
+![lineJoining.jpg](./pictures/lineJoining.jpg)
+
+Earlier iterations have produced the straight line going to the top junction labeled N2. The two N2 junctions are connected by the vertical line segment created for intermediate node N2.
+
+The algorithm first takes the middle of the vertical line segment joining the N2 junctions - it is shown by an open circle. It is used to produce two dotted line segments. If these dotted line segments are acceptable, the first solid line segment is replaced by the first of these two dotted segments. Otherwise, the dotted segments are rejected and the direction change of the top N2 junction is retained.
+
+Suppose the two dotted line segments are accepted. The algorithm will then construct the dotted line segment joining the top junction and the bottom junction. If that third dotted segment is accepted, all shown line segments are replaced by that line segment. Otherwise, the direction change at the middle point is kept and we have the two dotted line segments having the middle point.
+
+Iterating the line segments is done by function `straighten()` in file [straightened-line.ts](./projects/frank-config-layout/src/lib/graphics/straightened-line.ts). It takes a callback function that can be used to accept or reject line segments. This callback function not only takes a line segment but also a node id. This is why the figure shows a junction labeled N1. The dotted line segments not only change the route related to intermediate node N2, but also the route concerning intermediate node N1.
+
+After straightening the line segments, they are split again so that there is one line segment per intermediate edge. This is done on behalf of the playground that allows the user to select intermediate edges. Splitting straightened lines is not needed for the static SVG.
