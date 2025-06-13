@@ -152,7 +152,9 @@ export class AreaGroup implements AbstractPositionsArea {
   constructor(
     readonly area: Interval,
     readonly positions: number[],
-  ) {}
+  ) {
+    checkPositionsAreSortedNumbers(positions, 'constructor of AreaGroup');
+  }
 
   get positionInterval(): Interval {
     return Interval.createFrom(this.positions);
@@ -233,6 +235,36 @@ export function defaultPredecessorDecorator(
       return [leftBound + sizeFunction(position)];
     } else {
       return [roundedMedian([leftBound, rightBound])];
+    }
+  }
+}
+
+// Exported purely for testing.
+export function checkPositionsAreSortedNumbers(positions: unknown[], caller: string): void {
+  let isOk = true;
+  for (const p of positions) {
+    if (typeof p !== 'number') {
+      console.log(`Position is not a number: ${p}`);
+      isOk = false;
+    } else if (!Number.isInteger(p)) {
+      console.log(`Position is a number but it is not integer: ${p}`);
+      isOk = false;
+    }
+  }
+  if (!isOk) {
+    throw new Error(
+      `Tried to create area group from non-integer positions, see messages above: caller: ${caller}, positions: ${positions}`,
+    );
+  }
+  if (positions.length > 1) {
+    for (let i = 1; i < positions.length; ++i) {
+      const prev = positions[i - 1] as number;
+      const curr = positions[i] as number;
+      if (curr <= prev) {
+        throw new Error(
+          `Tried to create area group from non-sorted psotions: caller: ${caller}, positions: ${positions}`,
+        );
+      }
     }
   }
 }

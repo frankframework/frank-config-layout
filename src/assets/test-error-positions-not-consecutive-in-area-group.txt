@@ -1,0 +1,115 @@
+flowchart
+	d38e10("JavaListener"):::listener
+	d38e15("WebServiceListener"):::listener
+	d38e20("WebServiceListener"):::listener
+	d38e23("<a style='font-size:28px'>ManageDatabase</a>"):::normal
+	d38e43("XmlQuerySender"):::sender
+	d38e116("JavaListener"):::listener
+	d38e119("<a style='font-size:28px'>ManageFileSystem</a>"):::normal
+	d38e139("LocalFileSystemSender"):::sender
+	d38e209("ApiListener"):::listener
+	d38e212("<a style='font-size:28px'>Fernandez - Execute</a>"):::normal
+	d38e235("HttpSender"):::sender
+	d38e255("ApiListener"):::listener
+	d38e258("<a style='font-size:28px'>iBrick System</a>"):::normal
+	d38e272("ApiListener"):::listener
+	d38e277("ApiListener"):::listener
+	d38e280("<a style='font-size:28px'>iBricks - HCIM-2017 Patient</a>"):::normal
+	d38e339("HttpSender"):::sender
+	d38e395("ApiListener"):::listener
+	d38e398("<a style='font-size:28px'>iBricks - HCIM-2017 Allergies</a>"):::normal
+	d38e438("HttpSender"):::sender
+	d38e483("ApiListener"):::listener
+	d38e486("<a style='font-size:28px'>iBricks - HCIM-2017 Problems</a>"):::normal
+	d38e526("HttpSender"):::sender
+	d38e571("ApiListener"):::listener
+	d38e574("<a style='font-size:28px'>HCIM-2017 System</a>"):::normal
+	d38e588("ApiListener"):::listener
+	d38e591("<a style='font-size:28px'>Batch Importer - Inserter</a>"):::normal
+	d38e627("HttpSender"):::sender
+	d38e656("FixedQuerySender"):::sender
+	d38e679("JavaListener"):::listener
+	d38e684("ApiListener"):::listener
+	d38e687("<a style='font-size:28px'>Batch Importer - Processor</a>"):::normal
+	d38e693("FixedQuerySender"):::sender
+	d38e705("DelaySender"):::sender
+	d38e730("HttpSender"):::sender
+	d38e751("FixedQuerySender"):::sender
+	d38e763("ApiListener"):::listener
+	d38e766("<a style='font-size:28px'>Batch Importer - BatchState</a>"):::normal
+	d38e789("FixedQuerySender"):::sender
+	d38e808("ApiListener"):::listener
+	d38e813("JavaListener"):::listener
+	d38e816("<a style='font-size:28px'>ZisMut2MQTT - Submit to EventBus</a>"):::normal
+	d38e849("HttpSender"):::sender
+	d38e881("HttpSender"):::sender
+	d38e911("HttpSender"):::sender
+	d38e944("HttpSender"):::sender
+	d38e1024("HttpSender"):::sender
+	d38e1074("FixedQuerySender"):::sender
+	d38e1093("MessageStoreSender"):::sender
+	d38e1098("MqttSender"):::sender
+	d38e1120("HttpSender"):::sender
+	d38e1147("ApiListener"):::listener
+	d38e1152("ApiListener"):::listener
+	d38e1155("<a style='font-size:28px'>ZisMut2MQTT - Get ProcessedEvents</a>"):::normal
+	d38e1180("FixedQuerySender"):::sender
+	classDef normal fill:#fff,stroke-width:4px,stroke:#8bc34a;
+	classDef listener0 fill:#fff,stroke-width:4px,stroke:#fe41ff;
+	classDef listener1 fill:#fff,stroke-width:4px,stroke:#18a689;
+	classDef listener2 fill:#fff,stroke-width:4px,stroke:#18a689;
+	classDef listener3 fill:#fff,stroke-width:4px,stroke:#4150ff;
+	classDef listener4 fill:#fff,stroke-width:4px,stroke:#ffc107;
+	classDef listener5 fill:#fff,stroke-width:4px,stroke:#ff417e;
+	classDef sender0 fill:#fff,stroke-width:4px,stroke:#fe41ff;
+	classDef sender1 fill:#fff,stroke-width:4px,stroke:#8bc34a;
+	classDef sender2 fill:#fff,stroke-width:4px,stroke:#00abff;
+	classDef sender3 fill:#fff,stroke-width:4px,stroke:#4150ff;
+	classDef sender4 fill:#fff,stroke-width:4px,stroke:#ffc107;
+	classDef sender5 fill:#fff,stroke-width:4px,stroke:#ff417e;
+	classDef sender6 fill:#fff,stroke-width:4px,stroke:#8a41ff;
+	classDef sender7 fill:#fff,stroke-width:4px,stroke:#ff8741;
+	classDef sender8 fill:#fff,stroke-width:4px,stroke:#8bc34a;
+	d38e10 --> d38e23
+	d38e15 --> d38e23
+	d38e20 --> d38e23
+	d38e23 --> d38e43
+	d38e116 --> d38e119
+	d38e119 --> d38e139
+	d38e209 --> d38e212
+	d38e212 --> d38e235
+	d38e255 --> d38e258
+	d38e272 --> d38e280
+	d38e277 --> d38e280
+	d38e280 --> d38e339
+	d38e395 --> d38e398
+	d38e398 --> d38e438
+	d38e483 --> d38e486
+	d38e486 --> d38e526
+	d38e571 --> d38e574
+	d38e588 --> d38e591
+	d38e591 --> d38e627
+	d38e591 --> d38e656
+	d38e679 --> d38e687
+	d38e684 --> d38e687
+	d38e687 --> d38e693
+	d38e687 --> d38e705
+	d38e687 --> d38e730
+	d38e687 --> d38e751
+	d38e763 --> d38e766
+	d38e766 --> d38e789
+	d38e808 --> d38e816
+	d38e813 --> d38e816
+	d38e816 --> d38e849
+	d38e816 --> d38e881
+	d38e816 --> d38e911
+	d38e816 --> d38e944
+	d38e816 --> d38e1024
+	d38e816 --> d38e1074
+	d38e816 --> d38e1093
+	d38e816 --> d38e1098
+	d38e816 --> d38e1120
+	d38e1147 --> d38e1155
+	d38e1152 --> d38e1155
+	d38e1155 --> d38e1180
+	linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41 stroke:#8bc34a,stroke-width:3px,fill:none;
