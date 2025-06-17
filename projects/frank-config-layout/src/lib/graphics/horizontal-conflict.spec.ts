@@ -1,4 +1,8 @@
-import { defaultPredecessorDecorator, HorizontalConflictResolver } from './horizontal-conflict';
+import {
+  checkPositionsAreSortedNumbers,
+  defaultPredecessorDecorator,
+  HorizontalConflictResolver,
+} from './horizontal-conflict';
 import { Interval } from '../util/interval';
 
 describe('HorizontalConflictResolver AreaGroup', () => {
@@ -235,5 +239,47 @@ describe('HorizontalConflictResolver integration', () => {
     );
     const positions = xCalc.run();
     expect(positions).toEqual([100, 312, 337, 362, 387]);
+  });
+});
+
+describe('checkPositionsAreSortedNumbers', () => {
+  it('When positions are integer numbers then no exception', () => {
+    checkPositionsAreSortedNumbers([1, 2], 'test');
+  });
+
+  it('When a position is a string then exception caught and string shown', () => {
+    let caught: unknown;
+    try {
+      checkPositionsAreSortedNumbers([1, '2'], 'test');
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).not.toBeUndefined();
+    const error = caught as Error;
+    expect(error.message).toContain('2');
+  });
+
+  it('When a position is a floating point number then exception caught and number shown', () => {
+    let caught: unknown;
+    try {
+      checkPositionsAreSortedNumbers([1, 2.01], 'test');
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).not.toBeUndefined();
+    const error = caught as Error;
+    expect(error.message).toContain('2.01');
+  });
+
+  it('When positions are not sorted then exception thrown and positions shown', () => {
+    let caught: unknown;
+    try {
+      checkPositionsAreSortedNumbers([3, 1], 'test');
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).not.toBeUndefined();
+    const error = caught as Error;
+    expect(error.message).toContain('3,1');
   });
 });
