@@ -119,8 +119,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           My start
         </div>
@@ -133,8 +133,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           Node 1
         </div>
@@ -147,8 +147,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           Node 3
         </div>
@@ -161,8 +161,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           Node 2
         </div>
@@ -175,8 +175,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           End node
         </div>
@@ -196,10 +196,10 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     <polyline class="line" points="215,49 351,120" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N1-intermediate2">
-    <polyline class="line error" points="215,169 205,265" />
+    <polyline class="line error" points="215,169 210,265" />
   </g>
   <g class="frank-flowchart-edge-intermediate2-End">
-    <polyline class="line error" points="205,265 205,360" marker-end="url(#arrow)"/>
+    <polyline class="line error" points="210,265 205,360" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N2-End">
     <polyline class="line" points="87,289 165,360" marker-end="url(#arrow)"/>
@@ -208,10 +208,10 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     <polyline class="line" points="136,169 126,240" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N3-intermediate3">
-    <polyline class="line error" points="351,169 351,265" />
+    <polyline class="line error" points="351,169 297,265" />
   </g>
   <g class="frank-flowchart-edge-intermediate3-End">
-    <polyline class="line error" points="351,265 244,360" marker-end="url(#arrow)"/>
+    <polyline class="line error" points="297,265 244,360" marker-end="url(#arrow)"/>
   </g>
   <g text-anchor="middle" dominant-baseline="middle">
     <g transform="translate(88, 73)">
@@ -250,7 +250,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
         </div>
       </foreignObject>
     </g>
-    <g transform="translate(188, 193)">
+    <g transform="translate(189, 193)">
       <foreignObject style="width:49px; height:13px">
         <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
           <div class="label-text-box" >
@@ -259,7 +259,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
         </div>
       </foreignObject>
     </g>
-    <g transform="translate(327, 193)">
+    <g transform="translate(310, 193)">
       <foreignObject style="width:49px; height:13px">
         <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
           <div class="label-text-box" >
