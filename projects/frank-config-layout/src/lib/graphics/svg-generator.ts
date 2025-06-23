@@ -116,14 +116,15 @@ function renderNodes(nodes: readonly PlacedNode[]): string {
 }
 
 function renderOriginalNode(n: PlacedNode): string {
+  // See https://github.com/frankframework/frankframework/issues/9098.
   return `  <g class="${getNodeGroupClass(n.id)}" transform="translate(${n.horizontalBox.minValue}, ${n.verticalBox.minValue})">
     <rect class="${getRectangleClass(n)}"
       width="${n.horizontalBox.size}"
       height="${n.verticalBox.size}"
       rx="5">
     </rect>
-    <foreignObject style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="${n.horizontalBox.size}" height="${n.verticalBox.size}" style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           ${n.text}
         </div>

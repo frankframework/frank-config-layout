@@ -119,8 +119,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           My start
         </div>
@@ -133,8 +133,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           Node 1
         </div>
@@ -147,8 +147,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           Node 3
         </div>
@@ -161,8 +161,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           Node 2
         </div>
@@ -175,8 +175,8 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+    <foreignObject width="160" height="50" style="width:160px; height:50px">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           End node
         </div>
