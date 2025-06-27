@@ -9,7 +9,13 @@ flowchart
     const result = getGraphFromMermaid(input);
     expect(result.nodes.length).toEqual(1);
     expect(result.nodes[0].id).toEqual('d2e2');
-    expect(result.nodes[0].text).toEqual('<b>Test1</b><br/>JavaListener');
+    expect(result.nodes[0].text).toEqual({
+      html: '<b>Test1</b><br/>JavaListener',
+      lines: [
+        { text: 'Test1', isBold: true },
+        { text: 'JavaListener', isBold: false },
+      ],
+    });
     expect(result.nodes[0].style).toEqual('normal');
   });
 
@@ -24,8 +30,8 @@ d2e2 --> |success| d2e12
     expect(result.nodes.length).toEqual(2);
     expect(result.nodes[0].id).toEqual('d2e2');
     expect(result.nodes[1].id).toEqual('d2e12');
-    expect(result.nodes[0].text).toContain('Test');
-    expect(result.nodes[1].text).toContain('InputValidator');
+    expect(result.nodes[0].text.html).toContain('Test');
+    expect(result.nodes[1].text.html).toContain('InputValidator');
     expect(result.nodes[0].style).toEqual('normal');
     expect(result.edges.length).toEqual(1);
     expect(result.edges[0].from.id).toEqual('d2e2');

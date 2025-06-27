@@ -56,10 +56,6 @@ export interface LayoutLineSegment {
 export interface PlacedNode extends NodeForLayers {
   readonly horizontalBox: Interval;
   readonly verticalBox: Interval;
-  readonly id: string;
-  readonly text: string;
-  readonly errorStatus: number;
-  readonly layer: number;
 }
 
 export interface EdgeLabel {

@@ -2,7 +2,8 @@ import { NodeSequenceEditor, UpdateResponse } from './node-sequence-editor';
 import { NodeOrEdgeSelection } from './node-or-edge-selection';
 import {
   getRange,
-  createText,
+  createEdgeText,
+  createNodeText,
   LayoutBase,
   createGraphForLayers,
   GraphForLayers,
@@ -182,13 +183,13 @@ function checkEdgeStartN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: Nod
 }
 
 function newNode(id: string, layer: number, g: GraphForLayers): void {
-  g.addNode({ id, layer, text: '', errorStatus: ERROR_STATUS_SUCCESS });
+  g.addNode({ id, layer, text: createNodeText(''), errorStatus: ERROR_STATUS_SUCCESS });
 }
 
 function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    text: createText(),
+    text: createEdgeText(),
   });
 }

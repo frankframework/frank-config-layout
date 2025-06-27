@@ -14,14 +14,14 @@
    limitations under the License.
 */
 
-export interface Text {
+export interface EdgeText {
   readonly html: string;
   readonly lines: string[];
   readonly numLines: number;
   readonly maxLineLength: number;
 }
 
-export function createText(originalHtml?: string): Text {
+export function createEdgeText(originalHtml?: string): EdgeText {
   let lines: string[] = [];
   if (originalHtml !== undefined && originalHtml.length > 0) {
     lines = originalHtml.split('<br/>').map((s) => s.trim());
@@ -35,5 +35,32 @@ export function createText(originalHtml?: string): Text {
     lines,
     maxLineLength,
     numLines: lines.length,
+  };
+}
+
+export interface NodeTextLine {
+  readonly text: string;
+  readonly isBold: boolean;
+}
+
+export interface NodeText {
+  readonly html: string;
+  readonly lines: NodeTextLine[];
+}
+
+export function createNodeText(html: string): NodeText {
+  const rawLines: string[] = html.split('<br/>');
+  return {
+    html,
+    lines: rawLines.map((s) => createNodeTextLine(s)),
+  };
+}
+
+function createNodeTextLine(text: string): NodeTextLine {
+  const isBold: boolean = text.includes('<b>');
+  const plainText: string = text.replaceAll('</b>', '').replaceAll('<b>', '');
+  return {
+    text: plainText,
+    isBold,
   };
 }

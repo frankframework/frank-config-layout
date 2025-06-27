@@ -126,7 +126,7 @@ function renderOriginalNode(n: PlacedNode): string {
     <foreignObject width="${n.horizontalBox.size}" height="${n.verticalBox.size}" style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
       <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
-          ${n.text}
+          ${n.text.html}
         </div>
       </div>
     </foreignObject>

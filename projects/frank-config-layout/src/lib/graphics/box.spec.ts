@@ -10,6 +10,7 @@ import { LayoutModel } from '../model/layout-model';
 import { Interval } from '../util/interval';
 import { Box, LineChecker } from './box';
 import { Line, Point } from './graphics';
+import { createNodeText } from '../model/text';
 
 describe('Box', () => {
   const horizontalBox = Interval.createFromMinMax(12, 18);
@@ -134,7 +135,7 @@ function addNode(id: string, gl: OriginalGraph): void {
   const n: OriginalNode = {
     id,
     // These are dummy
-    text: '',
+    text: createNodeText(''),
     errorStatus: ERROR_STATUS_SUCCESS,
   };
   gl.addNode(n);
