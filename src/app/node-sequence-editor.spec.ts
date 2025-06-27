@@ -1,6 +1,7 @@
 import { NodeSequenceEditor, UpdateResponse } from './node-sequence-editor';
 import {
   createEdgeText,
+  createNodeText,
   createGraphForLayers,
   GraphForLayers,
   NodeForLayers,
@@ -20,7 +21,7 @@ function getInstanceToCheckOrdering(): NodeSequenceEditor {
 }
 
 function newTestNode(id: string, layer: number): NodeForLayers {
-  return { id, layer, text: '', errorStatus: ERROR_STATUS_SUCCESS };
+  return { id, layer, text: createNodeText(''), errorStatus: ERROR_STATUS_SUCCESS };
 }
 
 function connect(idFrom: string, idTo: string, g: GraphForLayers): void {

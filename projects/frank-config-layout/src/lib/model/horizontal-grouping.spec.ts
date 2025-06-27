@@ -1,4 +1,4 @@
-import { createEdgeText } from './text';
+import { createEdgeText, createNodeText } from './text';
 import { OriginalNode, OriginalGraph, createOriginalGraph, ERROR_STATUS_SUCCESS } from './error-flow';
 import {
   calculateLayerNumbers,
@@ -13,7 +13,7 @@ import {
 } from './horizontal-grouping';
 
 function newNode(id: string): OriginalNode {
-  return { id, text: '', errorStatus: ERROR_STATUS_SUCCESS };
+  return { id, text: createNodeText(''), errorStatus: ERROR_STATUS_SUCCESS };
 }
 
 function connect(idFrom: string, idTo: string, g: OriginalGraph): void {

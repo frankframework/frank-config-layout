@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { EdgeText } from './text';
+import { createNodeText, EdgeText, NodeText } from './text';
 import { Graph } from './graph';
 import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser';
 
@@ -39,7 +39,7 @@ export const ERROR_STATUS_ERROR = 2;
 
 export interface OriginalNode {
   id: string;
-  text: string;
+  text: NodeText;
   errorStatus: number;
 }
 
@@ -71,10 +71,11 @@ export function findErrorFlow(b: MermaidGraph): OriginalGraph {
 }
 
 function transformNode(n: MermaidNode): OriginalNode {
+  const text: NodeText = createNodeText(n.text);
   if (n.style === NODE_ERROR_CLASS) {
-    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_ERROR };
+    return { id: n.id, text, errorStatus: ERROR_STATUS_ERROR };
   } else {
-    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_SUCCESS };
+    return { id: n.id, text, errorStatus: ERROR_STATUS_SUCCESS };
   }
 }
 
