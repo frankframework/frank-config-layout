@@ -27,7 +27,7 @@ export function getCaption(n: NodeForLayers, choice: NodeCaptionChoice): string 
       return n.id;
     }
     case NodeCaptionChoice.TEXT: {
-      return n.text.lines[0].text;
+      return n.text.html;
     }
   }
 }
