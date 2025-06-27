@@ -14,14 +14,14 @@
    limitations under the License.
 */
 
-export interface Text {
+export interface EdgeText {
   readonly html: string;
   readonly lines: string[];
   readonly numLines: number;
   readonly maxLineLength: number;
 }
 
-export function createText(originalHtml?: string): Text {
+export function createEdgeText(originalHtml?: string): EdgeText {
   let lines: string[] = [];
   if (originalHtml !== undefined && originalHtml.length > 0) {
     lines = originalHtml.split('<br/>').map((s) => s.trim());

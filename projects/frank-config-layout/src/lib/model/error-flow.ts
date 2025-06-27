@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Text } from './text';
+import { EdgeText } from './text';
 import { Graph } from './graph';
 import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser';
 
@@ -46,7 +46,7 @@ export interface OriginalNode {
 export interface OriginalEdge {
   from: OriginalNode;
   to: OriginalNode;
-  text: Text;
+  text: EdgeText;
   errorStatus: number;
 }
 
@@ -78,25 +78,25 @@ function transformNode(n: MermaidNode): OriginalNode {
   }
 }
 
-function transformEdge(from: OriginalNode, to: OriginalNode, text: Text): OriginalEdge {
+function transformEdge(from: OriginalNode, to: OriginalNode, edgeText: EdgeText): OriginalEdge {
   if (from.errorStatus === ERROR_STATUS_ERROR) {
-    return { from, to, text, errorStatus: ERROR_STATUS_ERROR };
+    return { from, to, text: edgeText, errorStatus: ERROR_STATUS_ERROR };
   }
-  if (text.numLines === 0) {
-    return { from, to, text, errorStatus: ERROR_STATUS_SUCCESS };
+  if (edgeText.numLines === 0) {
+    return { from, to, text: edgeText, errorStatus: ERROR_STATUS_SUCCESS };
   } else {
-    const isError: boolean = text.lines
+    const isError: boolean = edgeText.lines
       .map((line) => ERROR_FORWARD_NAMES.has(line))
       .every((lineIsError) => lineIsError === true);
-    const isSuccess: boolean = text.lines
+    const isSuccess: boolean = edgeText.lines
       .map((line) => !ERROR_FORWARD_NAMES.has(line))
       .every((lineIsSuccess) => lineIsSuccess === true);
     if (isError) {
-      return { from, to, text, errorStatus: ERROR_STATUS_ERROR };
+      return { from, to, text: edgeText, errorStatus: ERROR_STATUS_ERROR };
     }
     if (isSuccess) {
-      return { from, to, text, errorStatus: ERROR_STATUS_SUCCESS };
+      return { from, to, text: edgeText, errorStatus: ERROR_STATUS_SUCCESS };
     }
-    return { from, to, text, errorStatus: ERROR_STATUS_MIXED };
+    return { from, to, text: edgeText, errorStatus: ERROR_STATUS_MIXED };
   }
 }

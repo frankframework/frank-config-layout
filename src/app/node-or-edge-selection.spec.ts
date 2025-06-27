@@ -2,7 +2,7 @@ import { NodeSequenceEditor, UpdateResponse } from './node-sequence-editor';
 import { NodeOrEdgeSelection } from './node-or-edge-selection';
 import {
   getRange,
-  createText,
+  createEdgeText,
   LayoutBase,
   createGraphForLayers,
   GraphForLayers,
@@ -189,6 +189,6 @@ function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    text: createText(),
+    text: createEdgeText(),
   });
 }

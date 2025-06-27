@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { createText, Text } from '../model/text';
+import { createEdgeText, EdgeText } from '../model/text';
 import { Graph } from '../model/graph';
 
 export interface MermaidNode {
@@ -26,7 +26,7 @@ export interface MermaidNode {
 export interface MermaidEdge {
   from: MermaidNode;
   to: MermaidNode;
-  text: Text;
+  text: EdgeText;
 }
 
 export type MermaidGraph = Graph<MermaidNode, MermaidEdge>;
@@ -50,7 +50,7 @@ export function getGraphFromMermaid(str: string): MermaidGraph {
     const firstPipeIndex = forwardLine.indexOf('|');
     const rawText =
       firstPipeIndex < 0 ? undefined : forwardLine.slice(firstPipeIndex + 1, forwardLine.lastIndexOf('|'));
-    const text: Text = createText(rawText);
+    const text: EdgeText = createEdgeText(rawText);
     if (result.getNodeById(fromId) === undefined) {
       throw new Error(`Intended edge references unknown from node [${fromId}]`);
     }

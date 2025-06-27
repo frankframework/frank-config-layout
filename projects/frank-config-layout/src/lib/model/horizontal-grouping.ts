@@ -15,7 +15,7 @@
 */
 
 import { getRange } from '../util/util';
-import { Text } from './text';
+import { EdgeText } from './text';
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow';
 import { Graph, NodeOrEdge, Connection, WithId, getKey, keyFor } from './graph';
 
@@ -35,7 +35,7 @@ export type OptionalNodeForLayers = NodeForLayers | null;
 export interface EdgeForLayers extends Connection<NodeForLayers> {
   readonly from: NodeForLayers;
   readonly to: NodeForLayers;
-  readonly text: Text;
+  readonly text: EdgeText;
 }
 
 export type OptionalEdgeForLayers = EdgeForLayers | null;

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { SequenceEditorComponent, ManualView, BackgroundClass } from './sequence-editor.component';
 import { NodeSequenceEditor } from '../../node-sequence-editor';
-import { createText, GraphForLayers, createGraphForLayers, ERROR_STATUS_SUCCESS } from 'frank-config-layout';
+import { createEdgeText, GraphForLayers, createGraphForLayers, ERROR_STATUS_SUCCESS } from 'frank-config-layout';
 
 describe('SequenceEditorComponent', () => {
   let component: SequenceEditorComponent;
@@ -50,7 +50,7 @@ function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    text: createText(),
+    text: createEdgeText(),
   });
 }
 

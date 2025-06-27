@@ -1,6 +1,6 @@
 import { NodeSequenceEditor, UpdateResponse } from './node-sequence-editor';
 import {
-  createText,
+  createEdgeText,
   createGraphForLayers,
   GraphForLayers,
   NodeForLayers,
@@ -27,7 +27,7 @@ function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    text: createText(),
+    text: createEdgeText(),
   });
 }
 
