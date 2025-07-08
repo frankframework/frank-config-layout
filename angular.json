@@ -111,7 +111,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/frank-config-layout/ng-package.json"
+            "project": "projects/frank-config-layout/ng-package.json",
+            "tsConfig": "projects/frank-config-layout/tsconfig.lib.json"
           }
         },
         "test": {
