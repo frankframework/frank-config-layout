@@ -78,6 +78,10 @@ function renderDefs(fontSize: number): string {
         font-family: "Inter", "trebuchet ms", serif;
       }
 
+      .rect-text {
+        font-family: "Inter", "trebuchet ms", serif;
+      }
+
       .label-text-wrapper {
         overflow: hidden;
         text-align: center;
@@ -115,23 +119,28 @@ function renderNodes(nodes: readonly PlacedNode[]): string {
   return nodes.map((n) => renderOriginalNode(n)).join('');
 }
 
-function renderOriginalNode(n: PlacedNode): string {
-  // See https://github.com/frankframework/frankframework/issues/9098.
-  return `  <g class="${getNodeGroupClass(n.id)}" transform="translate(${n.horizontalBox.minValue}, ${n.verticalBox.minValue})">
-    <rect class="${getRectangleClass(n)}"
-      width="${n.horizontalBox.size}"
-      height="${n.verticalBox.size}"
+function renderOriginalNode(node: PlacedNode): string {
+  const borderWidth = 4;
+  const fontSize = node.text.startsWith('<a') ? 28 : 16;
+  const innerHeight = node.verticalBox.size - borderWidth * 2;
+  const textY = innerHeight / 2 + fontSize / 2;
+  const textLength = node.horizontalBox.size - borderWidth * 2;
+  return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
+    <rect class="${getRectangleClass(node)}"
+      width="${node.horizontalBox.size}"
+      height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <foreignObject width="${n.horizontalBox.size}" height="${n.verticalBox.size}" style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
+    <text x="${borderWidth}" y="${textY}" textLength="${textLength}" class="rect-text">${node.text}</text>
+  </g>
+`;
+  /*<foreignObject width="${n.horizontalBox.size}" height="${n.verticalBox.size}" style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
       <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
         <div class="rect-text-box">
           ${n.text}
         </div>
       </div>
-    </foreignObject>
-  </g>
-`;
+    </foreignObject>*/
 }
 
 function getNodeGroupClass(id: string): string {
