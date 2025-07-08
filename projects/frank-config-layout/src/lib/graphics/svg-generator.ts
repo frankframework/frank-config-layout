@@ -46,7 +46,7 @@ function renderDefs(fontSize: number): string {
       .rectangle.errorOutline {
         stroke: #ec4758;
       }
-    
+
       .line {
         stroke: #8bc34a;
         stroke-width: 3;
@@ -75,7 +75,7 @@ function renderDefs(fontSize: number): string {
         text-align: center;
         white-space: nowrap;
         text-overflow: ellipsis;
-        font-family: "trebuchet ms";
+        font-family: "Inter", "trebuchet ms", serif;
       }
 
       .label-text-wrapper {
@@ -83,7 +83,7 @@ function renderDefs(fontSize: number): string {
         text-align: center;
         white-space: nowrap;
         text-overflow: ellipsis;
-        font-family: "trebuchet ms";
+        font-family: "Inter", "trebuchet ms", serif;
         font-size: ${fontSize}px;
       }
 
