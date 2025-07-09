@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Drawing, Line, Rectangle } from '../frank-flowchart/frank-flowchart.component';
 import { CalculatedStaticSvgComponent } from '../calculated-static-svg/calculated-static-svg.component';
@@ -61,7 +61,7 @@ export interface OriginalGraphOrError {
   styleUrl: './flow-chart-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.Default,
 })
-export class FlowChartEditorComponent {
+export class FlowChartEditorComponent implements OnInit {
   readonly SHOW_IMAGE = CalculatedStaticSvgComponent.SHOW_IMAGE;
   readonly SHOW_TEXT = CalculatedStaticSvgComponent.SHOW_TEXT;
 
@@ -77,6 +77,13 @@ export class FlowChartEditorComponent {
   selectionInModel: NodeOrEdgeSelection = new NodeOrEdgeSelection();
   showNodeTextInDrawing: boolean = true;
   choiceShowNodeTextInDrawing: NodeCaptionChoice = this.updateShowNodeTextInDrawing();
+
+  ngOnInit(): void {
+    this.mermaidText = globalThis.sessionStorage.getItem('mermaidText') ?? '';
+    if(this.mermaidText !== '') {
+      this.loadMermaid(this.layerNumberAlgorithms[0].key);
+    }
+  }
 
   updateShowNodeTextInDrawing(): NodeCaptionChoice {
     if (this.showNodeTextInDrawing) {
@@ -114,6 +121,7 @@ export class FlowChartEditorComponent {
       return;
     }
     this.loadGraph(graphOrError.graph!, algorithm);
+    globalThis.sessionStorage.setItem('mermaidText', this.mermaidText);
   }
 
   loadGraph(graph: OriginalGraph, algorithm: number): void {
@@ -198,6 +206,11 @@ export class FlowChartEditorComponent {
       edgeLabels: layout.edgeLabels,
       edgeLabelFontSize: this.dimensions.edgeLabelFontSize,
     };
+  }
+
+  resetMermaid(): void{
+    this.mermaidText = '';
+    this.loadMermaid(this.layerNumberAlgorithms[0].key);
   }
 
   static model2layout(
