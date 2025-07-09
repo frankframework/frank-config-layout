@@ -125,22 +125,16 @@ function renderOriginalNode(node: PlacedNode): string {
   const innerHeight = node.verticalBox.size - borderWidth * 2;
   const textY = innerHeight / 2 + fontSize / 2;
   const textLength = node.horizontalBox.size - borderWidth * 2;
+  const nodeText = tempConvertNodeTextToSVGElementText(node.text);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <text x="${borderWidth}" y="${textY}" textLength="${textLength}" class="rect-text">${node.text}</text>
+    <text x="${borderWidth}" y="${textY}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs" class="rect-text">${nodeText}</text>
   </g>
 `;
-  /*<foreignObject width="${n.horizontalBox.size}" height="${n.verticalBox.size}" style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
-        <div class="rect-text-box">
-          ${n.text}
-        </div>
-      </div>
-    </foreignObject>*/
 }
 
 function getNodeGroupClass(id: string): string {
@@ -211,4 +205,17 @@ function renderLabel(label: EdgeLabel): string {
 
 function closeSvg(): string {
   return '</svg>';
+}
+
+function tempConvertNodeTextToSVGElementText(nodeText: string): string {
+  const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
+  let svgText = "";
+  nodeDOM.body.childNodes.forEach((node) => {
+    const name = node.nodeName.toLowerCase();
+    if (name === 'br') return;
+
+    const text = node.textContent;
+    svgText += `<tspan data-html-node=${name}>${text}</tspan>`;
+  })
+  return svgText;
 }
