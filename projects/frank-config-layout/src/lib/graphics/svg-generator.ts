@@ -125,16 +125,17 @@ function renderOriginalNode(node: PlacedNode): string {
   const innerHeight = node.verticalBox.size - borderWidth * 2;
   const textY = innerHeight / 2 + fontSize / 2;
   const textLength = node.horizontalBox.size - borderWidth * 2;
-  const nodeText = tempConvertNodeTextToSVGElementText(node.text);
+  const nodeText = tempConvertNodeTextToSVGElementText(node.text, innerHeight, textLength, borderWidth);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <text x="${borderWidth}" y="${textY}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs" class="rect-text">${nodeText}</text>
+    <text x="${borderWidth}" y="${textY}" class="rect-text">${nodeText}</text>
   </g>
 `;
+  // <text x="${borderWidth}" y="${textY}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs" class="rect-text">${nodeText}</text>
 }
 
 function getNodeGroupClass(id: string): string {
@@ -207,15 +208,37 @@ function closeSvg(): string {
   return '</svg>';
 }
 
-function tempConvertNodeTextToSVGElementText(nodeText: string): string {
+function tempConvertNodeTextToSVGElementText(
+  nodeText: string,
+  innerHeight: number,
+  textLength: number,
+  x: number,
+): string {
   const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
-  let svgText = "";
-  nodeDOM.body.childNodes.forEach((node) => {
-    const name = node.nodeName.toLowerCase();
-    if (name === 'br') return;
+  const nodes = nodeDOM.body.childNodes;
+  const textParts: { name: string; text: string }[] = [];
+  let svgText = '';
 
-    const text = node.textContent;
-    svgText += `<tspan data-html-node=${name}>${text}</tspan>`;
-  })
+  // has to be done this way because childNodes doesn't have an iterator
+  // eslint-disable-next-line unicorn/no-for-loop
+  for (let index = 0; index < nodes.length; index++) {
+    const node = nodes[index];
+    const name = node.nodeName.toLowerCase();
+    if (name === 'br') continue;
+    const text = node.textContent ?? '';
+    textParts.push({ name, text });
+  }
+
+  if (textParts.length === 1) {
+    const { name, text } = textParts[0];
+    return `<tspan data-html-node=${name} textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+  }
+
+  const yPositions = innerHeight / textParts.length; // textParts.length === 1 ? innerHeight / 2 :
+  for (const index in textParts) {
+    const { name, text } = textParts[index];
+    const y = yPositions * (+index + 1);
+    svgText += `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+  }
   return svgText;
 }
