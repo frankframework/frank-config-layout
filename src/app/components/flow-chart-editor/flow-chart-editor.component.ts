@@ -168,6 +168,11 @@ export class FlowChartEditorComponent implements OnInit {
   }
 
   updateDrawing(): void {
+    if (this.layoutModel!.getNumLayers() === 0 || this.layoutModel!.getSequence().length === 0) {
+      this.drawing = null;
+      return;
+    }
+
     const layout = FlowChartEditorComponent.model2layout(this.layoutModel!, this.dimensions, this.originalGraph!);
     this.numCrossingLines = getNumCrossingLines(layout.layoutLineSegments);
     const rectangles: Rectangle[] = layout.nodes

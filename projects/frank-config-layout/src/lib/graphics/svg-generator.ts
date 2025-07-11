@@ -82,6 +82,14 @@ function renderDefs(fontSize: number): string {
         font-family: "Inter", "trebuchet ms", serif;
       }
 
+      .rect-text > tspan[data-html-node="a"] {
+        font-size: 28px;
+      }
+
+      .rect-text > tspan[data-html-node="b"] {
+        font-weight: bold;
+      }
+
       .label-text-wrapper {
         overflow: hidden;
         text-align: center;
@@ -121,21 +129,19 @@ function renderNodes(nodes: readonly PlacedNode[]): string {
 
 function renderOriginalNode(node: PlacedNode): string {
   const borderWidth = 4;
-  const fontSize = node.text.startsWith('<a') ? 28 : 16;
   const innerHeight = node.verticalBox.size - borderWidth * 2;
-  const textY = innerHeight / 2 + fontSize / 2;
-  const textLength = node.horizontalBox.size - borderWidth * 2;
-  const nodeText = tempConvertNodeTextToSVGElementText(node.text, innerHeight, textLength, borderWidth);
+  const innerWidth = node.horizontalBox.size - borderWidth * 2;
+  const nodeText = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <text x="${borderWidth}" y="${textY}" class="rect-text">${nodeText}</text>
+    <!-- innerWidth: ${innerWidth}, innerHeight: ${innerHeight} -->
+    <text class="rect-text">${nodeText}</text>
   </g>
 `;
-  // <text x="${borderWidth}" y="${textY}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs" class="rect-text">${nodeText}</text>
 }
 
 function getNodeGroupClass(id: string): string {
@@ -210,14 +216,13 @@ function closeSvg(): string {
 
 function tempConvertNodeTextToSVGElementText(
   nodeText: string,
+  innerWidth: number,
   innerHeight: number,
-  textLength: number,
-  x: number,
+  baseX: number,
 ): string {
   const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
   const nodes = nodeDOM.body.childNodes;
   const textParts: { name: string; text: string }[] = [];
-  let svgText = '';
 
   // has to be done this way because childNodes doesn't have an iterator
   // eslint-disable-next-line unicorn/no-for-loop
@@ -231,14 +236,33 @@ function tempConvertNodeTextToSVGElementText(
 
   if (textParts.length === 1) {
     const { name, text } = textParts[0];
-    return `<tspan data-html-node=${name} textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+    const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, innerHeight, 0, true);
+    return `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
   }
 
-  const yPositions = innerHeight / textParts.length; // textParts.length === 1 ? innerHeight / 2 :
+  const yPositions = innerHeight / textParts.length;
+  let svgText = '';
   for (const index in textParts) {
     const { name, text } = textParts[index];
-    const y = yPositions * (+index + 1);
+    const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, +index);
     svgText += `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
   }
   return svgText;
+}
+
+function calculateTextPostion(nodeText: string, nodeName: string, baseX: number, innerWidth: number, yPositions: number, nodeIndex: number, singlePart?: boolean): { x: number; y: number; length: number } {
+  const fontSize = nodeName === 'a' ? 28 : 16;
+  const fontWidth = calculateAverageFontCharacterWidth(fontSize);
+  const length = Math.min(nodeText.length * fontWidth, innerWidth);
+  const x = baseX + (innerWidth - length) / 2;
+  const y = singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1);
+  return { x, y, length };
+}
+
+function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): number {
+  // assuming Inter font https://chrishewett.com/blog/calculating-text-width-programmatically/
+  const baseWidthAt100pxSize = 55.4;
+  const baseWidthAt100pxSizeBold = 58.6;
+  const base = bold ? baseWidthAt100pxSizeBold : baseWidthAt100pxSize;
+  return base / 100 * fontSize;
 }
