@@ -15,15 +15,15 @@
 */
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
-import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from '../graphics/layout';
+import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
 export function generateSvg(layout: Layout, edgeLabelFontSize: number): string {
   return (
     openSvg(layout.width, layout.height) +
-    renderDefs(edgeLabelFontSize) +
+    renderDefs() +
     renderNodes(layout.nodes.map((n) => n as PlacedNode)) +
     renderEdges(layout.layoutLineSegments) +
-    renderLabels(layout.edgeLabels) +
+    renderLabels(layout.edgeLabels, edgeLabelFontSize) +
     closeSvg()
   );
 }
@@ -34,7 +34,7 @@ function openSvg(width: number, height: number): string {
 `;
 }
 
-function renderDefs(fontSize: number): string {
+function renderDefs(): string {
   return `  <defs>
     <style>
       .rectangle {
@@ -60,24 +60,6 @@ function renderDefs(fontSize: number): string {
         stroke: #FFDE59;
       }
 
-      .rect-text-wrapper {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-      }
-
-      .rect-text-box {
-        margin: 5px;
-        overflow: hidden;
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-family: "Inter", "trebuchet ms", serif;
-      }
-
       .rect-text {
         font-family: "Inter", "trebuchet ms", serif;
       }
@@ -92,24 +74,6 @@ function renderDefs(fontSize: number): string {
 
       .label-text {
         font-family: "Inter", "trebuchet ms", serif;
-      }
-
-      .label-text-wrapper {
-        overflow: hidden;
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-family: "Inter", "trebuchet ms", serif;
-        font-size: ${fontSize}px;
-      }
-
-      .label-text-box {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
       }
     </style>
     <!-- A marker to be used as an arrowhead -->
@@ -192,19 +156,19 @@ function classOfLine(edge: LayoutLineSegment): string {
   }
 }
 
-function renderLabels(labels: EdgeLabel[]): string {
+function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
   return [
     '  <g text-anchor="middle" dominant-baseline="middle">\n',
-    labels.map((label) => renderLabel(label)).join(''),
+    labels.map((label) => renderLabel(label, edgeLabelFontSize)).join(''),
     '  </g>\n',
   ].join('');
 }
 
-function renderLabel(label: EdgeLabel): string {
+function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
   const fontSize = label.verticalBox.size;
   const textLength = label.horizontalBox.size;
   return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
-      <text class="label-text" x="${textLength / 2}" y="${fontSize / 2}" font-size="${fontSize}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${label.text}</text>
+      <text class="label-text" x="${textLength / 2}" y="${fontSize / 2}" font-size="${edgeLabelFontSize}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${label.text}</text>
     </g>
 `;
 }
