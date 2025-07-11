@@ -90,6 +90,10 @@ function renderDefs(fontSize: number): string {
         font-weight: bold;
       }
 
+      .label-text {
+        font-family: "Inter", "trebuchet ms", serif;
+      }
+
       .label-text-wrapper {
         overflow: hidden;
         text-align: center;
@@ -138,7 +142,6 @@ function renderOriginalNode(node: PlacedNode): string {
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <!-- innerWidth: ${innerWidth}, innerHeight: ${innerHeight} -->
     <text class="rect-text">${nodeText}</text>
   </g>
 `;
@@ -198,14 +201,10 @@ function renderLabels(labels: EdgeLabel[]): string {
 }
 
 function renderLabel(label: EdgeLabel): string {
+  const fontSize = label.verticalBox.size;
+  const textLength = label.horizontalBox.size;
   return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
-      <foreignObject style="width:${label.horizontalBox.size}px; height:${label.verticalBox.size}px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            ${label.text}
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="${textLength / 2}" y="${fontSize / 2}" font-size="${fontSize}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${label.text}</text>
     </g>
 `;
 }
