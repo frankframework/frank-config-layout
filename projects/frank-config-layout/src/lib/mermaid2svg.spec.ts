@@ -51,7 +51,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       .rectangle.errorOutline {
         stroke: #ec4758;
       }
-    
+
       .line {
         stroke: #8bc34a;
         stroke-width: 3;
@@ -65,40 +65,20 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
         stroke: #FFDE59;
       }
 
-      .rect-text-wrapper {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
+      .rect-text {
+        font-family: "Inter", "trebuchet ms", serif;
       }
 
-      .rect-text-box {
-        margin: 5px;
-        overflow: hidden;
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-family: "trebuchet ms";
+      .rect-text > tspan[data-html-node="a"] {
+        font-size: 28px;
       }
 
-      .label-text-wrapper {
-        overflow: hidden;
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-family: "trebuchet ms";
-        font-size: 10px;
+      .rect-text > tspan[data-html-node="b"] {
+        font-weight: bold;
       }
 
-      .label-text-box {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
+      .label-text {
+        font-family: "Inter", "trebuchet ms", serif;
       }
     </style>
     <!-- A marker to be used as an arrowhead -->
@@ -119,13 +99,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject width="160" height="50" style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
-        <div class="rect-text-box">
-          My start
-        </div>
-      </div>
-    </foreignObject>
+    <text class="rect-text"><tspan data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">My start</tspan></text>
   </g>
   <g class="frank-flowchart-node-N1" transform="translate(96, 120)">
     <rect class="rectangle"
@@ -133,13 +107,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject width="160" height="50" style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
-        <div class="rect-text-box">
-          Node 1
-        </div>
-      </div>
-    </foreignObject>
+    <text class="rect-text"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 1</tspan></text>
   </g>
   <g class="frank-flowchart-node-N3" transform="translate(271, 120)">
     <rect class="rectangle errorOutline"
@@ -147,13 +115,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject width="160" height="50" style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
-        <div class="rect-text-box">
-          Node 3
-        </div>
-      </div>
-    </foreignObject>
+    <text class="rect-text"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 3</tspan></text>
   </g>
   <g class="frank-flowchart-node-N2" transform="translate(7, 240)">
     <rect class="rectangle"
@@ -161,13 +123,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject width="160" height="50" style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
-        <div class="rect-text-box">
-          Node 2
-        </div>
-      </div>
-    </foreignObject>
+    <text class="rect-text"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 2</tspan></text>
   </g>
   <g class="frank-flowchart-node-End" transform="translate(125, 360)">
     <rect class="rectangle"
@@ -175,13 +131,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <foreignObject width="160" height="50" style="width:160px; height:50px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
-        <div class="rect-text-box">
-          End node
-        </div>
-      </div>
-    </foreignObject>
+    <text class="rect-text"><tspan data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">End node</tspan></text>
   </g>
   <g class="frank-flowchart-edge-Start-N1">
     <polyline class="line" points="176,49 176,120" marker-end="url(#arrow)"/>
@@ -215,67 +165,25 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   </g>
   <g text-anchor="middle" dominant-baseline="middle">
     <g transform="translate(88, 73)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
     </g>
     <g transform="translate(152, 73)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
     </g>
     <g transform="translate(248, 73)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
     </g>
     <g transform="translate(108, 193)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
     </g>
     <g transform="translate(188, 193)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            failure
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="24.5" y="6.5" font-size="10">failure</text>
     </g>
     <g transform="translate(327, 193)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
     </g>
     <g transform="translate(96, 313)">
-      <foreignObject style="width:49px; height:13px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            success
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
     </g>
   </g>
 </svg>`;
