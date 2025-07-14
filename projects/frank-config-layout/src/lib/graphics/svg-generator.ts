@@ -167,8 +167,10 @@ function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
   const fontSize = label.verticalBox.size;
   const textLength = label.horizontalBox.size;
+  const x = fixedPointFloat(textLength / 2);
+  const y = fixedPointFloat(fontSize / 2);
   return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
-      <text class="label-text" x="${textLength / 2}" y="${fontSize / 2}" font-size="${edgeLabelFontSize}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${label.text}</text>
+      <text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${label.text}</text>
     </g>
 `;
 }
@@ -216,9 +218,9 @@ function tempConvertNodeTextToSVGElementText(
 function calculateTextPostion(nodeText: string, nodeName: string, baseX: number, innerWidth: number, yPositions: number, nodeIndex: number, singlePart?: boolean): { x: number; y: number; length: number } {
   const fontSize = nodeName === 'a' ? 28 : 16;
   const fontWidth = calculateAverageFontCharacterWidth(fontSize);
-  const length = Math.min(nodeText.length * fontWidth, innerWidth);
-  const x = baseX + (innerWidth - length) / 2;
-  const y = singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1);
+  const length = Math.min(fixedPointFloat(nodeText.length * fontWidth), innerWidth);
+  const x = fixedPointFloat(baseX + (innerWidth - length) / 2);
+  const y = fixedPointFloat(singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1));
   return { x, y, length };
 }
 
@@ -228,4 +230,8 @@ function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): n
   const baseWidthAt100pxSizeBold = 58.6;
   const base = bold ? baseWidthAt100pxSizeBold : baseWidthAt100pxSize;
   return base / 100 * fontSize;
+}
+
+export function fixedPointFloat(value: number, digits?: number): number {
+  return +value.toFixed(digits ?? 2);
 }
