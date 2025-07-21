@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng build frank-config-layout-playground && ng serve",
+    "start": "ng build frank-config-layout && ng serve",
     "serve": "ng serve",
     "build": "ng build frank-config-layout",
     "watch": "ng build frank-config-layout-playground --watch --configuration development",

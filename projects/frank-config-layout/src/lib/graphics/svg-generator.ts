@@ -15,15 +15,15 @@
 */
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
-import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from '../graphics/layout';
+import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
 export function generateSvg(layout: Layout, edgeLabelFontSize: number): string {
   return (
     openSvg(layout.width, layout.height) +
-    renderDefs(edgeLabelFontSize) +
+    renderDefs() +
     renderNodes(layout.nodes.map((n) => n as PlacedNode)) +
     renderEdges(layout.layoutLineSegments) +
-    renderLabels(layout.edgeLabels) +
+    renderLabels(layout.edgeLabels, edgeLabelFontSize) +
     closeSvg()
   );
 }
@@ -34,7 +34,7 @@ function openSvg(width: number, height: number): string {
 `;
 }
 
-function renderDefs(fontSize: number): string {
+function renderDefs(): string {
   return `  <defs>
     <style>
       .rectangle {
@@ -46,7 +46,7 @@ function renderDefs(fontSize: number): string {
       .rectangle.errorOutline {
         stroke: #ec4758;
       }
-    
+
       .line {
         stroke: #8bc34a;
         stroke-width: 3;
@@ -60,40 +60,20 @@ function renderDefs(fontSize: number): string {
         stroke: #FFDE59;
       }
 
-      .rect-text-wrapper {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
+      .rect-text {
+        font-family: "Inter", "trebuchet ms", serif;
       }
 
-      .rect-text-box {
-        margin: 5px;
-        overflow: hidden;
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-family: "trebuchet ms";
+      .rect-text > tspan[data-html-node="a"] {
+        font-size: 28px;
       }
 
-      .label-text-wrapper {
-        overflow: hidden;
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-family: "trebuchet ms";
-        font-size: ${fontSize}px;
+      .rect-text > tspan[data-html-node="b"] {
+        font-weight: bold;
       }
 
-      .label-text-box {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
+      .label-text {
+        font-family: "Inter", "trebuchet ms", serif;
       }
     </style>
     <!-- A marker to be used as an arrowhead -->
@@ -115,21 +95,18 @@ function renderNodes(nodes: readonly PlacedNode[]): string {
   return nodes.map((n) => renderOriginalNode(n)).join('');
 }
 
-function renderOriginalNode(n: PlacedNode): string {
-  // See https://github.com/frankframework/frankframework/issues/9098.
-  return `  <g class="${getNodeGroupClass(n.id)}" transform="translate(${n.horizontalBox.minValue}, ${n.verticalBox.minValue})">
-    <rect class="${getRectangleClass(n)}"
-      width="${n.horizontalBox.size}"
-      height="${n.verticalBox.size}"
+function renderOriginalNode(node: PlacedNode): string {
+  const borderWidth = 4;
+  const innerHeight = node.verticalBox.size - borderWidth * 2;
+  const innerWidth = node.horizontalBox.size - borderWidth * 2;
+  const nodeText = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
+  return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
+    <rect class="${getRectangleClass(node)}"
+      width="${node.horizontalBox.size}"
+      height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <foreignObject width="${n.horizontalBox.size}" height="${n.verticalBox.size}" style="width:${n.horizontalBox.size}px; height:${n.verticalBox.size}px">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper" style="position: fixed">
-        <div class="rect-text-box">
-          ${n.text}
-        </div>
-      </div>
-    </foreignObject>
+    <text class="rect-text">${nodeText}</text>
   </g>
 `;
 }
@@ -179,27 +156,82 @@ function classOfLine(edge: LayoutLineSegment): string {
   }
 }
 
-function renderLabels(labels: EdgeLabel[]): string {
+function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
   return [
     '  <g text-anchor="middle" dominant-baseline="middle">\n',
-    labels.map((label) => renderLabel(label)).join(''),
+    labels.map((label) => renderLabel(label, edgeLabelFontSize)).join(''),
     '  </g>\n',
   ].join('');
 }
 
-function renderLabel(label: EdgeLabel): string {
+function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
+  const fontSize = label.verticalBox.size;
+  const textLength = label.horizontalBox.size;
+  const x = fixedPointFloat(textLength / 2);
+  const y = fixedPointFloat(fontSize / 2);
   return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
-      <foreignObject style="width:${label.horizontalBox.size}px; height:${label.verticalBox.size}px">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper">
-          <div class="label-text-box" >
-            ${label.text}
-          </div>
-        </div>
-      </foreignObject>
+      <text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${label.text}</text>
     </g>
 `;
 }
 
 function closeSvg(): string {
   return '</svg>';
+}
+
+function tempConvertNodeTextToSVGElementText(
+  nodeText: string,
+  innerWidth: number,
+  innerHeight: number,
+  baseX: number,
+): string {
+  const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
+  const nodes = nodeDOM.body.childNodes;
+  const textParts: { name: string; text: string }[] = [];
+
+  // has to be done this way because childNodes doesn't have an iterator
+  // eslint-disable-next-line unicorn/no-for-loop
+  for (let index = 0; index < nodes.length; index++) {
+    const node = nodes[index];
+    const name = node.nodeName.toLowerCase();
+    if (name === 'br') continue;
+    const text = node.textContent ?? '';
+    textParts.push({ name, text });
+  }
+
+  if (textParts.length === 1) {
+    const { name, text } = textParts[0];
+    const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, innerHeight, 0, true);
+    return `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+  }
+
+  const yPositions = innerHeight / textParts.length;
+  let svgText = '';
+  for (const index in textParts) {
+    const { name, text } = textParts[index];
+    const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, +index);
+    svgText += `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+  }
+  return svgText;
+}
+
+function calculateTextPostion(nodeText: string, nodeName: string, baseX: number, innerWidth: number, yPositions: number, nodeIndex: number, singlePart?: boolean): { x: number; y: number; length: number } {
+  const fontSize = nodeName === 'a' ? 28 : 16;
+  const fontWidth = calculateAverageFontCharacterWidth(fontSize);
+  const length = Math.min(fixedPointFloat(nodeText.length * fontWidth), innerWidth);
+  const x = fixedPointFloat(baseX + (innerWidth - length) / 2);
+  const y = fixedPointFloat(singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1));
+  return { x, y, length };
+}
+
+function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): number {
+  // assuming Inter font https://chrishewett.com/blog/calculating-text-width-programmatically/
+  const baseWidthAt100pxSize = 55.4;
+  const baseWidthAt100pxSizeBold = 58.6;
+  const base = bold ? baseWidthAt100pxSizeBold : baseWidthAt100pxSize;
+  return base / 100 * fontSize;
+}
+
+export function fixedPointFloat(value: number, digits?: number): number {
+  return +value.toFixed(digits ?? 2);
 }

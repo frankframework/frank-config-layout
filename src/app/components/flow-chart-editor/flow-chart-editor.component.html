@@ -8,6 +8,9 @@
       <button class="loadButton" *ngFor="let alg of layerNumberAlgorithms" (click)="loadMermaid(alg.key)">
         Load with {{ alg.value }} algorithm
       </button>
+      <button class="loadButton" (click)="resetMermaid()">
+        Reset
+      </button>
     </td>
     <td>
       <table id="values">
