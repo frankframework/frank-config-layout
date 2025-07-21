@@ -1,6 +1,6 @@
 {
   "name": "@frankframework/frank-config-layout",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Calculate a nice layout for Frank configurations",
   "main": "master",
   "author": "Lenard van der Maas and Martijn Dirkse",
