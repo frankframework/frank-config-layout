@@ -6,7 +6,7 @@
     "start": "ng build frank-config-layout && ng serve",
     "serve": "ng serve",
     "build": "ng build frank-config-layout",
-    "test": "ng test frank-config-layout",
+    "test": "ng test frank-config-layout --no-watch --no-progress --browsers=ChromeHeadless",
     "test:playground": "ng test frank-config-layout-playground",
     "watch": "ng build frank-config-layout --watch",
     "watch:playground": "ng build frank-config-layout --watch"
