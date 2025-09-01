@@ -106,7 +106,7 @@ function renderOriginalNode(node: PlacedNode): string {
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <text class="rect-text">${nodeText}</text>
+    <text class="rect-text" textLength="${innerWidth}" lengthAdjust="spacingAndGlyphs">${nodeText}</text>
   </g>
 `;
 }
@@ -219,7 +219,7 @@ function calculateTextPostion(nodeText: string, nodeName: string, baseX: number,
   const fontSize = nodeName === 'a' ? 28 : 16;
   const fontWidth = calculateAverageFontCharacterWidth(fontSize);
   const length = Math.min(fixedPointFloat(nodeText.length * fontWidth), innerWidth);
-  const x = fixedPointFloat(baseX + (innerWidth - length) / 2);
+  const x = isFirefox() ? baseX :fixedPointFloat(baseX + (innerWidth - length) / 2);
   const y = fixedPointFloat(singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1));
   return { x, y, length };
 }
@@ -234,4 +234,8 @@ function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): n
 
 export function fixedPointFloat(value: number, digits?: number): number {
   return +value.toFixed(digits ?? 2);
+}
+
+export function isFirefox() {
+  return navigator.userAgent.toLowerCase().includes('firefox');
 }
