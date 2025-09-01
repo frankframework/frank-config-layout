@@ -99,7 +99,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <text class="rect-text" textLength="152" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">My start</tspan></text>
+    <text class="rect-text" textLength="70.91" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">My start</tspan></text>
   </g>
   <g class="frank-flowchart-node-N1" transform="translate(96, 120)">
     <rect class="rectangle"
@@ -107,7 +107,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <text class="rect-text" textLength="152" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 1</tspan></text>
+    <text class="rect-text" textLength="53.18" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 1</tspan></text>
   </g>
   <g class="frank-flowchart-node-N3" transform="translate(271, 120)">
     <rect class="rectangle errorOutline"
@@ -115,7 +115,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <text class="rect-text" textLength="152" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 3</tspan></text>
+    <text class="rect-text" textLength="53.18" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 3</tspan></text>
   </g>
   <g class="frank-flowchart-node-N2" transform="translate(7, 240)">
     <rect class="rectangle"
@@ -123,7 +123,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <text class="rect-text" textLength="152" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 2</tspan></text>
+    <text class="rect-text" textLength="53.18" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 2</tspan></text>
   </g>
   <g class="frank-flowchart-node-End" transform="translate(125, 360)">
     <rect class="rectangle"
@@ -131,7 +131,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       height="50"
       rx="5">
     </rect>
-    <text class="rect-text" textLength="152" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">End node</tspan></text>
+    <text class="rect-text" textLength="70.91" lengthAdjust="spacingAndGlyphs"><tspan data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">End node</tspan></text>
   </g>
   <g class="frank-flowchart-edge-Start-N1">
     <polyline class="line" points="176,49 176,120" marker-end="url(#arrow)"/>

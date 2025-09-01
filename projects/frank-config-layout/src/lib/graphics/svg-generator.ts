@@ -99,14 +99,14 @@ function renderOriginalNode(node: PlacedNode): string {
   const borderWidth = 4;
   const innerHeight = node.verticalBox.size - borderWidth * 2;
   const innerWidth = node.horizontalBox.size - borderWidth * 2;
-  const nodeText = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
+  const { svgText, totalTextLength } = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <text class="rect-text" textLength="${innerWidth}" lengthAdjust="spacingAndGlyphs">${nodeText}</text>
+    <text class="rect-text" textLength="${totalTextLength}" lengthAdjust="spacingAndGlyphs">${svgText}</text>
   </g>
 `;
 }
@@ -184,7 +184,7 @@ function tempConvertNodeTextToSVGElementText(
   innerWidth: number,
   innerHeight: number,
   baseX: number,
-): string {
+): { svgText: string, totalTextLength: number } {
   const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
   const nodes = nodeDOM.body.childNodes;
   const textParts: { name: string; text: string }[] = [];
@@ -200,26 +200,33 @@ function tempConvertNodeTextToSVGElementText(
   }
 
   if (textParts.length === 1) {
-    const { name, text } = textParts[0];
-    const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, innerHeight, 0, true);
-    return `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+    const { svgText, textLength } = createSVGTextElement(0, textParts, baseX, innerWidth, innerHeight, true);
+    return { svgText, totalTextLength: textLength };
   }
 
   const yPositions = innerHeight / textParts.length;
-  let svgText = '';
+  let totalSvgText = '';
+  let totalTextLength = 0;
   for (const index in textParts) {
-    const { name, text } = textParts[index];
-    const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, +index);
-    svgText += `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+    const { svgText, textLength } = createSVGTextElement(+index, textParts, baseX, innerWidth, yPositions);
+    totalSvgText += svgText;
+    totalTextLength += textLength;
   }
-  return svgText;
+  return { svgText: totalSvgText, totalTextLength };
+}
+
+function createSVGTextElement(index: number, textParts: { name: string, text: string }[], baseX: number, innerWidth: number, yPositions: number, singlePart?: boolean): { svgText: string, textLength: number } {
+  const { name, text } = textParts[index];
+  const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, index, singlePart);
+  const svgText = `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
+  return { svgText, textLength };
 }
 
 function calculateTextPostion(nodeText: string, nodeName: string, baseX: number, innerWidth: number, yPositions: number, nodeIndex: number, singlePart?: boolean): { x: number; y: number; length: number } {
   const fontSize = nodeName === 'a' ? 28 : 16;
   const fontWidth = calculateAverageFontCharacterWidth(fontSize);
   const length = Math.min(fixedPointFloat(nodeText.length * fontWidth), innerWidth);
-  const x = isFirefox() ? baseX :fixedPointFloat(baseX + (innerWidth - length) / 2);
+  const x = fixedPointFloat(baseX + (innerWidth - length) / 2);
   const y = fixedPointFloat(singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1));
   return { x, y, length };
 }
@@ -234,8 +241,4 @@ function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): n
 
 export function fixedPointFloat(value: number, digits?: number): number {
   return +value.toFixed(digits ?? 2);
-}
-
-export function isFirefox() {
-  return navigator.userAgent.toLowerCase().includes('firefox');
 }
