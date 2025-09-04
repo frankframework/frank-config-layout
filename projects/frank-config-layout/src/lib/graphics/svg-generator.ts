@@ -64,11 +64,11 @@ function renderDefs(): string {
         font-family: "Inter", "trebuchet ms", serif;
       }
 
-      .rect-text > tspan[data-html-node="a"] {
+      .rect-text > text[data-html-node="a"] {
         font-size: 28px;
       }
 
-      .rect-text > tspan[data-html-node="b"] {
+      .rect-text > text[data-html-node="b"] {
         font-weight: bold;
       }
 
@@ -99,14 +99,14 @@ function renderOriginalNode(node: PlacedNode): string {
   const borderWidth = 4;
   const innerHeight = node.verticalBox.size - borderWidth * 2;
   const innerWidth = node.horizontalBox.size - borderWidth * 2;
-  const { svgText, totalTextLength } = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
+  const { svgText } = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <text class="rect-text" textLength="${totalTextLength}" lengthAdjust="spacingAndGlyphs">${svgText}</text>
+    <g class="rect-text">${svgText}</g>
   </g>
 `;
 }
@@ -184,7 +184,7 @@ function tempConvertNodeTextToSVGElementText(
   innerWidth: number,
   innerHeight: number,
   baseX: number,
-): { svgText: string, totalTextLength: number } {
+): { svgText: string } {
   const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
   const nodes = nodeDOM.body.childNodes;
   const textParts: { name: string; text: string }[] = [];
@@ -200,29 +200,46 @@ function tempConvertNodeTextToSVGElementText(
   }
 
   if (textParts.length === 1) {
-    const { svgText, textLength } = createSVGTextElement(0, textParts, baseX, innerWidth, innerHeight, true);
-    return { svgText, totalTextLength: textLength };
+    const { svgText } = createSVGTextElement(0, textParts, baseX, innerWidth, innerHeight, true);
+    return { svgText };
   }
 
   const yPositions = innerHeight / textParts.length;
   let totalSvgText = '';
-  let totalTextLength = 0;
   for (const index in textParts) {
-    const { svgText, textLength } = createSVGTextElement(+index, textParts, baseX, innerWidth, yPositions);
+    const { svgText } = createSVGTextElement(+index, textParts, baseX, innerWidth, yPositions);
     totalSvgText += svgText;
-    totalTextLength += textLength;
   }
-  return { svgText: totalSvgText, totalTextLength };
+  return { svgText: totalSvgText };
 }
 
-function createSVGTextElement(index: number, textParts: { name: string, text: string }[], baseX: number, innerWidth: number, yPositions: number, singlePart?: boolean): { svgText: string, textLength: number } {
+function createSVGTextElement(
+  index: number,
+  textParts: { name: string; text: string }[],
+  baseX: number,
+  innerWidth: number,
+  yPositions: number,
+  singlePart?: boolean,
+): { svgText: string } {
   const { name, text } = textParts[index];
-  const { x, y, length: textLength } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, index, singlePart);
-  const svgText = `<tspan data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</tspan>`;
-  return { svgText, textLength };
+  const {
+    x,
+    y,
+    length: textLength,
+  } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, index, singlePart);
+  const svgText = `<text data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</text>`;
+  return { svgText };
 }
 
-function calculateTextPostion(nodeText: string, nodeName: string, baseX: number, innerWidth: number, yPositions: number, nodeIndex: number, singlePart?: boolean): { x: number; y: number; length: number } {
+function calculateTextPostion(
+  nodeText: string,
+  nodeName: string,
+  baseX: number,
+  innerWidth: number,
+  yPositions: number,
+  nodeIndex: number,
+  singlePart?: boolean,
+): { x: number; y: number; length: number } {
   const fontSize = nodeName === 'a' ? 28 : 16;
   const fontWidth = calculateAverageFontCharacterWidth(fontSize);
   const length = Math.min(fixedPointFloat(nodeText.length * fontWidth), innerWidth);
@@ -236,7 +253,7 @@ function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): n
   const baseWidthAt100pxSize = 55.4;
   const baseWidthAt100pxSizeBold = 58.6;
   const base = bold ? baseWidthAt100pxSizeBold : baseWidthAt100pxSize;
-  return base / 100 * fontSize;
+  return (base / 100) * fontSize;
 }
 
 export function fixedPointFloat(value: number, digits?: number): number {
