@@ -15,13 +15,17 @@
 */
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
+import { NodeText, NodeTextPart } from '../model/text';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
-export function generateSvg(layout: Layout, edgeLabelFontSize: number): string {
+export function generateSvg(layout: Layout, edgeLabelFontSize: number, border: number): string {
   return (
     openSvg(layout.width, layout.height) +
     renderDefs() +
-    renderNodes(layout.nodes.map((n) => n as PlacedNode)) +
+    renderNodes(
+      layout.nodes.map((n) => n as PlacedNode),
+      border,
+    ) +
     renderEdges(layout.layoutLineSegments) +
     renderLabels(layout.edgeLabels, edgeLabelFontSize) +
     closeSvg()
@@ -91,15 +95,12 @@ function renderDefs(): string {
 `;
 }
 
-function renderNodes(nodes: readonly PlacedNode[]): string {
-  return nodes.map((n) => renderOriginalNode(n)).join('');
+function renderNodes(nodes: readonly PlacedNode[], border: number): string {
+  return nodes.map((n) => renderOriginalNode(n, border)).join('');
 }
 
-function renderOriginalNode(node: PlacedNode): string {
-  const borderWidth = 4;
-  const innerHeight = node.verticalBox.size - borderWidth * 2;
-  const innerWidth = node.horizontalBox.size - borderWidth * 2;
-  const { svgText } = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
+function renderOriginalNode(node: PlacedNode, border: number): string {
+  const svgText = getSvgTextElements(node, border);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
@@ -167,8 +168,8 @@ function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
   const fontSize = label.verticalBox.size;
   const textLength = label.horizontalBox.size;
-  const x = fixedPointFloat(textLength / 2);
-  const y = fixedPointFloat(fontSize / 2);
+  const x = Math.round(textLength / 2);
+  const y = Math.round(fontSize / 2);
   return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
       <text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${label.text}</text>
     </g>
@@ -179,83 +180,27 @@ function closeSvg(): string {
   return '</svg>';
 }
 
-function tempConvertNodeTextToSVGElementText(
-  nodeText: string,
-  innerWidth: number,
-  innerHeight: number,
-  baseX: number,
-): { svgText: string } {
-  const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
-  const nodes = nodeDOM.body.childNodes;
-  const textParts: { name: string; text: string }[] = [];
-
-  // has to be done this way because childNodes doesn't have an iterator
-  // eslint-disable-next-line unicorn/no-for-loop
-  for (let index = 0; index < nodes.length; index++) {
-    const node = nodes[index];
-    const name = node.nodeName.toLowerCase();
-    if (name === 'br') continue;
-    const text = node.textContent ?? '';
-    textParts.push({ name, text });
+function getSvgTextElements(node: PlacedNode, border: number): string {
+  const nodeText: NodeText = node.text;
+  if (nodeText.parts.length === 1) {
+    const textPart = nodeText.parts[0];
+    const x = border;
+    const y = Math.round(node.verticalBox.size / 2 + textPart.fontSize / 2);
+    return getSvgTextElement(textPart, x, y);
   }
-
-  if (textParts.length === 1) {
-    const { svgText } = createSVGTextElement(0, textParts, baseX, innerWidth, innerHeight, true);
-    return { svgText };
-  }
-
-  const yPositions = innerHeight / textParts.length;
   let totalSvgText = '';
-  for (const index in textParts) {
-    const { svgText } = createSVGTextElement(+index, textParts, baseX, innerWidth, yPositions);
-    totalSvgText += svgText;
+  const innerHeight: number = node.verticalBox.size - 2 * border;
+  const innerWidth: number = node.horizontalBox.size - 2 * border;
+  const yStep = innerHeight / nodeText.parts.length;
+  for (let index = 0; index < nodeText.parts.length; ++index) {
+    const textPart = nodeText.parts[index];
+    const x = Math.round(border + (innerWidth - textPart.innerWidth) / 2);
+    const y = Math.round(border + yStep * (index + 1));
+    totalSvgText += getSvgTextElement(textPart, x, y);
   }
-  return { svgText: totalSvgText };
+  return totalSvgText;
 }
 
-function createSVGTextElement(
-  index: number,
-  textParts: { name: string; text: string }[],
-  baseX: number,
-  innerWidth: number,
-  yPositions: number,
-  singlePart?: boolean,
-): { svgText: string } {
-  const { name, text } = textParts[index];
-  const {
-    x,
-    y,
-    length: textLength,
-  } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, index, singlePart);
-  const svgText = `<text data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</text>`;
-  return { svgText };
-}
-
-function calculateTextPostion(
-  nodeText: string,
-  nodeName: string,
-  baseX: number,
-  innerWidth: number,
-  yPositions: number,
-  nodeIndex: number,
-  singlePart?: boolean,
-): { x: number; y: number; length: number } {
-  const fontSize = nodeName === 'a' ? 28 : 16;
-  const fontWidth = calculateAverageFontCharacterWidth(fontSize);
-  const length = Math.min(fixedPointFloat(nodeText.length * fontWidth), innerWidth);
-  const x = fixedPointFloat(baseX + (innerWidth - length) / 2);
-  const y = fixedPointFloat(singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1));
-  return { x, y, length };
-}
-
-function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): number {
-  // assuming Inter font https://chrishewett.com/blog/calculating-text-width-programmatically/
-  const baseWidthAt100pxSize = 55.4;
-  const baseWidthAt100pxSizeBold = 58.6;
-  const base = bold ? baseWidthAt100pxSizeBold : baseWidthAt100pxSize;
-  return (base / 100) * fontSize;
-}
-
-export function fixedPointFloat(value: number, digits?: number): number {
-  return +value.toFixed(digits ?? 2);
+function getSvgTextElement(textPart: NodeTextPart, x: number, y: number): string {
+  return `<text data-html-node=${textPart.name} x="${x}" y="${y}" textLength="${textPart.innerWidth}" lengthAdjust="spacingAndGlyphs">${textPart.text}</text>`;
 }

@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Text } from './text';
+import { EdgeText, NodeText } from './text';
 import { Graph } from './graph';
 import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser';
 
@@ -39,14 +39,14 @@ export const ERROR_STATUS_ERROR = 2;
 
 export interface OriginalNode {
   id: string;
-  text: string;
+  text: NodeText;
   errorStatus: number;
 }
 
 export interface OriginalEdge {
   from: OriginalNode;
   to: OriginalNode;
-  text: Text;
+  text: EdgeText;
   errorStatus: number;
 }
 
@@ -78,7 +78,7 @@ function transformNode(n: MermaidNode): OriginalNode {
   }
 }
 
-function transformEdge(from: OriginalNode, to: OriginalNode, text: Text): OriginalEdge {
+function transformEdge(from: OriginalNode, to: OriginalNode, text: EdgeText): OriginalEdge {
   if (from.errorStatus === ERROR_STATUS_ERROR) {
     return { from, to, text, errorStatus: ERROR_STATUS_ERROR };
   }
