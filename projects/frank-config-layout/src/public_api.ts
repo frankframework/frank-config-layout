@@ -89,7 +89,11 @@ export async function mermaid2svgStatistics(mermaid: string): Promise<SvgResult>
 
 export { getRange, rotateToSwapItems, permutationFrom } from './lib/util/util';
 export { getKey } from './lib/model/graph';
-export { EdgeText as Text, createEdgeText as createText } from './lib/model/text';
+export {
+  EdgeText as Text,
+  createEdgeText as createText,
+  createIntermediateNodeText as createDummyNodeText,
+} from './lib/model/text';
 export { getGraphFromMermaid } from './lib/parsing/mermaid-parser';
 export {
   findErrorFlow,

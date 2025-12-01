@@ -5,6 +5,7 @@ import {
   GraphForLayers,
   NodeForLayers,
   ERROR_STATUS_SUCCESS,
+  createDummyNodeText,
 } from 'frank-config-layout';
 
 function getInstanceToCheckOrdering(): NodeSequenceEditor {
@@ -20,7 +21,7 @@ function getInstanceToCheckOrdering(): NodeSequenceEditor {
 }
 
 function newTestNode(id: string, layer: number): NodeForLayers {
-  return { id, layer, text: '', errorStatus: ERROR_STATUS_SUCCESS };
+  return { id, layer, text: createDummyNodeText(), errorStatus: ERROR_STATUS_SUCCESS };
 }
 
 function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
