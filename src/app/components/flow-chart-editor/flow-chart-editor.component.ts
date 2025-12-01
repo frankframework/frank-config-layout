@@ -138,7 +138,7 @@ export class FlowChartEditorComponent implements OnInit {
   mermaid2graph(text: string): OriginalGraphOrError {
     let graph: OriginalGraph;
     try {
-      const b = getGraphFromMermaid(text);
+      const b = getGraphFromMermaid(text, this.dimensions);
       graph = findErrorFlow(b);
     } catch (error) {
       return { graph: null, error: `Invalid mermaid text: ${(error as Error).message}` };

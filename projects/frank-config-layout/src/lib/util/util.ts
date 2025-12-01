@@ -144,3 +144,8 @@ export class NumbersAroundZero {
     return previous;
   }
 }
+
+// Taken from chat, looks good.
+export function sumOf(numbers: number[]): number {
+  return numbers.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+}

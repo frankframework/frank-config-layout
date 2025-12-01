@@ -16,6 +16,7 @@
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
 import { NodeText, NodeTextPart } from '../model/text';
+import { sumOf } from '../util/util';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
 export function generateSvg(layout: Layout, edgeLabelFontSize: number, border: number): string {
@@ -190,13 +191,15 @@ function getSvgTextElements(node: PlacedNode, border: number): string {
   }
   let totalSvgText = '';
   const innerHeight: number = node.verticalBox.size - 2 * border;
+  const rawVerticalSpaceBetweenLines: number = innerHeight - sumOf(nodeText.parts.map((p) => p.fontSize));
+  const verticalSpaceBetweenLines = Math.max(rawVerticalSpaceBetweenLines, 0);
   const innerWidth: number = node.horizontalBox.size - 2 * border;
-  const yStep = innerHeight / nodeText.parts.length;
-  for (let index = 0; index < nodeText.parts.length; ++index) {
-    const textPart = nodeText.parts[index];
+  let currentY = border;
+  for (const textPart of nodeText.parts) {
     const x = Math.round(border + (innerWidth - textPart.innerWidth) / 2);
-    const y = Math.round(border + yStep * (index + 1));
+    const y = Math.round(currentY + textPart.fontSize);
     totalSvgText += getSvgTextElement(textPart, x, y);
+    currentY += textPart.fontSize + verticalSpaceBetweenLines;
   }
   return totalSvgText;
 }
