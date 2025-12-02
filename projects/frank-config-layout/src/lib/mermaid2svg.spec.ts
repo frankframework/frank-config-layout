@@ -2,9 +2,8 @@ import { Mermaid2svgService } from './mermaid2svg';
 import { Dimensions, SvgResult } from '../public_api';
 
 const dimensions: Dimensions = {
-  bigFontSize: 28,
-  smallFontSize: 16,
-  border: 4,
+  nodeTextFontSize: 16,
+  nodeTextBorder: 4,
   layerHeight: 50,
   layerDistance: 120,
   nodeBoxHeight: 50,

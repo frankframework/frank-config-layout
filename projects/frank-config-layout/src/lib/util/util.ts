@@ -14,6 +14,10 @@
    limitations under the License.
 */
 
+import { Box } from '../graphics/box';
+import { Point } from '../graphics/graphics';
+import { Interval } from './interval';
+
 // This can be done in a more concise way, see StackOverflow:
 // https://stackoverflow.com/questions/36947847/how-to-generate-range-of-numbers-from-0-to-n-in-es2015-only
 // However, the syntax applied there does not look so clear.
@@ -145,7 +149,37 @@ export class NumbersAroundZero {
   }
 }
 
-// Taken from chat, looks good.
-export function sumOf(numbers: number[]): number {
-  return numbers.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+export interface ArrangeInBoxParameters {
+  container: Box;
+  border: number;
+  commonItemHeight: number;
+  itemWidths: number[];
+}
+
+export function arrangeInBox(parameters: ArrangeInBoxParameters): Point[] {
+  if (parameters.itemWidths.length === 0) {
+    return [];
+  } else if (parameters.itemWidths.length === 1) {
+    return [
+      new Point(
+        Math.round(parameters.container.horizontalBox.center - parameters.itemWidths[0] / 2),
+        Math.round(parameters.container.verticalBox.center + parameters.commonItemHeight / 2),
+      ),
+    ];
+  } else {
+    const innerHeight: number = parameters.container.verticalBox.size - 2 * parameters.border;
+    const rawTotalVerticalSpaceBetweenLines: number =
+      innerHeight - parameters.itemWidths.length * parameters.commonItemHeight;
+    const verticalSpaceBetweenLines =
+      Math.max(rawTotalVerticalSpaceBetweenLines, 0) / (parameters.itemWidths.length - 1);
+    const result: Point[] = [];
+    let currentY = parameters.container.verticalBox.minValue + parameters.border;
+    for (const currentItemWidth of parameters.itemWidths) {
+      const x = Interval.createFromCenterSize(parameters.container.horizontalBox.center, currentItemWidth).minValue;
+      const y = Math.round(currentY + parameters.commonItemHeight);
+      result.push(new Point(x, y));
+      currentY += parameters.commonItemHeight + verticalSpaceBetweenLines;
+    }
+    return result;
+  }
 }

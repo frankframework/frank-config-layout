@@ -15,9 +15,8 @@
 */
 
 export interface NodeTextDimensions {
-  bigFontSize: number; // 28
-  smallFontSize: number; // 16
-  border: number;
+  nodeTextFontSize: number; // 16
+  nodeTextBorder: number;
 }
 
 export interface EdgeText {
@@ -30,7 +29,6 @@ export interface EdgeText {
 export interface NodeTextPart {
   readonly name: string;
   readonly text: string;
-  readonly fontSize: number;
   readonly innerWidth: number;
   readonly outerWidth: number;
 }
@@ -78,19 +76,18 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
     html,
     parts: textParts,
     innerWidth,
-    outerWidth: innerWidth + 2 * d.border,
+    outerWidth: innerWidth + 2 * d.nodeTextBorder,
   };
 }
 
 function createNodeTextPart(nodeName: string, text: string, d: NodeTextDimensions): NodeTextPart {
-  const fontSize: number = nodeName === 'a' ? d.bigFontSize : d.smallFontSize;
-  const fontWidth: number = calculateAverageFontCharacterWidth(fontSize);
+  // TODO: Calculate this only once.
+  const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize);
   const innerWidth: number = Math.round(text.length * fontWidth);
-  const outerWidth: number = innerWidth + 2 * d.border;
+  const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;
   return {
     name: nodeName,
     text,
-    fontSize,
     innerWidth,
     outerWidth,
   };

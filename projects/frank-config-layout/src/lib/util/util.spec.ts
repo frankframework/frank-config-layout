@@ -1,3 +1,6 @@
+import { Box } from '../graphics/box';
+import { Point } from '../graphics/graphics';
+import { Interval } from './interval';
 import {
   doRotateToSwapItems,
   getRange,
@@ -6,6 +9,7 @@ import {
   roundedMedian,
   sortedUniqNumbers,
   NumbersAroundZero,
+  arrangeInBox,
 } from './util';
 
 describe('Util test', () => {
@@ -156,5 +160,31 @@ describe('Util test', () => {
     expect(instance.next()).toEqual(1);
     expect(instance.next()).toEqual(-2);
     expect(instance.next()).toEqual(2);
+  });
+
+  it('When arrangeInBox arranges one item then it appears in the center of the container', () => {
+    const actual: Point[] = arrangeInBox({
+      container: new Box(Interval.createFromMinMax(10, 110), Interval.createFromMinMax(20, 70)),
+      border: 10,
+      commonItemHeight: 10,
+      itemWidths: [20],
+    });
+    expect(actual.length).toEqual(1);
+    expect(actual[0].x).toEqual(Interval.createFromCenterSize(Interval.createFromMinMax(10, 110).center, 20).minValue);
+    expect(actual[0].y).toEqual(50);
+  });
+
+  it('When arrangeInBox arranges two items then they are equally spaced over the inner height vertically and centered horizontally', () => {
+    const actual: Point[] = arrangeInBox({
+      container: new Box(Interval.createFromMinMax(10, 110), Interval.createFromMinMax(20, 85)),
+      border: 20,
+      commonItemHeight: 10,
+      itemWidths: [20, 30],
+    });
+    expect(actual.length).toEqual(2);
+    expect(actual[0].x).toEqual(50);
+    expect(actual[1].x).toEqual(45);
+    expect(actual[0].y).toEqual(50);
+    expect(actual[1].y).toEqual(66);
   });
 });

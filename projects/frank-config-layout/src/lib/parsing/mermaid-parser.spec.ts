@@ -47,8 +47,7 @@ d2e2 --> |success| d2e12
 // Dummy dimensions
 function dimensions(): NodeTextDimensions {
   return {
-    bigFontSize: 28,
-    smallFontSize: 16,
-    border: 4,
+    nodeTextFontSize: 16,
+    nodeTextBorder: 4,
   };
 }

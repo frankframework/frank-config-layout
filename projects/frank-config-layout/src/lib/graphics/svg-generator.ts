@@ -16,16 +16,21 @@
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
 import { NodeText, NodeTextPart } from '../model/text';
-import { sumOf } from '../util/util';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
-export function generateSvg(layout: Layout, edgeLabelFontSize: number, border: number): string {
+export function generateSvg(
+  layout: Layout,
+  nodeTextFontSize: number,
+  edgeLabelFontSize: number,
+  border: number,
+): string {
   return (
     openSvg(layout.width, layout.height) +
     renderDefs() +
     renderNodes(
       layout.nodes.map((n) => n as PlacedNode),
       border,
+      nodeTextFontSize,
     ) +
     renderEdges(layout.layoutLineSegments) +
     renderLabels(layout.edgeLabels, edgeLabelFontSize) +
@@ -96,12 +101,12 @@ function renderDefs(): string {
 `;
 }
 
-function renderNodes(nodes: readonly PlacedNode[], border: number): string {
-  return nodes.map((n) => renderOriginalNode(n, border)).join('');
+function renderNodes(nodes: readonly PlacedNode[], border: number, nodeTextFontSize: number): string {
+  return nodes.map((n) => renderOriginalNode(n, border, nodeTextFontSize)).join('');
 }
 
-function renderOriginalNode(node: PlacedNode, border: number): string {
-  const svgText = getSvgTextElements(node, border);
+function renderOriginalNode(node: PlacedNode, border: number, nodeTextFontSize: number): string {
+  const svgText = getSvgTextElements(node, border, nodeTextFontSize);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
@@ -181,25 +186,25 @@ function closeSvg(): string {
   return '</svg>';
 }
 
-function getSvgTextElements(node: PlacedNode, border: number): string {
+function getSvgTextElements(node: PlacedNode, border: number, fontSize: number): string {
   const nodeText: NodeText = node.text;
   if (nodeText.parts.length === 1) {
     const textPart = nodeText.parts[0];
     const x = border;
-    const y = Math.round(node.verticalBox.size / 2 + textPart.fontSize / 2);
+    const y = Math.round(node.verticalBox.size / 2 + fontSize / 2);
     return getSvgTextElement(textPart, x, y);
   }
   let totalSvgText = '';
   const innerHeight: number = node.verticalBox.size - 2 * border;
-  const rawVerticalSpaceBetweenLines: number = innerHeight - sumOf(nodeText.parts.map((p) => p.fontSize));
-  const verticalSpaceBetweenLines = Math.max(rawVerticalSpaceBetweenLines, 0);
+  const rawTotalVerticalSpaceBetweenLines: number = innerHeight - nodeText.parts.length * fontSize;
+  const verticalSpaceBetweenLines = Math.max(rawTotalVerticalSpaceBetweenLines, 0) / (nodeText.parts.length - 1);
   const innerWidth: number = node.horizontalBox.size - 2 * border;
   let currentY = border;
   for (const textPart of nodeText.parts) {
     const x = Math.round(border + (innerWidth - textPart.innerWidth) / 2);
-    const y = Math.round(currentY + textPart.fontSize);
+    const y = Math.round(currentY + fontSize);
     totalSvgText += getSvgTextElement(textPart, x, y);
-    currentY += textPart.fontSize + verticalSpaceBetweenLines;
+    currentY += fontSize + verticalSpaceBetweenLines;
   }
   return totalSvgText;
 }

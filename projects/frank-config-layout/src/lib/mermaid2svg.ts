@@ -85,7 +85,12 @@ export class Mermaid2svgService {
       getDerivedEdgeLabelDimensions(this.dimensions),
     ).run();
     return {
-      svg: generateSvg(layout, this.dimensions.edgeLabelFontSize, this.dimensions.border),
+      svg: generateSvg(
+        layout,
+        this.dimensions.nodeTextFontSize,
+        this.dimensions.edgeLabelFontSize,
+        this.dimensions.nodeTextBorder,
+      ),
       numNodes: g.nodes.length,
       numEdges: g.edges.length,
       numNodeVisitsDuringLayerCalculation: numNodeVisits,
