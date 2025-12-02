@@ -1,4 +1,4 @@
-import { createEdgeText, createIntermediateNodeText } from './text';
+import { createEmptyEdgeText, createIntermediateNodeText } from './text';
 import { OriginalNode, OriginalGraph, createOriginalGraph, ERROR_STATUS_SUCCESS } from './error-flow';
 import {
   calculateLayerNumbers,
@@ -20,7 +20,7 @@ function connect(idFrom: string, idTo: string, g: OriginalGraph): void {
   g.addEdge({
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
-    text: createEdgeText(),
+    text: createEmptyEdgeText(),
     errorStatus: ERROR_STATUS_SUCCESS,
   });
 }

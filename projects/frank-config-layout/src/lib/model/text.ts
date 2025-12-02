@@ -19,9 +19,15 @@ export interface NodeTextDimensions {
   nodeTextBorder: number;
 }
 
+export interface EdgeTextLine {
+  text: string;
+  width: number;
+  height: number;
+}
+
 export interface EdgeText {
   readonly html: string;
-  readonly lines: string[];
+  readonly lines: EdgeTextLine[];
   readonly numLines: number;
   readonly maxLineLength: number;
 }
@@ -40,9 +46,18 @@ export interface NodeText {
   readonly outerWidth: number;
 }
 
-export function createEdgeText(originalHtml?: string): EdgeText {
+export function createEmptyEdgeText(): EdgeText {
+  return {
+    html: '',
+    lines: [],
+    numLines: 0,
+    maxLineLength: 0,
+  };
+}
+
+export function createEdgeText(originalHtml: string, fontSize: number): EdgeText {
   let lines: string[] = [];
-  if (originalHtml !== undefined && originalHtml.length > 0) {
+  if (originalHtml.length > 0) {
     lines = originalHtml.split('<br/>').map((s) => s.trim());
   }
   let maxLineLength = 0;
@@ -51,7 +66,13 @@ export function createEdgeText(originalHtml?: string): EdgeText {
   }
   return {
     html: lines.join('<br/>'),
-    lines,
+    lines: lines.map((l) => {
+      return {
+        text: l,
+        width: calculateAverageFontCharacterWidth(fontSize) * l.length,
+        height: fontSize,
+      };
+    }),
     maxLineLength,
     numLines: lines.length,
   };

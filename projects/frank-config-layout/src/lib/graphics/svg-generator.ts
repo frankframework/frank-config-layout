@@ -175,14 +175,23 @@ function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
 }
 
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
-  const fontSize = label.verticalBox.size;
-  const textLength = label.horizontalBox.size;
-  const x = Math.round(textLength / 2);
-  const y = Math.round(fontSize / 2);
-  return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
-      <text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${label.text}</text>
-    </g>
-`;
+  const coordinates: Point[] = arrangeInBox({
+    container: new Box(label.horizontalBox, label.verticalBox),
+    border: 0,
+    itemWidths: label.text.lines.map((l) => l.width),
+    // TODO: This is not right - either make height variable or do not store with each line.
+    commonItemHeight: label.text.lines[0].height,
+  });
+  let result: string = '';
+  for (let i = 0; i < label.text.lines.length; ++i) {
+    const p: Point = coordinates[i];
+    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].text);
+  }
+  return result;
+}
+
+function renderSingleLayerText(x: number, y: number, edgeLabelFontSize: number, text: string): string {
+  return `<text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${text}</text>`;
 }
 
 function closeSvg(): string {

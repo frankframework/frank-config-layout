@@ -14,8 +14,16 @@
    limitations under the License.
 */
 
-import { createEdgeText, EdgeText, NodeText, NodeTextDimensions, createNodeText } from '../model/text';
+import {
+  createEdgeText,
+  EdgeText,
+  NodeText,
+  NodeTextDimensions,
+  createNodeText,
+  createEmptyEdgeText,
+} from '../model/text';
 import { Graph } from '../model/graph';
+import { EdgeLabelDimensions } from '../graphics/edge-label-layouter';
 
 export interface MermaidNode {
   id: string;
@@ -31,7 +39,7 @@ export interface MermaidEdge {
 
 export type MermaidGraph = Graph<MermaidNode, MermaidEdge>;
 
-export function getGraphFromMermaid(str: string, d: NodeTextDimensions): MermaidGraph {
+export function getGraphFromMermaid(str: string, dn: NodeTextDimensions, del: EdgeLabelDimensions): MermaidGraph {
   const result = new Graph<MermaidNode, MermaidEdge>();
   const lines: string[] = str.split(/\r?\n/).map((line) => line.trim());
   const nodeLines: string[] = lines.filter((line) => line.search(/^[\dA-Za-z-]+\(/) === 0);
@@ -42,7 +50,7 @@ export function getGraphFromMermaid(str: string, d: NodeTextDimensions): Mermaid
     const id = nodeLine.slice(0, nodeLine.indexOf('('));
     const text = nodeLine.slice(nodeLine.indexOf('(') + 2, nodeLine.lastIndexOf(')') - 1);
     const style = nodeLine.slice(nodeLine.lastIndexOf(':::') + 3);
-    result.addNode({ id, text: createNodeText(text, d), style });
+    result.addNode({ id, text: createNodeText(text, dn), style });
   }
   for (const forwardLine of forwardLines) {
     const fromId = forwardLine.slice(0, forwardLine.indexOf(' '));
@@ -50,7 +58,8 @@ export function getGraphFromMermaid(str: string, d: NodeTextDimensions): Mermaid
     const firstPipeIndex = forwardLine.indexOf('|');
     const rawText =
       firstPipeIndex < 0 ? undefined : forwardLine.slice(firstPipeIndex + 1, forwardLine.lastIndexOf('|'));
-    const text: EdgeText = createEdgeText(rawText);
+    const text: EdgeText =
+      rawText === undefined ? createEmptyEdgeText() : createEdgeText(rawText, del.edgeLabelFontSize);
     if (result.getNodeById(fromId) === undefined) {
       throw new Error(`Intended edge references unknown from node [${fromId}]`);
     }

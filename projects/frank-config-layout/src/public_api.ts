@@ -90,7 +90,7 @@ export { getRange, rotateToSwapItems, permutationFrom } from './lib/util/util';
 export { getKey } from './lib/model/graph';
 export {
   EdgeText as Text,
-  createEdgeText as createText,
+  createEmptyEdgeText as createText,
   createIntermediateNodeText as createDummyNodeText,
 } from './lib/model/text';
 export { getGraphFromMermaid } from './lib/parsing/mermaid-parser';

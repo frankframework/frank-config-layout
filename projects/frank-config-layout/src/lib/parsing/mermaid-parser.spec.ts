@@ -1,3 +1,4 @@
+import { EdgeLabelDimensions } from '../graphics/edge-label-layouter';
 import { NodeText, NodeTextDimensions } from '../model/text';
 import { getGraphFromMermaid } from './mermaid-parser';
 
@@ -7,7 +8,7 @@ describe('Parse Mermaid', () => {
 flowchart
     d2e2("<b>Test1</b><br/>JavaListener"):::normal
   `;
-    const result = getGraphFromMermaid(input, dimensions());
+    const result = getGraphFromMermaid(input, dimensions(), dimensions());
     expect(result.nodes.length).toEqual(1);
     expect(result.nodes[0].id).toEqual('d2e2');
     expect(result.nodes[0].text.html).toEqual('<b>Test1</b><br/>JavaListener');
@@ -21,7 +22,7 @@ d2e2("<b>Test1</b><br/>JavaListener"):::normal
 d2e12("<b>InputValidator</b>"):::normal
 d2e2 --> |success| d2e12
     `;
-    const result = getGraphFromMermaid(input, dimensions());
+    const result = getGraphFromMermaid(input, dimensions(), dimensions());
     expect(result.nodes.length).toEqual(2);
     expect(result.nodes[0].id).toEqual('d2e2');
     expect(result.nodes[1].id).toEqual('d2e12');
@@ -45,9 +46,12 @@ d2e2 --> |success| d2e12
 });
 
 // Dummy dimensions
-function dimensions(): NodeTextDimensions {
+function dimensions(): NodeTextDimensions & EdgeLabelDimensions {
   return {
     nodeTextFontSize: 16,
     nodeTextBorder: 4,
+    edgeLabelFontSize: 10,
+    preferredVertDistanceFromOrigin: 5,
+    strictlyKeepLabelOutOfBox: true,
   };
 }

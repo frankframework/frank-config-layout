@@ -30,7 +30,7 @@ import { getConnectedIdsOfKey, getKey, keyFor } from '../model/graph';
 import { Box, LineChecker } from './box';
 import { DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
 import { straighten, StraightenedLine, StraightenedLineSegmentsBuilder } from './straightened-line';
-import { NodeText } from '../model/text';
+import { EdgeText, NodeText } from '../model/text';
 
 export interface NodeAndEdgeDimensions {
   horizontalNodeBorder: number;
@@ -65,7 +65,7 @@ export interface PlacedNode extends NodeForLayers {
 export interface EdgeLabel {
   horizontalBox: Interval;
   verticalBox: Interval;
-  text: string;
+  text: EdgeText;
 }
 
 export interface Layout {
@@ -424,7 +424,7 @@ export class LayoutBuilder {
       return {
         horizontalBox: box.horizontalBox,
         verticalBox: box.verticalBox,
-        text: originalEdge.text.html,
+        text: originalEdge.text,
       };
     } else {
       return undefined;
