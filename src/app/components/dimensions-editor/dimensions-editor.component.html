@@ -3,35 +3,24 @@
     <td>
       <table id="edits">
         <tr>
-          <td>Big font size (SVG only):</td>
+          <td>Node text font size (SVG only):</td>
           <td>
             <input
-              [(ngModel)]="editDimensions.bigFontSize"
+              [(ngModel)]="editDimensions.nodeTextFontSize"
               type="number"
               minValue="1"
-              [ngClass]="editDimensions.bigFontSize !== lastPosted.bigFontSize ? 'changed' : ''"
+              [ngClass]="editDimensions.nodeTextFontSize !== lastPosted.nodeTextFontSize ? 'changed' : ''"
             />
           </td>
         </tr>
         <tr>
-          <td>Small font size (SVG only):</td>
+          <td>Node text border (SVG only):</td>
           <td>
             <input
-              [(ngModel)]="editDimensions.smallFontSize"
+              [(ngModel)]="editDimensions.nodeTextBorder"
               type="number"
               minValue="1"
-              [ngClass]="editDimensions.smallFontSize !== lastPosted.smallFontSize ? 'changed' : ''"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td>Border (SVG only):</td>
-          <td>
-            <input
-              [(ngModel)]="editDimensions.border"
-              type="number"
-              minValue="1"
-              [ngClass]="editDimensions.border !== lastPosted.border ? 'changed' : ''"
+              [ngClass]="editDimensions.nodeTextBorder !== lastPosted.nodeTextBorder ? 'changed' : ''"
             />
           </td>
         </tr>

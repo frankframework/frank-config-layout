@@ -16,6 +16,9 @@
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
 import { NodeText, NodeTextPart } from '../model/text';
+import { arrangeInBox } from '../util/util';
+import { Box } from './box';
+import { Point } from './graphics';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
 export function generateSvg(
@@ -113,8 +116,8 @@ function renderOriginalNode(node: PlacedNode, border: number, nodeTextFontSize: 
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <g class="rect-text">${svgText}</g>
   </g>
+  <g class="rect-text">${svgText}</g>
 `;
 }
 
@@ -188,23 +191,16 @@ function closeSvg(): string {
 
 function getSvgTextElements(node: PlacedNode, border: number, fontSize: number): string {
   const nodeText: NodeText = node.text;
-  if (nodeText.parts.length === 1) {
-    const textPart = nodeText.parts[0];
-    const x = border;
-    const y = Math.round(node.verticalBox.size / 2 + fontSize / 2);
-    return getSvgTextElement(textPart, x, y);
-  }
+  const textCoordinates: Point[] = arrangeInBox({
+    container: new Box(node.horizontalBox, node.verticalBox),
+    border,
+    commonItemHeight: fontSize,
+    itemWidths: nodeText.parts.map((p) => p.innerWidth),
+  });
   let totalSvgText = '';
-  const innerHeight: number = node.verticalBox.size - 2 * border;
-  const rawTotalVerticalSpaceBetweenLines: number = innerHeight - nodeText.parts.length * fontSize;
-  const verticalSpaceBetweenLines = Math.max(rawTotalVerticalSpaceBetweenLines, 0) / (nodeText.parts.length - 1);
-  const innerWidth: number = node.horizontalBox.size - 2 * border;
-  let currentY = border;
-  for (const textPart of nodeText.parts) {
-    const x = Math.round(border + (innerWidth - textPart.innerWidth) / 2);
-    const y = Math.round(currentY + fontSize);
-    totalSvgText += getSvgTextElement(textPart, x, y);
-    currentY += fontSize + verticalSpaceBetweenLines;
+  for (let i = 0; i < nodeText.parts.length; ++i) {
+    const p: Point = textCoordinates[i];
+    totalSvgText += getSvgTextElement(nodeText.parts[i], p.x, p.y);
   }
   return totalSvgText;
 }

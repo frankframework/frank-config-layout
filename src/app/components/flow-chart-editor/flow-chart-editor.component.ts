@@ -80,7 +80,7 @@ export class FlowChartEditorComponent implements OnInit {
 
   ngOnInit(): void {
     this.mermaidText = globalThis.sessionStorage.getItem('mermaidText') ?? '';
-    if(this.mermaidText !== '') {
+    if (this.mermaidText !== '') {
       this.loadMermaid(this.layerNumberAlgorithms[0].key);
     }
   }
@@ -213,7 +213,7 @@ export class FlowChartEditorComponent implements OnInit {
     };
   }
 
-  resetMermaid(): void{
+  resetMermaid(): void {
     this.mermaidText = '';
     this.loadMermaid(this.layerNumberAlgorithms[0].key);
   }
