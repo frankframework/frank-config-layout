@@ -12,28 +12,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: '~/.npm'
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Show npm version
-        run: npm -v
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Show pnpm version
+        run: pnpm -v
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Build project
-        run: npm run build
+        run: pnpm run build
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
       - name: Test library
-        run: npm run ng test frank-config-layout -- --browsers=ChromeHeadless --watch=false
+        run: pnpm run ng test frank-config-layout --browsers=ChromeHeadless --watch=false
       - name: Test playground
-        run: npm run ng test frank-config-layout-playground -- --browsers=ChromeHeadless --watch=false
+        run: pnpm run ng test frank-config-layout-playground --browsers=ChromeHeadless --watch=false
