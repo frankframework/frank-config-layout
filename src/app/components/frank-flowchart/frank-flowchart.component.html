@@ -63,7 +63,7 @@
         attr.height="{{label.verticalBox.size}}">
         <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper"
           [ngStyle]="{'font-size': drawing.edgeLabelFontSize + 'px'}">
-          <div class="label-text-box" [innerHTML]="label.text">
+          <div class="label-text-box" [innerHTML]="label.text.html">
           </div>
         </div>
       </foreignObject>

@@ -62,7 +62,7 @@ export class Mermaid2svgService {
 
   private async mermaid2svgStatisticsImpl(mermaid: string): Promise<SvgResult> {
     ++this._numSvgCalculations;
-    const b: MermaidGraph = getGraphFromMermaid(mermaid);
+    const b: MermaidGraph = getGraphFromMermaid(mermaid, this.dimensions, this.dimensions);
     const g: OriginalGraph = findErrorFlow(b);
     let numNodeVisits = 0;
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits);
@@ -85,7 +85,12 @@ export class Mermaid2svgService {
       getDerivedEdgeLabelDimensions(this.dimensions),
     ).run();
     return {
-      svg: generateSvg(layout, this.dimensions.edgeLabelFontSize),
+      svg: generateSvg(
+        layout,
+        this.dimensions.nodeTextFontSize,
+        this.dimensions.edgeLabelFontSize,
+        this.dimensions.nodeTextBorder,
+      ),
       numNodes: g.nodes.length,
       numEdges: g.edges.length,
       numNodeVisitsDuringLayerCalculation: numNodeVisits,

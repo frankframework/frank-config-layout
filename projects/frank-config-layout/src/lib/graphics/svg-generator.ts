@@ -15,13 +15,29 @@
 */
 
 import { ERROR_STATUS_ERROR, ERROR_STATUS_SUCCESS } from '../model/error-flow';
+import { NodeText, NodeTextPart } from '../model/text';
+import { arrangeInBox } from '../util/util';
+import { Box } from './box';
+import { Point } from './graphics';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
-export function generateSvg(layout: Layout, edgeLabelFontSize: number): string {
+// TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+// The way dimensions are divided over different interfaces and passed along
+// is not clear now. Should be reconsidered.
+export function generateSvg(
+  layout: Layout,
+  nodeTextFontSize: number,
+  edgeLabelFontSize: number,
+  border: number,
+): string {
   return (
     openSvg(layout.width, layout.height) +
     renderDefs() +
-    renderNodes(layout.nodes.map((n) => n as PlacedNode)) +
+    renderNodes(
+      layout.nodes.map((n) => n as PlacedNode),
+      border,
+      nodeTextFontSize,
+    ) +
     renderEdges(layout.layoutLineSegments) +
     renderLabels(layout.edgeLabels, edgeLabelFontSize) +
     closeSvg()
@@ -91,26 +107,28 @@ function renderDefs(): string {
 `;
 }
 
-function renderNodes(nodes: readonly PlacedNode[]): string {
-  return nodes.map((n) => renderOriginalNode(n)).join('');
+function renderNodes(nodes: readonly PlacedNode[], border: number, nodeTextFontSize: number): string {
+  return nodes.map((n) => renderOriginalNode(n, border, nodeTextFontSize)).join('');
 }
 
-function renderOriginalNode(node: PlacedNode): string {
-  const borderWidth = 4;
-  const innerHeight = node.verticalBox.size - borderWidth * 2;
-  const innerWidth = node.horizontalBox.size - borderWidth * 2;
-  const { svgText } = tempConvertNodeTextToSVGElementText(node.text, innerWidth, innerHeight, borderWidth);
+function renderOriginalNode(node: PlacedNode, border: number, nodeTextFontSize: number): string {
+  const svgText = getSvgTextElements(node, border, nodeTextFontSize);
   return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
-    <g class="rect-text">${svgText}</g>
   </g>
+  <g class="rect-text">${svgText}</g>
 `;
 }
 
+// TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+// Before this PR there was a <g> around this that specified that the x-coordinate
+// is the center, not the left border. We should restore that and redo calculating
+// x-coordinates. Then the alignment does not depend on the length estimate of
+// function calculateAverageFontCharacterWidth() in text.ts.
 function getNodeGroupClass(id: string): string {
   return `frank-flowchart-node-${id}`;
 }
@@ -157,105 +175,56 @@ function classOfLine(edge: LayoutLineSegment): string {
 }
 
 function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
-  return [
-    '  <g text-anchor="middle" dominant-baseline="middle">\n',
-    labels.map((label) => renderLabel(label, edgeLabelFontSize)).join(''),
-    '  </g>\n',
-  ].join('');
+  return labels.map((label) => renderLabel(label, edgeLabelFontSize)).join('');
 }
 
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
-  const fontSize = label.verticalBox.size;
-  const textLength = label.horizontalBox.size;
-  const x = fixedPointFloat(textLength / 2);
-  const y = fixedPointFloat(fontSize / 2);
-  return `    <g transform="translate(${label.horizontalBox.minValue}, ${label.verticalBox.minValue})">
-      <text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${label.text}</text>
-    </g>
-`;
+  // TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+  // The horizontal centers of the label boxes are known. We should supply
+  // the center x-coordinate in the <text> and make a <g> tell the SVG
+  // renderer that the center is supplied. Then we do not rely on the
+  // width estimate to properly align multiple labels of an edge.
+  // To reuse code, we should do the same for node texts.
+  const coordinates: Point[] = arrangeInBox({
+    container: new Box(label.horizontalBox, label.verticalBox),
+    border: 0,
+    itemWidths: label.text.lines.map((l) => l.width),
+    // TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+    // This is not right - either make height variable or do not store with each line.
+    commonItemHeight: label.text.lines[0].height,
+  });
+  let result: string = '';
+  for (let i = 0; i < label.text.lines.length; ++i) {
+    const p: Point = coordinates[i];
+    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].text);
+  }
+  return result;
+}
+
+function renderSingleLayerText(x: number, y: number, edgeLabelFontSize: number, text: string): string {
+  return `<text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${text}</text>`;
 }
 
 function closeSvg(): string {
   return '</svg>';
 }
 
-function tempConvertNodeTextToSVGElementText(
-  nodeText: string,
-  innerWidth: number,
-  innerHeight: number,
-  baseX: number,
-): { svgText: string } {
-  const nodeDOM = new DOMParser().parseFromString(nodeText, 'text/html');
-  const nodes = nodeDOM.body.childNodes;
-  const textParts: { name: string; text: string }[] = [];
-
-  // has to be done this way because childNodes doesn't have an iterator
-  // eslint-disable-next-line unicorn/no-for-loop
-  for (let index = 0; index < nodes.length; index++) {
-    const node = nodes[index];
-    const name = node.nodeName.toLowerCase();
-    if (name === 'br') continue;
-    const text = node.textContent ?? '';
-    textParts.push({ name, text });
-  }
-
-  if (textParts.length === 1) {
-    const { svgText } = createSVGTextElement(0, textParts, baseX, innerWidth, innerHeight, true);
-    return { svgText };
-  }
-
-  const yPositions = innerHeight / textParts.length;
+function getSvgTextElements(node: PlacedNode, border: number, fontSize: number): string {
+  const nodeText: NodeText = node.text;
+  const textCoordinates: Point[] = arrangeInBox({
+    container: new Box(node.horizontalBox, node.verticalBox),
+    border,
+    commonItemHeight: fontSize,
+    itemWidths: nodeText.parts.map((p) => p.innerWidth),
+  });
   let totalSvgText = '';
-  for (const index in textParts) {
-    const { svgText } = createSVGTextElement(+index, textParts, baseX, innerWidth, yPositions);
-    totalSvgText += svgText;
+  for (let i = 0; i < nodeText.parts.length; ++i) {
+    const p: Point = textCoordinates[i];
+    totalSvgText += getSvgTextElement(nodeText.parts[i], p.x, p.y);
   }
-  return { svgText: totalSvgText };
+  return totalSvgText;
 }
 
-function createSVGTextElement(
-  index: number,
-  textParts: { name: string; text: string }[],
-  baseX: number,
-  innerWidth: number,
-  yPositions: number,
-  singlePart?: boolean,
-): { svgText: string } {
-  const { name, text } = textParts[index];
-  const {
-    x,
-    y,
-    length: textLength,
-  } = calculateTextPostion(text, name, baseX, innerWidth, yPositions, index, singlePart);
-  const svgText = `<text data-html-node=${name} x="${x}" y="${y}" textLength="${textLength}" lengthAdjust="spacingAndGlyphs">${text}</text>`;
-  return { svgText };
-}
-
-function calculateTextPostion(
-  nodeText: string,
-  nodeName: string,
-  baseX: number,
-  innerWidth: number,
-  yPositions: number,
-  nodeIndex: number,
-  singlePart?: boolean,
-): { x: number; y: number; length: number } {
-  const fontSize = nodeName === 'a' ? 28 : 16;
-  const fontWidth = calculateAverageFontCharacterWidth(fontSize);
-  const length = Math.min(fixedPointFloat(nodeText.length * fontWidth), innerWidth);
-  const x = fixedPointFloat(baseX + (innerWidth - length) / 2);
-  const y = fixedPointFloat(singlePart ? (yPositions + fontSize) / 2 : yPositions * (nodeIndex + 1));
-  return { x, y, length };
-}
-
-function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): number {
-  // assuming Inter font https://chrishewett.com/blog/calculating-text-width-programmatically/
-  const baseWidthAt100pxSize = 55.4;
-  const baseWidthAt100pxSizeBold = 58.6;
-  const base = bold ? baseWidthAt100pxSizeBold : baseWidthAt100pxSize;
-  return (base / 100) * fontSize;
-}
-
-export function fixedPointFloat(value: number, digits?: number): number {
-  return +value.toFixed(digits ?? 2);
+function getSvgTextElement(textPart: NodeTextPart, x: number, y: number): string {
+  return `<text data-html-node=${textPart.name} x="${x}" y="${y}" textLength="${textPart.innerWidth}" lengthAdjust="spacingAndGlyphs">${textPart.text}</text>`;
 }

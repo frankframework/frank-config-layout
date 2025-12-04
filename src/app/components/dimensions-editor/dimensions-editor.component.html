@@ -3,6 +3,28 @@
     <td>
       <table id="edits">
         <tr>
+          <td>Node text font size (SVG only):</td>
+          <td>
+            <input
+              [(ngModel)]="editDimensions.nodeTextFontSize"
+              type="number"
+              minValue="1"
+              [ngClass]="editDimensions.nodeTextFontSize !== lastPosted.nodeTextFontSize ? 'changed' : ''"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>Node text border (SVG only):</td>
+          <td>
+            <input
+              [(ngModel)]="editDimensions.nodeTextBorder"
+              type="number"
+              minValue="1"
+              [ngClass]="editDimensions.nodeTextBorder !== lastPosted.nodeTextBorder ? 'changed' : ''"
+            />
+          </td>
+        </tr>
+        <tr>
           <td>Layer height:</td>
           <td><input
             [(ngModel)]="editDimensions.layerHeight" type="number" minValue="1"
@@ -31,17 +53,14 @@
           </td>
         </tr>
         <tr>
-          <td>Node width:</td>
-          <td><input
-            [(ngModel)]="editDimensions.nodeWidth" type="number" minValue="1"
-            [ngClass]="editDimensions.nodeWidth !== lastPosted.nodeWidth ? 'changed' : ''"/>
-          </td>
-        </tr>
-        <tr>
-          <td>Node box width:</td>
-          <td><input
-            [(ngModel)]="editDimensions.nodeBoxWidth" type="number" minValue="1"
-            [ngClass]="editDimensions.nodeBoxWidth !== lastPosted.nodeBoxWidth ? 'changed' : ''" />
+          <td>Horizontal node border (SVG only):</td>
+          <td>
+            <input
+              [(ngModel)]="editDimensions.horizontalNodeBorder"
+              type="number"
+              minValue="1"
+              [ngClass]="editDimensions.horizontalNodeBorder !== lastPosted.horizontalNodeBorder ? 'changed' : ''"
+            />
           </td>
         </tr>
         <tr>

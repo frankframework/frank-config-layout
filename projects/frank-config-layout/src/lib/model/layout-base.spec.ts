@@ -1,4 +1,4 @@
-import { createText } from './text';
+import { createEmptyEdgeText, createIntermediateNodeText } from './text';
 import { GraphForLayers, createGraphForLayers } from './horizontal-grouping';
 import { LayoutBase, getNumCrossings, alignFromLayer, NumCrossingsJudgement } from './layout-base';
 import { ERROR_STATUS_SUCCESS } from './error-flow';
@@ -8,7 +8,7 @@ function addNode(id: string, layer: number, g: GraphForLayers): void {
     id,
     layer,
     // These are dummy
-    text: '',
+    text: createIntermediateNodeText(),
     errorStatus: ERROR_STATUS_SUCCESS,
   });
 }
@@ -18,7 +18,7 @@ function connect(idFrom: string, idTo: string, g: GraphForLayers): void {
     from: g.getNodeById(idFrom),
     to: g.getNodeById(idTo),
     // These are dummy
-    text: createText(),
+    text: createEmptyEdgeText(),
   });
 }
 

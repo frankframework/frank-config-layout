@@ -19,8 +19,9 @@
 import { EdgeLabelDimensions } from './lib/graphics/edge-label-layouter';
 import { NodeAndEdgeDimensions } from './lib/graphics/layout';
 import { Mermaid2svgService } from './lib/mermaid2svg';
+import { NodeTextDimensions } from './lib/model/text';
 
-export interface Dimensions extends NodeAndEdgeDimensions, EdgeLabelDimensions {}
+export interface Dimensions extends NodeTextDimensions, NodeAndEdgeDimensions, EdgeLabelDimensions {}
 
 /*
  * These are the real outputs of this library
@@ -44,12 +45,13 @@ export function initMermaid2Svg(d: Dimensions): void {
 
 export function getFactoryDimensions(): Dimensions {
   return {
-    layerHeight: 50,
+    nodeTextFontSize: 16,
+    nodeTextBorder: 8,
+    layerHeight: 54,
     layerDistance: 120,
-    nodeBoxHeight: 50,
+    nodeBoxHeight: 54,
     intermediateWidth: 60,
-    nodeWidth: 175,
-    nodeBoxWidth: 160,
+    horizontalNodeBorder: 15,
     boxConnectorAreaPerc: 50,
     intermediateLayerPassedByVerticalLine: true,
     lineTransgressionPerc: 200,
@@ -86,7 +88,11 @@ export async function mermaid2svgStatistics(mermaid: string): Promise<SvgResult>
 
 export { getRange, rotateToSwapItems, permutationFrom } from './lib/util/util';
 export { getKey } from './lib/model/graph';
-export { Text, createText } from './lib/model/text';
+export {
+  EdgeText as Text,
+  createEmptyEdgeText as createText,
+  createIntermediateNodeText as createDummyNodeText,
+} from './lib/model/text';
 export { getGraphFromMermaid } from './lib/parsing/mermaid-parser';
 export {
   findErrorFlow,

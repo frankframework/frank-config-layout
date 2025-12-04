@@ -80,7 +80,7 @@ export class FlowChartEditorComponent implements OnInit {
 
   ngOnInit(): void {
     this.mermaidText = globalThis.sessionStorage.getItem('mermaidText') ?? '';
-    if(this.mermaidText !== '') {
+    if (this.mermaidText !== '') {
       this.loadMermaid(this.layerNumberAlgorithms[0].key);
     }
   }
@@ -138,7 +138,7 @@ export class FlowChartEditorComponent implements OnInit {
   mermaid2graph(text: string): OriginalGraphOrError {
     let graph: OriginalGraph;
     try {
-      const b = getGraphFromMermaid(text);
+      const b = getGraphFromMermaid(text, this.dimensions, this.dimensions);
       graph = findErrorFlow(b);
     } catch (error) {
       return { graph: null, error: `Invalid mermaid text: ${(error as Error).message}` };
@@ -213,7 +213,7 @@ export class FlowChartEditorComponent implements OnInit {
     };
   }
 
-  resetMermaid(): void{
+  resetMermaid(): void {
     this.mermaidText = '';
     this.loadMermaid(this.layerNumberAlgorithms[0].key);
   }

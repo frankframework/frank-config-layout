@@ -15,7 +15,7 @@
 */
 
 import { getRange } from '../util/util';
-import { Text } from './text';
+import { createIntermediateNodeText, EdgeText, NodeText } from './text';
 import { OriginalGraph, OriginalNode, OriginalEdge } from './error-flow';
 import { Graph, NodeOrEdge, Connection, WithId, getKey, keyFor } from './graph';
 
@@ -25,7 +25,7 @@ export interface WithLayerNumber extends WithId {
 
 export interface NodeForLayers extends WithId, WithLayerNumber {
   readonly id: string;
-  readonly text: string;
+  readonly text: NodeText;
   readonly errorStatus: number;
   readonly layer: number;
 }
@@ -35,7 +35,7 @@ export type OptionalNodeForLayers = NodeForLayers | null;
 export interface EdgeForLayers extends Connection<NodeForLayers> {
   readonly from: NodeForLayers;
   readonly to: NodeForLayers;
-  readonly text: Text;
+  readonly text: EdgeText;
 }
 
 export type OptionalEdgeForLayers = EdgeForLayers | null;
@@ -124,7 +124,7 @@ function handleEdge(
     const intermediateNodes: NodeForLayers[] = getIntermediateLayers(layerFrom, layerTo).map((layer) => {
       return {
         id: `intermediate${intermediateNodeSeq++}`,
-        text: '',
+        text: createIntermediateNodeText(),
         errorStatus: edge.errorStatus,
         layer,
       };

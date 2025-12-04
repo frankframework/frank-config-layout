@@ -14,16 +14,50 @@
    limitations under the License.
 */
 
-export interface Text {
+export interface NodeTextDimensions {
+  nodeTextFontSize: number; // 16
+  nodeTextBorder: number;
+}
+
+export interface EdgeTextLine {
+  text: string;
+  width: number;
+  height: number;
+}
+
+export interface EdgeText {
   readonly html: string;
-  readonly lines: string[];
+  readonly lines: EdgeTextLine[];
   readonly numLines: number;
   readonly maxLineLength: number;
 }
 
-export function createText(originalHtml?: string): Text {
+export interface NodeTextPart {
+  readonly name: string;
+  readonly text: string;
+  readonly innerWidth: number;
+  readonly outerWidth: number;
+}
+
+export interface NodeText {
+  readonly html: string;
+  readonly parts: NodeTextPart[];
+  readonly innerWidth: number;
+  readonly outerWidth: number;
+}
+
+export function createEmptyEdgeText(): EdgeText {
+  return {
+    html: '',
+    lines: [],
+    numLines: 0,
+    maxLineLength: 0,
+  };
+}
+
+export function createEdgeText(originalHtml: string, fontSize: number): EdgeText {
   let lines: string[] = [];
-  if (originalHtml !== undefined && originalHtml.length > 0) {
+  if (originalHtml.length > 0) {
     lines = originalHtml.split('<br/>').map((s) => s.trim());
   }
   let maxLineLength = 0;
@@ -32,8 +66,67 @@ export function createText(originalHtml?: string): Text {
   }
   return {
     html: lines.join('<br/>'),
-    lines,
+    lines: lines.map((l) => {
+      return {
+        text: l,
+        width: calculateAverageFontCharacterWidth(fontSize) * l.length,
+        height: fontSize,
+      };
+    }),
     maxLineLength,
     numLines: lines.length,
   };
+}
+
+export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
+  const nodeDOM = new DOMParser().parseFromString(html, 'text/html');
+  const nodes = nodeDOM.body.childNodes;
+  const textParts: NodeTextPart[] = [];
+
+  // has to be done this way because childNodes doesn't have an iterator
+  // eslint-disable-next-line unicorn/no-for-loop
+  for (let index = 0; index < nodes.length; index++) {
+    const node = nodes[index];
+    const name = node.nodeName.toLowerCase();
+    if (name === 'br') continue;
+    const text = node.textContent ?? '';
+    textParts.push(createNodeTextPart(name, text, d));
+  }
+  const innerWidth = Math.max(...textParts.map((p) => p.innerWidth));
+  return {
+    html,
+    parts: textParts,
+    innerWidth,
+    outerWidth: innerWidth + 2 * d.nodeTextBorder,
+  };
+}
+
+function createNodeTextPart(nodeName: string, text: string, d: NodeTextDimensions): NodeTextPart {
+  // TODO: Calculate this only once.
+  const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize);
+  const innerWidth: number = Math.round(text.length * fontWidth);
+  const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;
+  return {
+    name: nodeName,
+    text,
+    innerWidth,
+    outerWidth,
+  };
+}
+
+export function createIntermediateNodeText(): NodeText {
+  return {
+    html: '',
+    parts: [],
+    innerWidth: 0,
+    outerWidth: 1,
+  };
+}
+
+export function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): number {
+  // assuming Inter font https://chrishewett.com/blog/calculating-text-width-programmatically/
+  const baseWidthAt100pxSize = 55.4;
+  const baseWidthAt100pxSizeBold = 58.6;
+  const base = bold ? baseWidthAt100pxSizeBold : baseWidthAt100pxSize;
+  return (base / 100) * fontSize;
 }

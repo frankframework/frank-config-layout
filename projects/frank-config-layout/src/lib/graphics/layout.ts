@@ -30,13 +30,13 @@ import { getConnectedIdsOfKey, getKey, keyFor } from '../model/graph';
 import { Box, LineChecker } from './box';
 import { DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
 import { straighten, StraightenedLine, StraightenedLineSegmentsBuilder } from './straightened-line';
+import { EdgeText, NodeText } from '../model/text';
 
 export interface NodeAndEdgeDimensions {
-  nodeWidth: number;
+  horizontalNodeBorder: number;
   intermediateWidth: number;
   layerHeight: number;
   layerDistance: number;
-  nodeBoxWidth: number;
   nodeBoxHeight: number;
   boxConnectorAreaPerc: number;
   intermediateLayerPassedByVerticalLine: boolean;
@@ -57,7 +57,7 @@ export interface PlacedNode extends NodeForLayers {
   readonly horizontalBox: Interval;
   readonly verticalBox: Interval;
   readonly id: string;
-  readonly text: string;
+  readonly text: NodeText;
   readonly errorStatus: number;
   readonly layer: number;
 }
@@ -65,7 +65,7 @@ export interface PlacedNode extends NodeForLayers {
 export interface EdgeLabel {
   horizontalBox: Interval;
   verticalBox: Interval;
-  text: string;
+  text: EdgeText;
 }
 
 export interface Layout {
@@ -167,7 +167,9 @@ export class LayoutBuilder {
   }
 
   private widthOfNode(id: string): number {
-    return this.og.hasNode(id) ? this.d.nodeWidth : this.d.intermediateWidth;
+    return this.og.hasNode(id)
+      ? this.og.getNodeById(id)!.text.outerWidth + 2 * this.d.horizontalNodeBorder
+      : this.d.intermediateWidth;
   }
 
   private initializeXFrom(subjectLayer: number, sourceLayer: number): void {
@@ -228,7 +230,7 @@ export class LayoutBuilder {
   }
 
   private widthOfNodeBox(id: string): number {
-    return this.og.hasNode(id) ? this.d.nodeBoxWidth : 1;
+    return this.og.hasNode(id) ? this.og.getNodeById(id)!.text.outerWidth : 1;
   }
 
   private calculateConnectorY(): void {
@@ -304,7 +306,7 @@ export class LayoutBuilder {
   }
 
   private getCrossSafeWidth(id: string): number {
-    return this.og.hasNode(id) ? this.d.nodeBoxWidth + 2 * this.d.boxCrossProtectionMargin : 1;
+    return this.og.hasNode(id) ? this.widthOfNode(id) + 2 * this.d.boxCrossProtectionMargin : 1;
   }
 
   private getLayoutLineSegmentsFor(
@@ -422,7 +424,7 @@ export class LayoutBuilder {
       return {
         horizontalBox: box.horizontalBox,
         verticalBox: box.verticalBox,
-        text: originalEdge.text.html,
+        text: originalEdge.text,
       };
     } else {
       return undefined;
