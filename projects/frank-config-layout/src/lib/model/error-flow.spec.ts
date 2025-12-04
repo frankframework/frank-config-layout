@@ -17,6 +17,9 @@ N1(""):::normal
 N2(""):::normal
 N1 --> |success| N2
 `;
+    // TODO: issue https://github.com/frankframework/frank-config-layout/issues/51.
+    // Dimensions that are configured in the playground should be handled better. Then
+    // we get rid of these awkward arguments.
     const b = getGraphFromMermaid(input, dimensions(), dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);

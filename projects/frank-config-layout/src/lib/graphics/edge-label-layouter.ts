@@ -36,6 +36,9 @@ export interface DerivedEdgeLabelDimensions {
 export function getDerivedEdgeLabelDimensions(d: EdgeLabelDimensions): DerivedEdgeLabelDimensions {
   return {
     estCharacterWidth: calculateAverageFontCharacterWidth(d.edgeLabelFontSize),
+    // TODO issue https://github.com/frankframework/frank-config-layout/issues/51.
+    // When a label has multiple lines then we need a marging between the lines,
+    // not an increased line height. The text is rendered with a martin in svg-generator.ts.
     estLabelLineHeight: d.edgeLabelFontSize + 3,
     preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
     strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox,

@@ -21,6 +21,9 @@ import { Box } from './box';
 import { Point } from './graphics';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
+// TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+// The way dimensions are divided over different interfaces and passed along
+// is not clear now. Should be reconsidered.
 export function generateSvg(
   layout: Layout,
   nodeTextFontSize: number,
@@ -121,6 +124,11 @@ function renderOriginalNode(node: PlacedNode, border: number, nodeTextFontSize: 
 `;
 }
 
+// TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+// Before this PR there was a <g> around this that specified that the x-coordinate
+// is the center, not the left border. We should restore that and redo calculating
+// x-coordinates. Then the alignment does not depend on the length estimate of
+// function calculateAverageFontCharacterWidth() in text.ts.
 function getNodeGroupClass(id: string): string {
   return `frank-flowchart-node-${id}`;
 }
@@ -171,11 +179,18 @@ function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
 }
 
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
+  // TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+  // The horizontal centers of the label boxes are known. We should supply
+  // the center x-coordinate in the <text> and make a <g> tell the SVG
+  // renderer that the center is supplied. Then we do not rely on the
+  // width estimate to properly align multiple labels of an edge.
+  // To reuse code, we should do the same for node texts.
   const coordinates: Point[] = arrangeInBox({
     container: new Box(label.horizontalBox, label.verticalBox),
     border: 0,
     itemWidths: label.text.lines.map((l) => l.width),
-    // TODO: This is not right - either make height variable or do not store with each line.
+    // TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
+    // This is not right - either make height variable or do not store with each line.
     commonItemHeight: label.text.lines[0].height,
   });
   let result: string = '';
