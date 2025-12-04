@@ -29,6 +29,6 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
       - name: Test library
-        run: pnpm run ng test frank-config-layout -- --browsers=ChromeHeadless --watch=false
+        run: pnpm run ng test frank-config-layout --browsers=ChromeHeadless --watch=false
       - name: Test playground
-        run: pnpm run ng test frank-config-layout-playground -- --browsers=ChromeHeadless --watch=false
+        run: pnpm run ng test frank-config-layout-playground --browsers=ChromeHeadless --watch=false
