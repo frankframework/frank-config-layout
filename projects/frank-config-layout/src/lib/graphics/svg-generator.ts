@@ -167,11 +167,7 @@ function classOfLine(edge: LayoutLineSegment): string {
 }
 
 function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
-  return [
-    '  <g text-anchor="middle" dominant-baseline="middle">\n',
-    labels.map((label) => renderLabel(label, edgeLabelFontSize)).join(''),
-    '  </g>\n',
-  ].join('');
+  return labels.map((label) => renderLabel(label, edgeLabelFontSize)).join('');
 }
 
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {

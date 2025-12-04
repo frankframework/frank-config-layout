@@ -123,7 +123,7 @@ export function createIntermediateNodeText(): NodeText {
   };
 }
 
-function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): number {
+export function calculateAverageFontCharacterWidth(fontSize: number, bold?: boolean): number {
   // assuming Inter font https://chrishewett.com/blog/calculating-text-width-programmatically/
   const baseWidthAt100pxSize = 55.4;
   const baseWidthAt100pxSizeBold = 58.6;

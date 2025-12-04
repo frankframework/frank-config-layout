@@ -18,6 +18,7 @@ import { NumbersAroundZero } from '../util/util';
 import { Box } from './box';
 import { Interval } from '../util/interval';
 import { Line, Point } from './graphics';
+import { calculateAverageFontCharacterWidth } from '../model/text';
 
 export interface EdgeLabelDimensions {
   edgeLabelFontSize: number;
@@ -34,7 +35,7 @@ export interface DerivedEdgeLabelDimensions {
 
 export function getDerivedEdgeLabelDimensions(d: EdgeLabelDimensions): DerivedEdgeLabelDimensions {
   return {
-    estCharacterWidth: d.edgeLabelFontSize - 3,
+    estCharacterWidth: calculateAverageFontCharacterWidth(d.edgeLabelFontSize),
     estLabelLineHeight: d.edgeLabelFontSize + 3,
     preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
     strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox,
