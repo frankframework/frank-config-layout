@@ -47,7 +47,7 @@ export function getFactoryDimensions(): Dimensions {
   return {
     nodeTextFontSize: 16,
     nodeTextBorder: 8,
-    layerHeight: 54,
+    layerHeight: 60,
     layerDistance: 120,
     nodeBoxHeight: 54,
     intermediateWidth: 60,
