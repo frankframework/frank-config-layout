@@ -120,15 +120,10 @@ function renderOriginalNode(node: PlacedNode, border: number, nodeTextFontSize: 
       rx="5">
     </rect>
   </g>
-  <g class="rect-text">${svgText}</g>
+  <g class="rect-text" text-anchor="middle" dominant-baseline="middle">${svgText}</g>
 `;
 }
 
-// TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
-// Before this PR there was a <g> around this that specified that the x-coordinate
-// is the center, not the left border. We should restore that and redo calculating
-// x-coordinates. Then the alignment does not depend on the length estimate of
-// function calculateAverageFontCharacterWidth() in text.ts.
 function getNodeGroupClass(id: string): string {
   return `frank-flowchart-node-${id}`;
 }
@@ -175,16 +170,10 @@ function classOfLine(edge: LayoutLineSegment): string {
 }
 
 function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
-  return labels.map((label) => renderLabel(label, edgeLabelFontSize)).join('');
+  return `  <g text-anchor="middle" dominant-baseline="middle">${labels.map((label) => renderLabel(label, edgeLabelFontSize)).join('')}</g>`;
 }
 
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
-  // TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
-  // The horizontal centers of the label boxes are known. We should supply
-  // the center x-coordinate in the <text> and make a <g> tell the SVG
-  // renderer that the center is supplied. Then we do not rely on the
-  // width estimate to properly align multiple labels of an edge.
-  // To reuse code, we should do the same for node texts.
   const coordinates: Point[] = arrangeInBox({
     container: new Box(label.horizontalBox, label.verticalBox),
     border: 0,

@@ -170,8 +170,8 @@ describe('Util test', () => {
       itemWidths: [20],
     });
     expect(actual.length).toEqual(1);
-    expect(actual[0].x).toEqual(Interval.createFromCenterSize(Interval.createFromMinMax(10, 110).center, 20).minValue);
-    expect(actual[0].y).toEqual(50);
+    expect(actual[0].x).toEqual(60);
+    expect(actual[0].y).toEqual(45);
   });
 
   it('When arrangeInBox arranges two items then they are equally spaced over the inner height vertically and centered horizontally', () => {
@@ -182,9 +182,9 @@ describe('Util test', () => {
       itemWidths: [20, 30],
     });
     expect(actual.length).toEqual(2);
-    expect(actual[0].x).toEqual(50);
-    expect(actual[1].x).toEqual(45);
-    expect(actual[0].y).toEqual(50);
-    expect(actual[1].y).toEqual(66);
+    expect(actual[0].x).toEqual(60);
+    expect(actual[1].x).toEqual(60);
+    expect(actual[0].y).toEqual(45);
+    expect(actual[1].y).toEqual(61);
   });
 });

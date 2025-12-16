@@ -16,7 +16,6 @@
 
 import { Box } from '../graphics/box';
 import { Point } from '../graphics/graphics';
-import { Interval } from './interval';
 
 // This can be done in a more concise way, see StackOverflow:
 // https://stackoverflow.com/questions/36947847/how-to-generate-range-of-numbers-from-0-to-n-in-es2015-only
@@ -156,14 +155,15 @@ export interface ArrangeInBoxParameters {
   itemWidths: number[];
 }
 
+// Returns the (x, y) coordinates of the text centers, both horizontally and vertically.
 export function arrangeInBox(parameters: ArrangeInBoxParameters): Point[] {
   if (parameters.itemWidths.length === 0) {
     return [];
   } else if (parameters.itemWidths.length === 1) {
     return [
       new Point(
-        Math.round(parameters.container.horizontalBox.center - parameters.itemWidths[0] / 2),
-        Math.round(parameters.container.verticalBox.center + parameters.commonItemHeight / 2),
+        Math.round(parameters.container.horizontalBox.center),
+        Math.round(parameters.container.verticalBox.center),
       ),
     ];
   } else {
@@ -174,9 +174,9 @@ export function arrangeInBox(parameters: ArrangeInBoxParameters): Point[] {
       Math.max(rawTotalVerticalSpaceBetweenLines, 0) / (parameters.itemWidths.length - 1);
     const result: Point[] = [];
     let currentY = parameters.container.verticalBox.minValue + parameters.border;
-    for (const currentItemWidth of parameters.itemWidths) {
-      const x = Interval.createFromCenterSize(parameters.container.horizontalBox.center, currentItemWidth).minValue;
-      const y = Math.round(currentY + parameters.commonItemHeight);
+    for (const {} of parameters.itemWidths) {
+      const x = parameters.container.horizontalBox.center;
+      const y = Math.round(currentY + parameters.commonItemHeight / 2);
       result.push(new Point(x, y));
       currentY += parameters.commonItemHeight + verticalSpaceBetweenLines;
     }
