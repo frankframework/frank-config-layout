@@ -89,8 +89,9 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
     const node = nodes[index];
     const name = node.nodeName.toLowerCase();
     if (name === 'br') continue;
+    const isBold: boolean = name === 'b';
     const text = node.textContent ?? '';
-    textParts.push(createNodeTextPart(name, text, d));
+    textParts.push(createNodeTextPart(name, text, isBold, d));
   }
   const innerWidth = Math.max(...textParts.map((p) => p.innerWidth));
   return {
@@ -101,9 +102,8 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
   };
 }
 
-function createNodeTextPart(nodeName: string, text: string, d: NodeTextDimensions): NodeTextPart {
-  // TODO: Calculate this only once.
-  const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize);
+function createNodeTextPart(nodeName: string, text: string, isBold: boolean, d: NodeTextDimensions): NodeTextPart {
+  const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize, isBold);
   const innerWidth: number = Math.round(text.length * fontWidth);
   const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;
   return {
