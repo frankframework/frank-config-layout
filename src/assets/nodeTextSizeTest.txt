@@ -1,0 +1,28 @@
+flowchart
+  d266e7("<b>DirectoryListener<b>"):::listener
+  d266e10("<a style='font-size:28px'>MFHIn</a>"):::normal
+  d266e32("FixedQuerySender"):::sender
+  d266e55("JdbcTableListener"):::listener
+  d266e60("JavaListener"):::listener
+  d266e63("<b>MFHProcessor</b>"):::normal
+  classDef normal fill:#fff,stroke-width:4px,stroke:#8bc34a;
+  classDef listener0 fill:#fff,stroke-width:4px,stroke:#fe41ff;
+  classDef listener1 fill:#fff,stroke-width:4px,stroke:#18a689;
+  classDef listener2 fill:#fff,stroke-width:4px,stroke:#18a689;
+  classDef listener3 fill:#fff,stroke-width:4px,stroke:#4150ff;
+  classDef listener4 fill:#fff,stroke-width:4px,stroke:#ffc107;
+  classDef listener5 fill:#fff,stroke-width:4px,stroke:#ff417e;
+  classDef sender0 fill:#fff,stroke-width:4px,stroke:#fe41ff;
+  classDef sender1 fill:#fff,stroke-width:4px,stroke:#8bc34a;
+  classDef sender2 fill:#fff,stroke-width:4px,stroke:#00abff;
+  classDef sender3 fill:#fff,stroke-width:4px,stroke:#4150ff;
+  classDef sender4 fill:#fff,stroke-width:4px,stroke:#ffc107;
+  classDef sender5 fill:#fff,stroke-width:4px,stroke:#ff417e;
+  classDef sender6 fill:#fff,stroke-width:4px,stroke:#8a41ff;
+  classDef sender7 fill:#fff,stroke-width:4px,stroke:#ff8741;
+  classDef sender8 fill:#fff,stroke-width:4px,stroke:#8bc34a;
+  d266e7 --> d266e10
+  d266e10 --> d266e32
+  d266e55 --> d266e63
+  d266e60 --> d266e63
+  linkStyle 0,1,2,3 stroke:#8bc34a,stroke-width:3px,fill:none;

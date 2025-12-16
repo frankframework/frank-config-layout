@@ -46,7 +46,7 @@ export function initMermaid2Svg(d: Dimensions): void {
 export function getFactoryDimensions(): Dimensions {
   return {
     nodeTextFontSize: 16,
-    nodeTextBorder: 8,
+    nodeTextBorder: 12,
     layerHeight: 60,
     layerDistance: 120,
     nodeBoxHeight: 54,
