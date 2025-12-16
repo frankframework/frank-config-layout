@@ -80,10 +80,6 @@ function renderDefs(): string {
         font-family: "Inter", "trebuchet ms", serif;
       }
 
-      .rect-text > text[data-html-node="a"] {
-        font-size: 28px;
-      }
-
       .rect-text > text[data-html-node="b"] {
         font-weight: bold;
       }
@@ -215,5 +211,5 @@ function getSvgTextElements(node: PlacedNode, border: number, fontSize: number):
 }
 
 function getSvgTextElement(textPart: NodeTextPart, x: number, y: number): string {
-  return `<text data-html-node=${textPart.name} x="${x}" y="${y}" textLength="${textPart.innerWidth}" lengthAdjust="spacingAndGlyphs">${textPart.text}</text>`;
+  return `<text data-html-node=${textPart.name} x="${x}" y="${y}">${textPart.text}</text>`;
 }
