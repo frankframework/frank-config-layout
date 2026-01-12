@@ -1,3 +1,4 @@
+import { provideZoneChangeDetection } from "@angular/core";
 /*
    Copyright 2024 WeAreFrank!
 
@@ -18,6 +19,6 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
 
 platformBrowserDynamic()
-  .bootstrapModule(AppModule)
+  .bootstrapModule(AppModule, { applicationProviders: [provideZoneChangeDetection()], })
   // eslint-disable-next-line unicorn/prefer-top-level-await
   .catch((error) => console.error(error));

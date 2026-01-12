@@ -5,9 +5,11 @@
       <textarea [(ngModel)]="mermaidText"></textarea>
     </td>
     <td>
-      <button class="loadButton" *ngFor="let alg of layerNumberAlgorithms" (click)="loadMermaid(alg.key)">
-        Load with {{ alg.value }} algorithm
-      </button>
+      @for (alg of layerNumberAlgorithms; track alg) {
+        <button class="loadButton" (click)="loadMermaid(alg.key)">
+          Load with {{ alg.value }} algorithm
+        </button>
+      }
       <button class="loadButton" (click)="resetMermaid()">
         Reset
       </button>
