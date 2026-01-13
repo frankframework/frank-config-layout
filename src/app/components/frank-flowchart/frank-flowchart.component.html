@@ -1,72 +1,80 @@
 <div class="wrapper">
   <div id="scale-overlay">{{scale}}%</div>
-  <svg *ngIf="drawing !== null" class="svg" xmlns="http://www.w3.org/2000/svg"
+  @if (drawing !== null) {
+    <svg class="svg" xmlns="http://www.w3.org/2000/svg"
       appSvgZoomPan (newScale)="newScale($event)" preserveAspectRatio="none"
       [attr.width]="drawing.width" [attr.height]="drawing.height" >
-    <defs>
-      <!-- A marker to be used as an arrowhead -->
-      <marker
-        id="arrow"
-        viewBox="0 0 4 4"
-        refX="4"
-        refY="2"
-        markerWidth="4"
-        markerHeight="4"
-        orient="auto-start-reverse">
-        <path d="M 0 0 L 4 2 L 0 4 z" />
-      </marker>
-    </defs>
-    <g *ngFor="let rectangle of drawing.rectangles" (click)="handleShapeClicked(rectangle.id)">
-      <rect class="rectangle"
-        [class.errorOutline]="rectangle.errorStatus === ERROR_STATUS_ERROR"
-        [attr.x]="rectangle.x"
-        [attr.y]="rectangle.y"
-        [attr.width]="rectangle.width"
-        [attr.height]="rectangle.height"
-        id="rectangle.id"
-        rx="5">
-      </rect>
-      <foreignObject
-        [attr.x]="rectangle.x"
-        [attr.y]="rectangle.y"
-        [attr.width]="rectangle.width"
-        [attr.height]="rectangle.height">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
-          <div class="rect-text-box" [innerHTML]="rectangle.text">
-          </div>
-        </div>
-      </foreignObject>
-      <rect class="rect-hover-padding"
-        [attr.x]="rectangle.x - 5"
-        [attr.y]="rectangle.y - 5"
-        [attr.width]="rectangle.width + 10"
-        [attr.height]="rectangle.height + 10"
-        [class.selected]="rectangle.selected"
-        rx="10">
-      </rect>
-    </g>
-    <g *ngFor="let line of drawing.lines" (click)="handleShapeClicked(line.id)">
-      <polyline class="line"
-        attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
-        [attr.marker-end]="line.arrow ? 'url(#arrow)' : null"
-        id="{{line.id}}"
-        [class.error]="line.errorStatus === ERROR_STATUS_ERROR"
-        [class.mixed]="line.errorStatus === ERROR_STATUS_MIXED"/>
-      <polyline class="line-hover-padding"
-        attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
-        [class.selected]="line.selected"/>
-    </g>
-    <g *ngFor="let label of drawing.edgeLabels"
-      attr.transform="translate({{label.horizontalBox.minValue}}, {{label.verticalBox.minValue}})">
-      <foreignObject 
-        attr.width="{{label.horizontalBox.size}}"
-        attr.height="{{label.verticalBox.size}}">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper"
-          [ngStyle]="{'font-size': drawing.edgeLabelFontSize + 'px'}">
-          <div class="label-text-box" [innerHTML]="label.text.html">
-          </div>
-        </div>
-      </foreignObject>
-    </g>
-  </svg>
+      <defs>
+        <!-- A marker to be used as an arrowhead -->
+        <marker
+          id="arrow"
+          viewBox="0 0 4 4"
+          refX="4"
+          refY="2"
+          markerWidth="4"
+          markerHeight="4"
+          orient="auto-start-reverse">
+          <path d="M 0 0 L 4 2 L 0 4 z" />
+        </marker>
+      </defs>
+      @for (rectangle of drawing.rectangles; track rectangle) {
+        <g (click)="handleShapeClicked(rectangle.id)">
+          <rect class="rectangle"
+            [class.errorOutline]="rectangle.errorStatus === ERROR_STATUS_ERROR"
+            [attr.x]="rectangle.x"
+            [attr.y]="rectangle.y"
+            [attr.width]="rectangle.width"
+            [attr.height]="rectangle.height"
+            id="rectangle.id"
+            rx="5">
+          </rect>
+          <foreignObject
+            [attr.x]="rectangle.x"
+            [attr.y]="rectangle.y"
+            [attr.width]="rectangle.width"
+            [attr.height]="rectangle.height">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="rect-text-wrapper">
+              <div class="rect-text-box" [innerHTML]="rectangle.text">
+              </div>
+            </div>
+          </foreignObject>
+          <rect class="rect-hover-padding"
+            [attr.x]="rectangle.x - 5"
+            [attr.y]="rectangle.y - 5"
+            [attr.width]="rectangle.width + 10"
+            [attr.height]="rectangle.height + 10"
+            [class.selected]="rectangle.selected"
+            rx="10">
+          </rect>
+        </g>
+      }
+      @for (line of drawing.lines; track line) {
+        <g (click)="handleShapeClicked(line.id)">
+          <polyline class="line"
+            attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
+            [attr.marker-end]="line.arrow ? 'url(#arrow)' : null"
+            id="{{line.id}}"
+            [class.error]="line.errorStatus === ERROR_STATUS_ERROR"
+            [class.mixed]="line.errorStatus === ERROR_STATUS_MIXED"/>
+          <polyline class="line-hover-padding"
+            attr.points="{{line.x1}},{{line.y1}} {{line.x2}},{{line.y2}}"
+            [class.selected]="line.selected"/>
+        </g>
+      }
+      @for (label of drawing.edgeLabels; track label) {
+        <g
+          attr.transform="translate({{label.horizontalBox.minValue}}, {{label.verticalBox.minValue}})">
+          <foreignObject
+            attr.width="{{label.horizontalBox.size}}"
+            attr.height="{{label.verticalBox.size}}">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="label-text-wrapper"
+              [ngStyle]="{'font-size': drawing.edgeLabelFontSize + 'px'}">
+              <div class="label-text-box" [innerHTML]="label.text.html">
+              </div>
+            </div>
+          </foreignObject>
+        </g>
+      }
+    </svg>
+  }
 </div>

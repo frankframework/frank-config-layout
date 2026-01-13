@@ -12,6 +12,6 @@
     "directory": "projects/frank-config-layout"
   },
   "peerDependencies": {
-    "@angular/core": "^20.2.2"
+    "@angular/core": "^21.0.8"
   }
 }
