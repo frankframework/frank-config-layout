@@ -18,45 +18,25 @@ import { NumbersAroundZero } from '../util/util';
 import { Box } from './box';
 import { Interval } from '../util/interval';
 import { Line, Point } from './graphics';
-import { calculateAverageFontCharacterWidth } from '../model/text';
 
 export interface EdgeLabelDimensions {
-  edgeLabelFontSize: number;
-  preferredVertDistanceFromOrigin: number;
-  strictlyKeepLabelOutOfBox: boolean;
-}
-
-export interface DerivedEdgeLabelDimensions {
   estCharacterWidth: number;
   estLabelLineHeight: number;
   preferredVertDistanceFromOrigin: number;
   strictlyKeepLabelOutOfBox: boolean;
 }
 
-export function getDerivedEdgeLabelDimensions(d: EdgeLabelDimensions): DerivedEdgeLabelDimensions {
-  return {
-    estCharacterWidth: calculateAverageFontCharacterWidth(d.edgeLabelFontSize),
-    // In theory, we need a margin between multiple lines of an edge label.
-    // In practice, we get an acceptable result by adjusting the line heigt
-    // to produce it.
-    estLabelLineHeight: d.edgeLabelFontSize + 3,
-    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
-    strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox,
-  };
-}
-
 export class EdgeLabelLayouter {
   private boxes: Box[] = [];
 
-  constructor(readonly derivedDimensions: DerivedEdgeLabelDimensions) {}
+  constructor(readonly dimensions: EdgeLabelDimensions) {}
 
   add(line: Line, numCharactersOnLine: number, numTextLines: number): Box {
     const vdistSources = new NumbersAroundZero();
     while (true) {
       const vdistSource: number = vdistSources.next();
       const vdist: number =
-        this.derivedDimensions.preferredVertDistanceFromOrigin +
-        vdistSource * this.derivedDimensions.estLabelLineHeight;
+        this.dimensions.preferredVertDistanceFromOrigin + vdistSource * this.dimensions.estLabelLineHeight;
       if (vdist <= 0) {
         // The vertical center of the label would be in the box from which the line originates.
         // Next vdistSource.
@@ -65,14 +45,14 @@ export class EdgeLabelLayouter {
       const candidateCenter: Point = this.pointAt(vdist, line);
       const horizontalBox = Interval.createFromCenterSize(
         candidateCenter.x,
-        numCharactersOnLine * this.derivedDimensions.estCharacterWidth,
+        numCharactersOnLine * this.dimensions.estCharacterWidth,
       );
       const verticalBox = Interval.createFromCenterSize(
         candidateCenter.y,
-        numTextLines * this.derivedDimensions.estLabelLineHeight,
+        numTextLines * this.dimensions.estLabelLineHeight,
       );
       const candidateBox = new Box(horizontalBox, verticalBox);
-      if (this.derivedDimensions.strictlyKeepLabelOutOfBox && candidateBox.verticalBox.contains(line.startPoint.y)) {
+      if (this.dimensions.strictlyKeepLabelOutOfBox && candidateBox.verticalBox.contains(line.startPoint.y)) {
         // The label would intersect with the box from which the line originates.
         // Next vdistSource.
         continue;

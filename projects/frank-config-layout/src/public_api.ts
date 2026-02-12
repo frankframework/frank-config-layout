@@ -136,6 +136,6 @@ export {
   calculateNumCrossingsChangesFromAligning,
   minimizeNumCrossings,
 } from './lib/model/layout-base';
-export { getDerivedEdgeLabelDimensions } from './lib/graphics/edge-label-layouter';
+export { getDerivedDimensions } from './lib/dimensions';
 export { LayoutModel, LayoutModelBuilder } from './lib/model/layout-model';
 export { LayoutBuilder, Layout, PlacedNode, EdgeLabel, getNumCrossingLines } from './lib/graphics/layout';

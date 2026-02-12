@@ -28,7 +28,7 @@ import { HorizontalConflictResolver } from './horizontal-conflict';
 import { getRange } from '../util/util';
 import { getConnectedIdsOfKey, getKey, keyFor } from '../model/graph';
 import { Box, LineChecker } from './box';
-import { DerivedEdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
+import { EdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
 import { straighten, StraightenedLine, StraightenedLineSegmentsBuilder } from './straightened-line';
 import { EdgeText, NodeText } from '../model/text';
 
@@ -84,11 +84,12 @@ export class LayoutBuilder {
   private layoutLineSegmentsByOriginalEdge = new Map<string, LayoutLineSegment[]>();
   private originalEdgesByConnector = new Map<string, string>();
   private lineThrougIntermediateNodeAllowance: number;
+
   constructor(
     private model: LayoutModel,
     private og: OriginalGraphReferencingIntermediates,
     private d: NodeAndEdgeDimensions,
-    private derivedEdgeLabelDimensions: DerivedEdgeLabelDimensions,
+    private derivedEdgeLabelDimensions: EdgeLabelDimensions,
   ) {
     this.lineThrougIntermediateNodeAllowance = Math.round((d.intermediateWidth * d.lineTransgressionPerc) / 100);
   }

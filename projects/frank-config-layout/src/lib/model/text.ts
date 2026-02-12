@@ -21,8 +21,6 @@ export interface NodeTextDimensions {
 
 export interface EdgeTextLine {
   text: string;
-  width: number;
-  height: number;
 }
 
 export interface EdgeText {
@@ -46,6 +44,11 @@ export interface NodeText {
   readonly outerWidth: number;
 }
 
+export interface ParseNodeTextDimensions {
+  nodeTextBorder: number;
+  nodeTextFontSize: number;
+}
+
 export function createEmptyEdgeText(): EdgeText {
   return {
     html: '',
@@ -55,7 +58,7 @@ export function createEmptyEdgeText(): EdgeText {
   };
 }
 
-export function createEdgeText(originalHtml: string, fontSize: number): EdgeText {
+export function createEdgeText(originalHtml: string): EdgeText {
   let lines: string[] = [];
   if (originalHtml.length > 0) {
     lines = originalHtml.split('<br/>').map((s) => s.trim());
@@ -67,10 +70,9 @@ export function createEdgeText(originalHtml: string, fontSize: number): EdgeText
   return {
     html: lines.join('<br/>'),
     lines: lines.map((l) => {
+      // TODO: No need to use an object here, string suffices.
       return {
         text: l,
-        width: calculateAverageFontCharacterWidth(fontSize) * l.length,
-        height: fontSize,
       };
     }),
     maxLineLength,
@@ -78,7 +80,7 @@ export function createEdgeText(originalHtml: string, fontSize: number): EdgeText
   };
 }
 
-export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
+export function createNodeText(html: string, d: ParseNodeTextDimensions): NodeText {
   const nodeDOM = new DOMParser().parseFromString(html, 'text/html');
   const nodes = nodeDOM.body.childNodes;
   const textParts: NodeTextPart[] = [];
@@ -102,7 +104,7 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
   };
 }
 
-function createNodeTextPart(nodeName: string, text: string, isBold: boolean, d: NodeTextDimensions): NodeTextPart {
+function createNodeTextPart(nodeName: string, text: string, isBold: boolean, d: ParseNodeTextDimensions): NodeTextPart {
   const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize, isBold);
   const innerWidth: number = Math.round(text.length * fontWidth);
   const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;

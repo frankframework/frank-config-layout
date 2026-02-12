@@ -17,10 +17,7 @@ N1(""):::normal
 N2(""):::normal
 N1 --> |success| N2
 `;
-    // TODO: issue https://github.com/frankframework/frank-config-layout/issues/51.
-    // Dimensions that are configured in the playground should be handled better. Then
-    // we get rid of these awkward arguments.
-    const b = getGraphFromMermaid(input, dimensions(), dimensions());
+    const b = getGraphFromMermaid(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -36,7 +33,7 @@ N1(""):::normal
 N2(""):::normal
 N1 --> N2
 `;
-    const b = getGraphFromMermaid(input, dimensions(), dimensions());
+    const b = getGraphFromMermaid(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -52,7 +49,7 @@ N1(""):::errorOutline
 N2(""):::normal
 N1 --> |success| N2
 `;
-    const b = getGraphFromMermaid(input, dimensions(), dimensions());
+    const b = getGraphFromMermaid(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -68,7 +65,7 @@ N1(""):::normal
 N2(""):::normal
 N1 --> |exception| N2
 `;
-    const b = getGraphFromMermaid(input, dimensions(), dimensions());
+    const b = getGraphFromMermaid(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -85,7 +82,7 @@ N1(""):::normal
 N2(""):::normal
 N1 --> |exception<br/>success| N2
 `;
-    const b = getGraphFromMermaid(input, dimensions(), dimensions());
+    const b = getGraphFromMermaid(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -101,7 +98,7 @@ N1 --> |exception<br/>success| N2
 N1(""):::normal
 N2(""):::normal
 N1 --> |success<br/>  exception  | N2`;
-    const b = getGraphFromMermaid(input, dimensions(), dimensions());
+    const b = getGraphFromMermaid(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     const instance = c.getEdgeByKey('N1-N2');
     expect(instance.text.numLines).toEqual(2);
@@ -124,8 +121,9 @@ function dimensions(): NodeTextDimensions & EdgeLabelDimensions {
   return {
     nodeTextFontSize: 16,
     nodeTextBorder: 4,
-    edgeLabelFontSize: 10,
+    estLabelLineHeight: 10,
     preferredVertDistanceFromOrigin: 5,
     strictlyKeepLabelOutOfBox: true,
+    estCharacterWidth: 0,
   };
 }
