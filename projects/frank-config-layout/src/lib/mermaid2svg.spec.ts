@@ -1,22 +1,5 @@
 import { Mermaid2svgService } from './mermaid2svg';
-import { Dimensions, SvgResult } from '../public_api';
-
-const dimensions: Dimensions = {
-  nodeTextFontSize: 16,
-  nodeTextBorder: 4,
-  layerHeight: 50,
-  layerDistance: 120,
-  nodeBoxHeight: 50,
-  intermediateWidth: 60,
-  horizontalNodeBorder: 15,
-  boxConnectorAreaPerc: 50,
-  intermediateLayerPassedByVerticalLine: false,
-  edgeLabelFontSize: 10,
-  preferredVertDistanceFromOrigin: 30,
-  strictlyKeepLabelOutOfBox: false,
-  lineTransgressionPerc: 100,
-  boxCrossProtectionMargin: 0,
-};
+import { getFactoryDimensions, SvgResult } from '../public_api';
 
 const input = `Start("My start"):::normal
 N1("Node 1"):::normal
@@ -40,7 +23,7 @@ N3 --> |success| End`;
 // "const expected = ``" before inserting the text inside the ``.
 //
 const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
-  width="439" height="480" >
+  width="286" height="480" >
   <defs>
     <style>
       .rectangle {
@@ -70,10 +53,6 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
         font-family: "Inter", "trebuchet ms", serif;
       }
 
-      .rect-text > text[data-html-node="a"] {
-        font-size: 28px;
-      }
-
       .rect-text > text[data-html-node="b"] {
         font-weight: bold;
       }
@@ -94,117 +73,94 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
       <path d="M 0 0 L 4 2 L 0 4 z" />
     </marker>
   </defs>
-  <g class="frank-flowchart-node-Start" transform="translate(96, 0)">
+  <g class="frank-flowchart-node-Start" transform="translate(78, 3)">
     <rect class="rectangle"
-      width="160"
-      height="50"
+      width="95"
+      height="54"
       rx="5">
     </rect>
-    <g class="rect-text"><text data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">My start</text></g>
   </g>
-  <g class="frank-flowchart-node-N1" transform="translate(96, 120)">
+  <g class="rect-text" text-anchor="middle" dominant-baseline="middle"><text data-html-node=#text x="125" y="30">My start</text></g>
+  <g class="frank-flowchart-node-N1" transform="translate(87, 123)">
     <rect class="rectangle"
-      width="160"
-      height="50"
+      width="77"
+      height="54"
       rx="5">
     </rect>
-    <g class="rect-text"><text data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 1</text></g>
   </g>
-  <g class="frank-flowchart-node-N3" transform="translate(271, 120)">
+  <g class="rect-text" text-anchor="middle" dominant-baseline="middle"><text data-html-node=#text x="125" y="150">Node 1</text></g>
+  <g class="frank-flowchart-node-N3" transform="translate(194, 123)">
     <rect class="rectangle errorOutline"
-      width="160"
-      height="50"
+      width="77"
+      height="54"
       rx="5">
     </rect>
-    <g class="rect-text"><text data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 3</text></g>
   </g>
-  <g class="frank-flowchart-node-N2" transform="translate(7, 240)">
+  <g class="rect-text" text-anchor="middle" dominant-baseline="middle"><text data-html-node=#text x="232" y="150">Node 3</text></g>
+  <g class="frank-flowchart-node-N2" transform="translate(15, 243)">
     <rect class="rectangle"
-      width="160"
-      height="50"
+      width="77"
+      height="54"
       rx="5">
     </rect>
-    <g class="rect-text"><text data-html-node=#text x="53.41" y="29" textLength="53.18" lengthAdjust="spacingAndGlyphs">Node 2</text></g>
   </g>
-  <g class="frank-flowchart-node-End" transform="translate(125, 360)">
+  <g class="rect-text" text-anchor="middle" dominant-baseline="middle"><text data-html-node=#text x="53" y="270">Node 2</text></g>
+  <g class="frank-flowchart-node-End" transform="translate(90, 363)">
     <rect class="rectangle"
-      width="160"
-      height="50"
+      width="95"
+      height="54"
       rx="5">
     </rect>
-    <g class="rect-text"><text data-html-node=#text x="44.55" y="29" textLength="70.91" lengthAdjust="spacingAndGlyphs">End node</text></g>
   </g>
+  <g class="rect-text" text-anchor="middle" dominant-baseline="middle"><text data-html-node=#text x="137" y="390">End node</text></g>
   <g class="frank-flowchart-edge-Start-N1">
-    <polyline class="line" points="176,49 176,120" marker-end="url(#arrow)"/>
+    <polyline class="line" points="125,56 125,123" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-Start-intermediate1">
-    <polyline class="line" points="136,49 59,145" />
+    <polyline class="line" points="101,56 42,150" />
   </g>
   <g class="frank-flowchart-edge-intermediate1-N2">
-    <polyline class="line" points="59,145 47,240" marker-end="url(#arrow)"/>
+    <polyline class="line" points="42,150 34,243" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-Start-N3">
-    <polyline class="line" points="215,49 351,120" marker-end="url(#arrow)"/>
+    <polyline class="line" points="148,56 232,123" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N1-intermediate2">
-    <polyline class="line error" points="215,169 205,265" />
+    <polyline class="line error" points="144,176 140,270" />
   </g>
   <g class="frank-flowchart-edge-intermediate2-End">
-    <polyline class="line error" points="205,265 205,360" marker-end="url(#arrow)"/>
+    <polyline class="line error" points="140,270 137,363" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N2-End">
-    <polyline class="line" points="87,289 165,360" marker-end="url(#arrow)"/>
+    <polyline class="line" points="53,296 113,363" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N1-N2">
-    <polyline class="line" points="136,169 126,240" marker-end="url(#arrow)"/>
+    <polyline class="line" points="106,176 72,243" marker-end="url(#arrow)"/>
   </g>
   <g class="frank-flowchart-edge-N3-intermediate3">
-    <polyline class="line error" points="351,169 351,265" />
+    <polyline class="line error" points="232,176 196,270" />
   </g>
   <g class="frank-flowchart-edge-intermediate3-End">
-    <polyline class="line error" points="351,265 244,360" marker-end="url(#arrow)"/>
+    <polyline class="line error" points="196,270 160,363" marker-end="url(#arrow)"/>
   </g>
-  <g text-anchor="middle" dominant-baseline="middle">
-    <g transform="translate(88, 73)">
-      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
-    </g>
-    <g transform="translate(152, 73)">
-      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
-    </g>
-    <g transform="translate(248, 73)">
-      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
-    </g>
-    <g transform="translate(108, 193)">
-      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
-    </g>
-    <g transform="translate(188, 193)">
-      <text class="label-text" x="24.5" y="6.5" font-size="10">failure</text>
-    </g>
-    <g transform="translate(327, 193)">
-      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
-    </g>
-    <g transform="translate(96, 313)">
-      <text class="label-text" x="24.5" y="6.5" font-size="10">success</text>
-    </g>
-  </g>
-</svg>`;
+  <g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="82" y="86" font-size="10">success</text><text class="label-text" x="125" y="86" font-size="10">success</text><text class="label-text" x="186" y="86" font-size="10">success</text><text class="label-text" x="91" y="206" font-size="10">success</text><text class="label-text" x="143" y="206" font-size="10">failure</text><text class="label-text" x="221" y="206" font-size="10">success</text><text class="label-text" x="80" y="326" font-size="10">success</text></g></svg>`;
 
 describe('Mermaid2svg - please maintain this test using the GUI', () => {
   let service: Mermaid2svgService;
 
   beforeEach(() => {
     // No need to test injection - if injection does not work then the app does not show
-    service = new Mermaid2svgService(dimensions);
+    service = new Mermaid2svgService(getFactoryDimensions());
   });
 
-  xit('Test the plain SVG', (done) => {
+  it('Test the plain SVG', (done) => {
     service.mermaid2svg(input).then((svg) => {
       expect(svg.split('\n')).toEqual(expectedSvg!.split('\n'));
       done();
     });
   });
 
-  xit('Test with statistics', (done) => {
+  it('Test with statistics', (done) => {
     service.mermaid2svgStatistics(input).then((statistics) => {
       expect(statistics.svg).toEqual(expectedSvg);
       expect(statistics.numNodes).toEqual(5);
@@ -214,7 +170,7 @@ describe('Mermaid2svg - please maintain this test using the GUI', () => {
     });
   });
 
-  xit('Test that real calculation is done only once', (done) => {
+  it('Test that real calculation is done only once', (done) => {
     const first: Promise<SvgResult> = service.mermaid2svgStatistics(input);
     const second: Promise<string> = service.mermaid2svg(input);
     Promise.all([first, second]).then(() => {
