@@ -1,24 +1,11 @@
 import { Dimensions } from '../public_api';
-import { calculateAverageFontCharacterWidth } from './model/text';
+import { EdgeLabelDimensions } from './graphics/edge-label-layouter';
+import { NodeAndEdgeDimensions } from './graphics/layout';
+import { SvgGenerationDimensions } from './graphics/svg-generator';
+import { calculateAverageFontCharacterWidth, NodeTextDimensions } from './model/text';
 
-export interface DerivedDimensions {
-  nodeTextFontSize: number; // 16
-  nodeTextBorder: number;
-  horizontalNodeBorder: number;
-  intermediateWidth: number;
-  layerHeight: number;
-  layerDistance: number;
-  nodeBoxHeight: number;
-  boxConnectorAreaPerc: number;
-  intermediateLayerPassedByVerticalLine: boolean;
-  boxCrossProtectionMargin: number;
-  lineTransgressionPerc: number;
-  edgeLabelFontSize: number;
-  estEdgeLabelCharacterWidth: number;
-  estEdgeLabelLineHeight: number;
-  preferredVertDistanceFromOrigin: number;
-  strictlyKeepLabelOutOfBox: boolean;
-}
+export interface DerivedDimensions
+  extends EdgeLabelDimensions, NodeAndEdgeDimensions, SvgGenerationDimensions, NodeTextDimensions {}
 
 export function getDerivedDimensions(d: Dimensions): DerivedDimensions {
   return {

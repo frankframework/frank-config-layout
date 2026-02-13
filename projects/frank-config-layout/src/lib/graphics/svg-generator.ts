@@ -21,7 +21,7 @@ import { Box } from './box';
 import { Point } from './graphics';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
-interface SvgGenerationDimensions {
+export interface SvgGenerationDimensions {
   nodeTextFontSize: number;
   nodeTextBorder: number;
   edgeLabelFontSize: number;
