@@ -18,45 +18,25 @@ import { NumbersAroundZero } from '../util/util';
 import { Box } from './box';
 import { Interval } from '../util/interval';
 import { Line, Point } from './graphics';
-import { calculateAverageFontCharacterWidth } from '../model/text';
 
 export interface EdgeLabelDimensions {
-  edgeLabelFontSize: number;
+  estEdgeLabelCharacterWidth: number;
+  estEdgeLabelLineHeight: number;
   preferredVertDistanceFromOrigin: number;
   strictlyKeepLabelOutOfBox: boolean;
-}
-
-export interface DerivedEdgeLabelDimensions {
-  estCharacterWidth: number;
-  estLabelLineHeight: number;
-  preferredVertDistanceFromOrigin: number;
-  strictlyKeepLabelOutOfBox: boolean;
-}
-
-export function getDerivedEdgeLabelDimensions(d: EdgeLabelDimensions): DerivedEdgeLabelDimensions {
-  return {
-    estCharacterWidth: calculateAverageFontCharacterWidth(d.edgeLabelFontSize),
-    // TODO issue https://github.com/frankframework/frank-config-layout/issues/51.
-    // When a label has multiple lines then we need a marging between the lines,
-    // not an increased line height. The text is rendered with a martin in svg-generator.ts.
-    estLabelLineHeight: d.edgeLabelFontSize + 3,
-    preferredVertDistanceFromOrigin: d.preferredVertDistanceFromOrigin,
-    strictlyKeepLabelOutOfBox: d.strictlyKeepLabelOutOfBox,
-  };
 }
 
 export class EdgeLabelLayouter {
   private boxes: Box[] = [];
 
-  constructor(readonly derivedDimensions: DerivedEdgeLabelDimensions) {}
+  constructor(readonly dimensions: EdgeLabelDimensions) {}
 
   add(line: Line, numCharactersOnLine: number, numTextLines: number): Box {
     const vdistSources = new NumbersAroundZero();
     while (true) {
       const vdistSource: number = vdistSources.next();
       const vdist: number =
-        this.derivedDimensions.preferredVertDistanceFromOrigin +
-        vdistSource * this.derivedDimensions.estLabelLineHeight;
+        this.dimensions.preferredVertDistanceFromOrigin + vdistSource * this.dimensions.estEdgeLabelLineHeight;
       if (vdist <= 0) {
         // The vertical center of the label would be in the box from which the line originates.
         // Next vdistSource.
@@ -65,14 +45,14 @@ export class EdgeLabelLayouter {
       const candidateCenter: Point = this.pointAt(vdist, line);
       const horizontalBox = Interval.createFromCenterSize(
         candidateCenter.x,
-        numCharactersOnLine * this.derivedDimensions.estCharacterWidth,
+        numCharactersOnLine * this.dimensions.estEdgeLabelCharacterWidth,
       );
       const verticalBox = Interval.createFromCenterSize(
         candidateCenter.y,
-        numTextLines * this.derivedDimensions.estLabelLineHeight,
+        numTextLines * this.dimensions.estEdgeLabelLineHeight,
       );
       const candidateBox = new Box(horizontalBox, verticalBox);
-      if (this.derivedDimensions.strictlyKeepLabelOutOfBox && candidateBox.verticalBox.contains(line.startPoint.y)) {
+      if (this.dimensions.strictlyKeepLabelOutOfBox && candidateBox.verticalBox.contains(line.startPoint.y)) {
         // The label would intersect with the box from which the line originates.
         // Next vdistSource.
         continue;

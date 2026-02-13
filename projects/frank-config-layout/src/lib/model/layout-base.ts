@@ -185,7 +185,6 @@ function alignFromLayerTo(lb: LayoutBase, target: number, ref: number): void {
   ref = target;
 }
 
-// TODO: I do not know how to test this automatically
 export function calculateNumCrossingsChangesFromAligning(original: LayoutBase): number[] {
   const originalNumCrossings = getNumCrossings(original);
   const result: number[] = [];

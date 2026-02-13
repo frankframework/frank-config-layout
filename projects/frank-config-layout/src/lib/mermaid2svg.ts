@@ -20,7 +20,6 @@ import { LayoutBase, minimizeNumCrossings } from './model/layout-base';
 import { generateSvg } from './graphics/svg-generator';
 import { AsynchronousCache } from './util/asynchronous-cache';
 import { sha256 } from './util/hash';
-import { getDerivedEdgeLabelDimensions } from './graphics/edge-label-layouter';
 import { findErrorFlow, OriginalGraph } from './model/error-flow';
 import {
   introduceIntermediateNodesAndEdges,
@@ -29,6 +28,7 @@ import {
 } from './model/horizontal-grouping';
 import { SvgResult, Dimensions } from '../public_api';
 import { LayoutModel, LayoutModelBuilder } from './model/layout-model';
+import { DerivedDimensions, getDerivedDimensions } from './dimensions';
 
 export class Mermaid2svgService {
   private cache = new AsynchronousCache<SvgResult>();
@@ -42,7 +42,11 @@ export class Mermaid2svgService {
     return [...this.cache.getSortedKeys()];
   }
 
-  constructor(private dimensions: Dimensions) {}
+  private dimensions: DerivedDimensions;
+
+  constructor(dimensions: Dimensions) {
+    this.dimensions = getDerivedDimensions(dimensions);
+  }
 
   async mermaid2svg(mermaid: string): Promise<string> {
     const statistics = await this.mermaid2svgStatistics(mermaid);
@@ -62,7 +66,7 @@ export class Mermaid2svgService {
 
   private async mermaid2svgStatisticsImpl(mermaid: string): Promise<SvgResult> {
     ++this._numSvgCalculations;
-    const b: MermaidGraph = getGraphFromMermaid(mermaid, this.dimensions, this.dimensions);
+    const b: MermaidGraph = getGraphFromMermaid(mermaid, this.dimensions);
     const g: OriginalGraph = findErrorFlow(b);
     let numNodeVisits = 0;
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits);
@@ -82,15 +86,10 @@ export class Mermaid2svgService {
       layoutModel,
       intermediates.original,
       this.dimensions,
-      getDerivedEdgeLabelDimensions(this.dimensions),
+      this.dimensions,
     ).run();
     return {
-      svg: generateSvg(
-        layout,
-        this.dimensions.nodeTextFontSize,
-        this.dimensions.edgeLabelFontSize,
-        this.dimensions.nodeTextBorder,
-      ),
+      svg: generateSvg(layout, this.dimensions),
       numNodes: g.nodes.length,
       numEdges: g.edges.length,
       numNodeVisitsDuringLayerCalculation: numNodeVisits,

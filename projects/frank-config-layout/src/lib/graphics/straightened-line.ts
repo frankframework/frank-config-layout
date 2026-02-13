@@ -66,7 +66,6 @@ export class StraightenedLine {
     return [first, second];
   }
 
-  // TODO: Test
   split(pointFunction: (id: string, line: Line) => Point): StraightenedLine[] {
     if (this.replacedNodes.length === 0) {
       return [this];

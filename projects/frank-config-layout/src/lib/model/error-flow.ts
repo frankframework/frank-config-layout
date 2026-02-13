@@ -86,10 +86,10 @@ function transformEdge(from: OriginalNode, to: OriginalNode, text: EdgeText): Or
     return { from, to, text, errorStatus: ERROR_STATUS_SUCCESS };
   } else {
     const isError: boolean = text.lines
-      .map((line) => ERROR_FORWARD_NAMES.has(line.text))
+      .map((line) => ERROR_FORWARD_NAMES.has(line))
       .every((lineIsError) => lineIsError === true);
     const isSuccess: boolean = text.lines
-      .map((line) => !ERROR_FORWARD_NAMES.has(line.text))
+      .map((line) => !ERROR_FORWARD_NAMES.has(line))
       .every((lineIsSuccess) => lineIsSuccess === true);
     if (isError) {
       return { from, to, text, errorStatus: ERROR_STATUS_ERROR };
