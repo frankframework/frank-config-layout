@@ -32,7 +32,6 @@ import {
   GraphForLayers,
   Dimensions,
   getFactoryDimensions,
-  getDerivedEdgeLabelDimensions,
   Layout,
   PlacedNode,
   OriginalGraphReferencingIntermediates,
@@ -40,6 +39,8 @@ import {
   LayoutModelBuilder,
   LayoutBuilder,
   getNumCrossingLines,
+  getDerivedDimensions,
+  DerivedDimensions,
 } from 'frank-config-layout';
 import { IntermediatesCreationResult } from 'frank-config-layout';
 
@@ -103,7 +104,7 @@ export class FlowChartEditorComponent implements OnInit {
     }
   }
 
-  dimensions = getFactoryDimensions();
+  dimensions = getDerivedDimensions(getFactoryDimensions());
   drawing: Drawing | null = null;
   numCrossingLines: number = 0;
 
@@ -138,7 +139,7 @@ export class FlowChartEditorComponent implements OnInit {
   mermaid2graph(text: string): OriginalGraphOrError {
     let graph: OriginalGraph;
     try {
-      const b = getGraphFromMermaid(text, this.dimensions, this.dimensions);
+      const b = getGraphFromMermaid(text, this.dimensions);
       graph = findErrorFlow(b);
     } catch (error) {
       return { graph: null, error: `Invalid mermaid text: ${(error as Error).message}` };
@@ -220,20 +221,15 @@ export class FlowChartEditorComponent implements OnInit {
 
   static model2layout(
     model: NodeSequenceEditor,
-    inDimensions: Dimensions,
+    inDimensions: DerivedDimensions,
     originalGraph: OriginalGraphReferencingIntermediates,
   ): Layout {
     const layoutModel: LayoutModel = new LayoutModelBuilder(model.getShownNodesLayoutBase(), model.graph).run();
-    return new LayoutBuilder(
-      layoutModel,
-      originalGraph,
-      inDimensions,
-      getDerivedEdgeLabelDimensions(inDimensions),
-    ).run();
+    return new LayoutBuilder(layoutModel, originalGraph, inDimensions, inDimensions).run();
   }
 
   onNewDimensions(d: Dimensions): void {
-    this.dimensions = d;
+    this.dimensions = getDerivedDimensions(d);
     this.updateDrawing();
   }
 }
