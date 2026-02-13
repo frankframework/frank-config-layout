@@ -25,7 +25,7 @@ interface SvgGenerationDimensions {
   nodeTextFontSize: number;
   nodeTextBorder: number;
   edgeLabelFontSize: number;
-  estCharacterWidth: number;
+  estEdgeLabelCharacterWidth: number;
 }
 
 export function generateSvg(layout: Layout, d: SvgGenerationDimensions): string {
@@ -38,7 +38,7 @@ export function generateSvg(layout: Layout, d: SvgGenerationDimensions): string 
       d.nodeTextFontSize,
     ) +
     renderEdges(layout.layoutLineSegments) +
-    renderLabels(layout.edgeLabels, d.edgeLabelFontSize, d.estCharacterWidth) +
+    renderLabels(layout.edgeLabels, d.edgeLabelFontSize, d.estEdgeLabelCharacterWidth) +
     closeSvg()
   );
 }
@@ -164,21 +164,21 @@ function classOfLine(edge: LayoutLineSegment): string {
   }
 }
 
-function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number, estCharacterWidth: number): string {
-  return `  <g text-anchor="middle" dominant-baseline="middle">${labels.map((label) => renderLabel(label, edgeLabelFontSize, estCharacterWidth)).join('')}</g>`;
+function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number, estEdgeLabelCharacterWidth: number): string {
+  return `  <g text-anchor="middle" dominant-baseline="middle">${labels.map((label) => renderLabel(label, edgeLabelFontSize, estEdgeLabelCharacterWidth)).join('')}</g>`;
 }
 
-function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estCharacterWidth: number): string {
+function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCharacterWidth: number): string {
   const coordinates: Point[] = arrangeInBox({
     container: new Box(label.horizontalBox, label.verticalBox),
     border: 0,
-    itemWidths: label.text.lines.map((l) => l.text.length * estCharacterWidth),
+    itemWidths: label.text.lines.map((l) => l.length * estEdgeLabelCharacterWidth),
     commonItemHeight: edgeLabelFontSize,
   });
   let result: string = '';
   for (let i = 0; i < label.text.lines.length; ++i) {
     const p: Point = coordinates[i];
-    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].text);
+    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i]);
   }
   return result;
 }

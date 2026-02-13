@@ -19,13 +19,9 @@ export interface NodeTextDimensions {
   nodeTextBorder: number;
 }
 
-export interface EdgeTextLine {
-  text: string;
-}
-
 export interface EdgeText {
   readonly html: string;
-  readonly lines: EdgeTextLine[];
+  readonly lines: string[];
   readonly numLines: number;
   readonly maxLineLength: number;
 }
@@ -69,12 +65,7 @@ export function createEdgeText(originalHtml: string): EdgeText {
   }
   return {
     html: lines.join('<br/>'),
-    lines: lines.map((l) => {
-      // TODO: No need to use an object here, string suffices.
-      return {
-        text: l,
-      };
-    }),
+    lines,
     maxLineLength,
     numLines: lines.length,
   };

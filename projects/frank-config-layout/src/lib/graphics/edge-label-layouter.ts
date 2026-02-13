@@ -20,8 +20,8 @@ import { Interval } from '../util/interval';
 import { Line, Point } from './graphics';
 
 export interface EdgeLabelDimensions {
-  estCharacterWidth: number;
-  estLabelLineHeight: number;
+  estEdgeLabelCharacterWidth: number;
+  estEdgeLabelLineHeight: number;
   preferredVertDistanceFromOrigin: number;
   strictlyKeepLabelOutOfBox: boolean;
 }
@@ -36,7 +36,7 @@ export class EdgeLabelLayouter {
     while (true) {
       const vdistSource: number = vdistSources.next();
       const vdist: number =
-        this.dimensions.preferredVertDistanceFromOrigin + vdistSource * this.dimensions.estLabelLineHeight;
+        this.dimensions.preferredVertDistanceFromOrigin + vdistSource * this.dimensions.estEdgeLabelLineHeight;
       if (vdist <= 0) {
         // The vertical center of the label would be in the box from which the line originates.
         // Next vdistSource.
@@ -45,11 +45,11 @@ export class EdgeLabelLayouter {
       const candidateCenter: Point = this.pointAt(vdist, line);
       const horizontalBox = Interval.createFromCenterSize(
         candidateCenter.x,
-        numCharactersOnLine * this.dimensions.estCharacterWidth,
+        numCharactersOnLine * this.dimensions.estEdgeLabelCharacterWidth,
       );
       const verticalBox = Interval.createFromCenterSize(
         candidateCenter.y,
-        numTextLines * this.dimensions.estLabelLineHeight,
+        numTextLines * this.dimensions.estEdgeLabelLineHeight,
       );
       const candidateBox = new Box(horizontalBox, verticalBox);
       if (this.dimensions.strictlyKeepLabelOutOfBox && candidateBox.verticalBox.contains(line.startPoint.y)) {

@@ -102,7 +102,7 @@ N1 --> |success<br/>  exception  | N2`;
     const c: OriginalGraph = findErrorFlow(b);
     const instance = c.getEdgeByKey('N1-N2');
     expect(instance.text.numLines).toEqual(2);
-    expect(instance.text.lines.map((l) => l.text)).toEqual(['success', 'exception']);
+    expect(instance.text.lines).toEqual(['success', 'exception']);
     // The second line is trimmed, length of word 'exception'
     expect(instance.text.maxLineLength).toEqual(9);
   });
@@ -121,9 +121,9 @@ function dimensions(): NodeTextDimensions & EdgeLabelDimensions {
   return {
     nodeTextFontSize: 16,
     nodeTextBorder: 4,
-    estLabelLineHeight: 10,
+    estEdgeLabelLineHeight: 10,
     preferredVertDistanceFromOrigin: 5,
     strictlyKeepLabelOutOfBox: true,
-    estCharacterWidth: 0,
+    estEdgeLabelCharacterWidth: 0,
   };
 }

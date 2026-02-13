@@ -5,8 +5,8 @@ import { EdgeLabelDimensions, EdgeLabelLayouter } from './edge-label-layouter';
 describe('EdgeLabelLayouter', () => {
   it('When two labels fit next to each other they appear next to each other, downwards', () => {
     const dimensions: EdgeLabelDimensions = {
-      estCharacterWidth: 5,
-      estLabelLineHeight: 10,
+      estEdgeLabelCharacterWidth: 5,
+      estEdgeLabelLineHeight: 10,
       preferredVertDistanceFromOrigin: 30,
       strictlyKeepLabelOutOfBox: false,
     };
@@ -27,8 +27,8 @@ describe('EdgeLabelLayouter', () => {
 
   it('When two labels do not fit next to each other they appear on different heights, downwards', () => {
     const dimensions: EdgeLabelDimensions = {
-      estCharacterWidth: 5,
-      estLabelLineHeight: 10,
+      estEdgeLabelCharacterWidth: 5,
+      estEdgeLabelLineHeight: 10,
       preferredVertDistanceFromOrigin: 30,
       strictlyKeepLabelOutOfBox: false,
     };
@@ -52,8 +52,8 @@ describe('EdgeLabelLayouter', () => {
 
   it('When two labels fit next to each other they appear next to each other, upwards', () => {
     const dimensions: EdgeLabelDimensions = {
-      estCharacterWidth: 5,
-      estLabelLineHeight: 10,
+      estEdgeLabelCharacterWidth: 5,
+      estEdgeLabelLineHeight: 10,
       preferredVertDistanceFromOrigin: 30,
       strictlyKeepLabelOutOfBox: false,
     };
@@ -74,8 +74,8 @@ describe('EdgeLabelLayouter', () => {
 
   it('When two labels do not fit next to each other they appear on different heights, upwards', () => {
     const dimensions: EdgeLabelDimensions = {
-      estCharacterWidth: 5,
-      estLabelLineHeight: 10,
+      estEdgeLabelCharacterWidth: 5,
+      estEdgeLabelLineHeight: 10,
       preferredVertDistanceFromOrigin: 30,
       strictlyKeepLabelOutOfBox: false,
     };
@@ -96,8 +96,8 @@ describe('EdgeLabelLayouter', () => {
 
   it('When not strictlyKeepLabelOutOfBox, label can intersect box', () => {
     const dimensions = {
-      estCharacterWidth: 5,
-      estLabelLineHeight: 10,
+      estEdgeLabelCharacterWidth: 5,
+      estEdgeLabelLineHeight: 10,
       preferredVertDistanceFromOrigin: 12,
       strictlyKeepLabelOutOfBox: false,
     };
@@ -114,8 +114,8 @@ describe('EdgeLabelLayouter', () => {
 
   it('When strictlyKeepLabelOutOfBox, label can not intersect box', () => {
     const dimensions = {
-      estCharacterWidth: 5,
-      estLabelLineHeight: 10,
+      estEdgeLabelCharacterWidth: 5,
+      estEdgeLabelLineHeight: 10,
       preferredVertDistanceFromOrigin: 12,
       strictlyKeepLabelOutOfBox: true,
     };
