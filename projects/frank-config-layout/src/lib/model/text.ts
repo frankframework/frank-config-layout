@@ -40,11 +40,6 @@ export interface NodeText {
   readonly outerWidth: number;
 }
 
-export interface ParsedNodeTextDimensions {
-  nodeTextBorder: number;
-  nodeTextFontSize: number;
-}
-
 export function createEmptyEdgeText(): EdgeText {
   return {
     html: '',
@@ -71,7 +66,7 @@ export function createEdgeText(originalHtml: string): EdgeText {
   };
 }
 
-export function createNodeText(html: string, d: ParsedNodeTextDimensions): NodeText {
+export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
   const nodeDOM = new DOMParser().parseFromString(html, 'text/html');
   const nodes = nodeDOM.body.childNodes;
   const textParts: NodeTextPart[] = [];
@@ -95,12 +90,7 @@ export function createNodeText(html: string, d: ParsedNodeTextDimensions): NodeT
   };
 }
 
-function createNodeTextPart(
-  nodeName: string,
-  text: string,
-  isBold: boolean,
-  d: ParsedNodeTextDimensions,
-): NodeTextPart {
+function createNodeTextPart(nodeName: string, text: string, isBold: boolean, d: NodeTextDimensions): NodeTextPart {
   const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize, isBold);
   const innerWidth: number = Math.round(text.length * fontWidth);
   const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;
