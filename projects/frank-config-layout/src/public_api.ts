@@ -16,12 +16,24 @@
    limitations under the License.
 */
 
-import { EdgeLabelDimensions } from './lib/graphics/edge-label-layouter';
-import { NodeAndEdgeDimensions } from './lib/graphics/layout';
 import { Mermaid2svgService } from './lib/mermaid2svg';
-import { NodeTextDimensions } from './lib/model/text';
 
-export interface Dimensions extends NodeTextDimensions, NodeAndEdgeDimensions, EdgeLabelDimensions {}
+export interface Dimensions {
+  nodeTextFontSize: number; // 16
+  nodeTextBorder: number;
+  horizontalNodeBorder: number;
+  intermediateWidth: number;
+  layerHeight: number;
+  layerDistance: number;
+  nodeBoxHeight: number;
+  boxConnectorAreaPerc: number;
+  intermediateLayerPassedByVerticalLine: boolean;
+  boxCrossProtectionMargin: number;
+  lineTransgressionPerc: number;
+  edgeLabelFontSize: number;
+  preferredVertDistanceFromOrigin: number;
+  strictlyKeepLabelOutOfBox: boolean;
+}
 
 /*
  * These are the real outputs of this library
@@ -124,6 +136,6 @@ export {
   calculateNumCrossingsChangesFromAligning,
   minimizeNumCrossings,
 } from './lib/model/layout-base';
-export { getDerivedEdgeLabelDimensions } from './lib/graphics/edge-label-layouter';
+export { getDerivedDimensions, DerivedDimensions } from './lib/dimensions';
 export { LayoutModel, LayoutModelBuilder } from './lib/model/layout-model';
 export { LayoutBuilder, Layout, PlacedNode, EdgeLabel, getNumCrossingLines } from './lib/graphics/layout';

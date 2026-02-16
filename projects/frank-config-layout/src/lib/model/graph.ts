@@ -118,7 +118,6 @@ export class Graph<T extends WithId, U extends Connection<T>> {
     return this._edgesByKey.get(key)!;
   }
 
-  // TODO: Unit test this.
   searchEdge(idFrom: string, idTo: string): U | undefined {
     const key = keyFor(idFrom, idTo);
     return this._edgesByKey.get(key);

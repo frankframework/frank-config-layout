@@ -21,25 +21,24 @@ import { Box } from './box';
 import { Point } from './graphics';
 import { EdgeLabel, Layout, LayoutLineSegment, PlacedNode } from './layout';
 
-// TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
-// The way dimensions are divided over different interfaces and passed along
-// is not clear now. Should be reconsidered.
-export function generateSvg(
-  layout: Layout,
-  nodeTextFontSize: number,
-  edgeLabelFontSize: number,
-  border: number,
-): string {
+export interface SvgGenerationDimensions {
+  nodeTextFontSize: number;
+  nodeTextBorder: number;
+  edgeLabelFontSize: number;
+  estEdgeLabelCharacterWidth: number;
+}
+
+export function generateSvg(layout: Layout, d: SvgGenerationDimensions): string {
   return (
     openSvg(layout.width, layout.height) +
     renderDefs() +
     renderNodes(
       layout.nodes.map((n) => n as PlacedNode),
-      border,
-      nodeTextFontSize,
+      d.nodeTextBorder,
+      d.nodeTextFontSize,
     ) +
     renderEdges(layout.layoutLineSegments) +
-    renderLabels(layout.edgeLabels, edgeLabelFontSize) +
+    renderLabels(layout.edgeLabels, d.edgeLabelFontSize, d.estEdgeLabelCharacterWidth) +
     closeSvg()
   );
 }
@@ -165,23 +164,21 @@ function classOfLine(edge: LayoutLineSegment): string {
   }
 }
 
-function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number): string {
-  return `  <g text-anchor="middle" dominant-baseline="middle">${labels.map((label) => renderLabel(label, edgeLabelFontSize)).join('')}</g>`;
+function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number, estEdgeLabelCharacterWidth: number): string {
+  return `  <g text-anchor="middle" dominant-baseline="middle">${labels.map((label) => renderLabel(label, edgeLabelFontSize, estEdgeLabelCharacterWidth)).join('')}</g>`;
 }
 
-function renderLabel(label: EdgeLabel, edgeLabelFontSize: number): string {
+function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCharacterWidth: number): string {
   const coordinates: Point[] = arrangeInBox({
     container: new Box(label.horizontalBox, label.verticalBox),
     border: 0,
-    itemWidths: label.text.lines.map((l) => l.width),
-    // TODO: Issue https://github.com/frankframework/frank-config-layout/issues/51.
-    // This is not right - either make height variable or do not store with each line.
-    commonItemHeight: label.text.lines[0].height,
+    itemWidths: label.text.lines.map((l) => l.length * estEdgeLabelCharacterWidth),
+    commonItemHeight: edgeLabelFontSize,
   });
   let result: string = '';
   for (let i = 0; i < label.text.lines.length; ++i) {
     const p: Point = coordinates[i];
-    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].text);
+    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i]);
   }
   return result;
 }
