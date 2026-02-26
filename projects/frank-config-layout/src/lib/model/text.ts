@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 WeAreFrank!
+   Copyright 2025-2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,8 +27,7 @@ export interface EdgeText {
 }
 
 export interface NodeTextPart {
-  readonly name: string;
-  readonly text: string;
+  readonly textElement: string;
   readonly innerWidth: number;
   readonly outerWidth: number;
 }
@@ -51,6 +50,7 @@ export function createEmptyEdgeText(): EdgeText {
 
 export function createEdgeText(originalHtml: string): EdgeText {
   let lines: string[] = [];
+  // TODO
   if (originalHtml.length > 0) {
     lines = originalHtml.split('<br/>').map((s) => s.trim());
   }
@@ -76,10 +76,11 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
   for (let index = 0; index < nodes.length; index++) {
     const node = nodes[index];
     const name = node.nodeName.toLowerCase();
-    if (name === 'br') continue;
-    const isBold: boolean = name === 'b';
-    const text = node.textContent ?? '';
-    textParts.push(createNodeTextPart(name, text, isBold, d));
+    if (name !== 'text') continue;
+    const textNode = node as SVGTextElement;
+    const textContent = textNode.textContent ?? '';
+    const isBold: boolean = textNode.dataset['htmlNode'] === 'b';
+    textParts.push(createNodeTextPart(textNode.outerHTML, textContent, isBold, d));
   }
   const innerWidth = Math.max(...textParts.map((p) => p.innerWidth));
   return {
@@ -90,13 +91,17 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
   };
 }
 
-function createNodeTextPart(nodeName: string, text: string, isBold: boolean, d: NodeTextDimensions): NodeTextPart {
+function createNodeTextPart(
+  textElement: string,
+  textContent: string,
+  isBold: boolean,
+  d: NodeTextDimensions,
+): NodeTextPart {
   const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize, isBold);
-  const innerWidth: number = Math.round(text.length * fontWidth);
+  const innerWidth: number = Math.round(textContent.length * fontWidth);
   const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;
   return {
-    name: nodeName,
-    text,
+    textElement,
     innerWidth,
     outerWidth,
   };

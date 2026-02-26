@@ -29,10 +29,10 @@ d2e2 --> |success| d2e12
     expect(text0.html).toContain('Test');
     expect(text0.parts.length).toEqual(2);
     expect(text0.parts[0].name).toEqual('b');
-    expect(text0.parts[0].text).toEqual('Test1');
+    expect(text0.parts[0].textElement).toEqual('Test1');
     // Text outside an HTML element.
     expect(text0.parts[1].name).toEqual('#text');
-    expect(text0.parts[1].text).toEqual('JavaListener');
+    expect(text0.parts[1].textElement).toEqual('JavaListener');
     expect(result.nodes[1].text.html).toContain('InputValidator');
     expect(result.nodes[0].style).toEqual('normal');
     expect(result.edges.length).toEqual(1);
