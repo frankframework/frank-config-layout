@@ -49,17 +49,14 @@ export function createEmptyEdgeText(): EdgeText {
 }
 
 export function createEdgeText(originalHtml: string): EdgeText {
-  let lines: string[] = [];
-  // TODO
-  if (originalHtml.length > 0) {
-    lines = originalHtml.split('<br/>').map((s) => s.trim());
+  if (originalHtml.length === 0) {
+    return createEmptyEdgeText();
   }
-  let maxLineLength = 0;
-  if (lines.length > 0) {
-    maxLineLength = Math.max(...lines.map((s) => s.length));
-  }
+  const lines = originalHtml.split('</text>').map((s) => `${s.trim()}</text>`);
+  lines.pop(); // remove the last element, which is empty due to the split
+  const maxLineLength = Math.max(...lines.map((s) => s.length));
   return {
-    html: lines.join('<br/>'),
+    html: lines.join(''),
     lines,
     maxLineLength,
     numLines: lines.length,

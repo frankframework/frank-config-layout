@@ -179,8 +179,10 @@ function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCh
   return result;
 }
 
-function renderSingleLayerText(x: number, y: number, edgeLabelFontSize: number, text: string): string {
-  return `<text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${text}</text>`;
+function renderSingleLayerText(x: number, y: number, edgeLabelFontSize: number, textElement: string): string {
+  const elementStart = textElement.slice(0, 5);
+  const elementEnd = textElement.slice(5);
+  return `${elementStart} class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}"${elementEnd}`;
 }
 
 function closeSvg(): string {
