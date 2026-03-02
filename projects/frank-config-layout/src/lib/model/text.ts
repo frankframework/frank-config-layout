@@ -79,7 +79,7 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
     const isBold: boolean = textNode.dataset['htmlNode'] === 'b';
     textParts.push(createNodeTextPart(textNode.outerHTML, textContent, isBold, d));
   }
-  const innerWidth = Math.max(...textParts.map((p) => p.innerWidth));
+  const innerWidth = Math.max(0, ...textParts.map((p) => p.innerWidth));
   return {
     html,
     parts: textParts,

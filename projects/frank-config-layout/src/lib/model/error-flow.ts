@@ -20,18 +20,20 @@ import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser';
 
 const NODE_ERROR_CLASS = 'errorOutline';
 
-const ERROR_FORWARD_NAMES = new Set([
-  'exception',
-  'failure',
-  'fail',
-  'timeout',
-  'illegalResult',
-  'presumedTimeout',
-  'interrupt',
-  'parserError',
-  'outputParserError',
-  'outputFailure',
-]);
+const ERROR_FORWARD_NAMES = new Set(
+  [
+    'exception',
+    'failure',
+    'fail',
+    'timeout',
+    'illegalResult',
+    'presumedTimeout',
+    'interrupt',
+    'parserError',
+    'outputParserError',
+    'outputFailure',
+  ].map((name) => `<text>${name}</text>`),
+);
 
 export const ERROR_STATUS_SUCCESS = 0;
 export const ERROR_STATUS_MIXED = 1;
@@ -71,11 +73,9 @@ export function findErrorFlow(b: MermaidGraph): OriginalGraph {
 }
 
 function transformNode(n: MermaidNode): OriginalNode {
-  if (n.style === NODE_ERROR_CLASS) {
-    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_ERROR };
-  } else {
-    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_SUCCESS };
-  }
+  return n.style === NODE_ERROR_CLASS
+    ? { id: n.id, text: n.text, errorStatus: ERROR_STATUS_ERROR }
+    : { id: n.id, text: n.text, errorStatus: ERROR_STATUS_SUCCESS };
 }
 
 function transformEdge(from: OriginalNode, to: OriginalNode, text: EdgeText): OriginalEdge {

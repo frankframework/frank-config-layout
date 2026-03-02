@@ -10,19 +10,19 @@ describe('Text', () => {
   });
 
   it('When text has one line then have one line trimmed', () => {
-    const instance: EdgeText = createEdgeText('  exception   ');
-    expect(instance.html).toEqual('exception');
-    expect(instance.lines).toEqual(['exception']);
+    const instance: EdgeText = createEdgeText('  <text>exception</text>   ');
+    expect(instance.html).toEqual('<text>exception</text>');
+    expect(instance.lines).toEqual(['<text>exception</text>']);
     expect(instance.numLines).toEqual(1);
-    expect(instance.maxLineLength).toEqual(9);
+    expect(instance.maxLineLength).toEqual(22);
   });
 
-  it('When text has two lines then over-all HTML joined by <br/>', () => {
-    const instance = createEdgeText('success<br/>  exception  ');
+  it('When text has two lines', () => {
+    const instance = createEdgeText('  <text>success</text><text>exception</text>  ');
     expect(instance.numLines).toEqual(2);
-    expect(instance.lines).toEqual(['success', 'exception']);
+    expect(instance.lines).toEqual(['<text>success</text>', '<text>exception</text>']);
     // The second line is trimmed, length of word "exception"
-    expect(instance.maxLineLength).toEqual(9);
-    expect(instance.html).toEqual('success<br/>exception');
+    expect(instance.maxLineLength).toEqual(22);
+    expect(instance.html).toEqual('<text>success</text><text>exception</text>');
   });
 });

@@ -111,7 +111,7 @@ function renderOriginalNode(node: PlacedNode, border: number, nodeTextFontSize: 
       rx="5">
     </rect>
   </g>
-  <g class="rect-text" text-anchor="middle" dominant-baseline="middle">${svgText}</g>
+<g class="rect-text" text-anchor="middle" dominant-baseline="middle">${svgText}</g>
 `;
 }
 
