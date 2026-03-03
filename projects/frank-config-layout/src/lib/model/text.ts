@@ -19,21 +19,25 @@ export interface NodeTextDimensions {
   nodeTextBorder: number;
 }
 
+export interface TextPart {
+  readonly svg: string;
+  readonly text: string;
+}
+
 export interface EdgeText {
-  readonly html: string;
-  readonly lines: string[];
+  readonly svg: string;
+  readonly lines: TextPart[];
   readonly numLines: number;
   readonly maxLineLength: number;
 }
 
-export interface NodeTextPart {
-  readonly textElement: string;
+export interface NodeTextPart extends TextPart {
   readonly innerWidth: number;
   readonly outerWidth: number;
 }
 
 export interface NodeText {
-  readonly html: string;
+  readonly svg: string;
   readonly parts: NodeTextPart[];
   readonly innerWidth: number;
   readonly outerWidth: number;
@@ -41,30 +45,36 @@ export interface NodeText {
 
 export function createEmptyEdgeText(): EdgeText {
   return {
-    html: '',
+    svg: '',
     lines: [],
     numLines: 0,
     maxLineLength: 0,
   };
 }
 
-export function createEdgeText(originalHtml: string): EdgeText {
-  if (originalHtml.length === 0) {
+export function createEdgeText(originalSvg: string): EdgeText {
+  if (originalSvg.length === 0) {
     return createEmptyEdgeText();
   }
-  const lines = originalHtml.split('</text>').map((s) => `${s.trim()}</text>`);
-  lines.pop(); // remove the last element, which is empty due to the split
-  const maxLineLength = Math.max(...lines.map((s) => s.length));
+  const parts = originalSvg.split('</text>');
+  parts.pop(); // remove the last element, which is always empty
+  const lines = parts.map((line) => {
+    const text = line.slice(line.indexOf('>') + 1);
+    const svg = `${line.trim()}</text>`;
+    return { text, svg };
+  });
+
+  const maxLineLength = Math.max(...lines.map((line) => line.text.length));
   return {
-    html: lines.join(''),
+    svg: originalSvg,
     lines,
     maxLineLength,
     numLines: lines.length,
   };
 }
 
-export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
-  const nodeDOM = new DOMParser().parseFromString(html, 'text/html');
+export function createNodeText(svg: string, d: NodeTextDimensions): NodeText {
+  const nodeDOM = new DOMParser().parseFromString(svg, 'text/html');
   const nodes = nodeDOM.body.childNodes;
   const textParts: NodeTextPart[] = [];
 
@@ -81,7 +91,7 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
   }
   const innerWidth = Math.max(0, ...textParts.map((p) => p.innerWidth));
   return {
-    html,
+    svg: svg,
     parts: textParts,
     innerWidth,
     outerWidth: innerWidth + 2 * d.nodeTextBorder,
@@ -98,7 +108,8 @@ function createNodeTextPart(
   const innerWidth: number = Math.round(textContent.length * fontWidth);
   const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;
   return {
-    textElement,
+    svg: textElement,
+    text: textContent,
     innerWidth,
     outerWidth,
   };
@@ -106,7 +117,7 @@ function createNodeTextPart(
 
 export function createIntermediateNodeText(): NodeText {
   return {
-    html: '',
+    svg: '',
     parts: [],
     innerWidth: 0,
     outerWidth: 1,

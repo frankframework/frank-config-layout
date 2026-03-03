@@ -1,5 +1,5 @@
 /*
-   Copyright 2024-2025 WeAreFrank!
+   Copyright 2024-2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 */
 
 import { LayoutBuilder, Layout } from './graphics/layout';
-import { getGraphFromMermaid, MermaidGraph } from './parsing/mermaid-parser';
+import { getGraphFromFlow, FlowGraph } from './parsing/flowcode-parser';
 import { LayoutBase, minimizeNumCrossings } from './model/layout-base';
 import { generateSvg } from './graphics/svg-generator';
 import { AsynchronousCache } from './util/asynchronous-cache';
@@ -30,7 +30,7 @@ import { SvgResult, Dimensions } from '../public_api';
 import { LayoutModel, LayoutModelBuilder } from './model/layout-model';
 import { DerivedDimensions, getDerivedDimensions } from './dimensions';
 
-export class Mermaid2svgService {
+export class Flow2svgService {
   private cache = new AsynchronousCache<SvgResult>();
 
   private _numSvgCalculations = 0;
@@ -48,25 +48,25 @@ export class Mermaid2svgService {
     this.dimensions = getDerivedDimensions(dimensions);
   }
 
-  async mermaid2svg(mermaid: string): Promise<string> {
-    const statistics = await this.mermaid2svgStatistics(mermaid);
+  async flow2svg(flow: string): Promise<string> {
+    const statistics = await this.flow2svgStatistics(flow);
     return statistics.svg;
   }
 
-  async mermaid2svgStatistics(mermaid: string): Promise<SvgResult> {
+  async flow2svgStatistics(flow: string): Promise<SvgResult> {
     let hash: string;
     try {
-      hash = await sha256(mermaid);
+      hash = await sha256(flow);
     } catch (error) {
       console.log(error);
       throw new Error('Could not calculate hash');
     }
-    return await this.cache.get(hash, () => this.mermaid2svgStatisticsImpl(mermaid));
+    return await this.cache.get(hash, () => this.flow2svgStatisticsImpl(flow));
   }
 
-  private async mermaid2svgStatisticsImpl(mermaid: string): Promise<SvgResult> {
+  private async flow2svgStatisticsImpl(flow: string): Promise<SvgResult> {
     ++this._numSvgCalculations;
-    const b: MermaidGraph = getGraphFromMermaid(mermaid, this.dimensions);
+    const b: FlowGraph = getGraphFromFlow(flow, this.dimensions);
     const g: OriginalGraph = findErrorFlow(b);
     let numNodeVisits = 0;
     const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits);

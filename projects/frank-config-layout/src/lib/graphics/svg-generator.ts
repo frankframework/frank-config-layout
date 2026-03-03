@@ -168,13 +168,13 @@ function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCh
   const coordinates: Point[] = arrangeInBox({
     container: new Box(label.horizontalBox, label.verticalBox),
     border: 0,
-    itemWidths: label.text.lines.map((l) => l.length * estEdgeLabelCharacterWidth),
+    itemWidths: label.text.lines.map((line) => line.text.length * estEdgeLabelCharacterWidth),
     commonItemHeight: edgeLabelFontSize,
   });
   let result: string = '';
   for (let i = 0; i < label.text.lines.length; ++i) {
     const p: Point = coordinates[i];
-    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i]);
+    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].svg);
   }
   return result;
 }
@@ -206,7 +206,7 @@ function getSvgTextElements(node: PlacedNode, border: number, fontSize: number):
 }
 
 function getSvgTextElement(textPart: NodeTextPart, x: number, y: number): string {
-  const elementStart = textPart.textElement.slice(0, 5);
-  const elementEnd = textPart.textElement.slice(5);
+  const elementStart = textPart.svg.slice(0, 5);
+  const elementEnd = textPart.svg.slice(5);
   return `${elementStart} x="${x}" y="${y}"${elementEnd}`;
 }

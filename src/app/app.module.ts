@@ -29,7 +29,7 @@ import { routes } from './app.routes';
 import { SvgZoomPanDirective } from './directives/svg-zoom-pan.directive';
 import { CalculatedStaticSvgComponent } from './components/calculated-static-svg/calculated-static-svg.component';
 import { StaticSvgStatisticsComponent } from './components/static-svg-statistics/static-svg-statistics.component';
-import { initMermaid2Svg, getFactoryDimensions } from 'frank-config-layout';
+import { initFlow2Svg, getFactoryDimensions } from 'frank-config-layout';
 
 @NgModule({
   declarations: [
@@ -47,4 +47,4 @@ import { initMermaid2Svg, getFactoryDimensions } from 'frank-config-layout';
 })
 export class AppModule {}
 
-initMermaid2Svg(getFactoryDimensions());
+initFlow2Svg(getFactoryDimensions());

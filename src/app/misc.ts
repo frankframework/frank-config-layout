@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 WeAreFrank!
+   Copyright 2025-2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ export function getCaption(n: NodeForLayers, choice: NodeCaptionChoice): string 
       return n.id;
     }
     case NodeCaptionChoice.TEXT: {
-      return n.text.html;
+      return n.text.svg;
     }
   }
 }

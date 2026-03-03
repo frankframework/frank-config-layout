@@ -1,4 +1,4 @@
-import { Mermaid2svgService } from './mermaid2svg';
+import { Flow2svgService } from './flow2svg';
 import { getFactoryDimensions, SvgResult } from '../public_api';
 
 const input = `Start('<text>My start</text>'):::normal
@@ -14,7 +14,7 @@ N2 --> |<text>success</text>| End
 N1 --> |<text>success</text>| N2
 N3 --> |<text>success</text>| End`;
 
-// In the GUI, enter the above Mermaid text. Then look at the bottom
+// In the GUI, enter the above Flow text. Then look at the bottom
 // under the heading "Static SVG". If that image looks good, copy
 // the text next to the static SVG here.
 //
@@ -143,7 +143,7 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
 <g class="frank-flowchart-edge-intermediate3-End">
     <polyline class="line error" points="196,270 160,363" marker-end="url(#arrow)"/>
   </g>
-<g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="82" y="86" font-size="10">success</text><text class="label-text" x="125" y="73" font-size="10">success</text><text class="label-text" x="202" y="99" font-size="10">success</text><text class="label-text" x="91" y="206" font-size="10">success</text><text class="label-text" x="143" y="193" font-size="10">failure</text><text class="label-text" x="221" y="206" font-size="10">success</text><text class="label-text" x="80" y="326" font-size="10">success</text></g></svg>`;
+<g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="82" y="86" font-size="10">success</text><text class="label-text" x="125" y="86" font-size="10">success</text><text class="label-text" x="186" y="86" font-size="10">success</text><text class="label-text" x="91" y="206" font-size="10">success</text><text class="label-text" x="143" y="206" font-size="10">failure</text><text class="label-text" x="221" y="206" font-size="10">success</text><text class="label-text" x="80" y="326" font-size="10">success</text></g></svg>`;
 
 const inputMultiline = `Start('<text>My start</text><text>subtitle</text>'):::normal
 N1('<text>Node 1</text><text>subtitle</text>'):::normal
@@ -279,25 +279,25 @@ const expectedMultiline = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   <g class="frank-flowchart-edge-intermediate3-End">
     <polyline class="line error" points="220,270 178,363" marker-end="url(#arrow)"/>
   </g>
-  <g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="92" y="78" font-size="10">success</text><text class="label-text" x="92" y="94" font-size="10">other</text><text class="label-text" x="138" y="104" font-size="10">success</text><text class="label-text" x="138" y="120" font-size="10">other</text><text class="label-text" x="207" y="86" font-size="10">success</text><text class="label-text" x="101" y="206" font-size="10">success</text><text class="label-text" x="160" y="193" font-size="10">failure</text><text class="label-text" x="249" y="206" font-size="10">success</text><text class="label-text" x="93" y="326" font-size="10">success</text></g></svg>`;
+  <g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="92" y="78" font-size="10">success</text><text class="label-text" x="92" y="94" font-size="10">other</text><text class="label-text" x="138" y="78" font-size="10">success</text><text class="label-text" x="138" y="94" font-size="10">other</text><text class="label-text" x="207" y="86" font-size="10">success</text><text class="label-text" x="101" y="206" font-size="10">success</text><text class="label-text" x="160" y="206" font-size="10">failure</text><text class="label-text" x="249" y="206" font-size="10">success</text><text class="label-text" x="93" y="326" font-size="10">success</text></g></svg>`;
 
-describe('Mermaid2svg - please maintain this test using the GUI', () => {
-  let service: Mermaid2svgService;
+describe('Flow2svg - please maintain this test using the GUI', () => {
+  let service: Flow2svgService;
 
   beforeEach(() => {
     // No need to test injection - if injection does not work then the app does not show
-    service = new Mermaid2svgService(getFactoryDimensions());
+    service = new Flow2svgService(getFactoryDimensions());
   });
 
   it('Test the plain SVG', (done) => {
-    service.mermaid2svg(input).then((svg) => {
+    service.flow2svg(input).then((svg) => {
       expect(svg.split('\n').map((line) => line.trim())).toEqual(expectedSvg!.split('\n').map((line) => line.trim()));
       done();
     });
   });
 
   it('Test SVG with multiline nodes and edges', (done) => {
-    service.mermaid2svg(inputMultiline).then((svg) => {
+    service.flow2svg(inputMultiline).then((svg) => {
       expect(svg.split('\n').map((line) => line.trim())).toEqual(
         expectedMultiline!.split('\n').map((line) => line.trim()),
       );
@@ -306,7 +306,7 @@ describe('Mermaid2svg - please maintain this test using the GUI', () => {
   });
 
   it('Test with statistics', (done) => {
-    service.mermaid2svgStatistics(input).then((statistics) => {
+    service.flow2svgStatistics(input).then((statistics) => {
       expect(statistics.svg).toEqual(expectedSvg);
       expect(statistics.numNodes).toEqual(5);
       expect(statistics.numEdges).toEqual(7);
@@ -316,8 +316,8 @@ describe('Mermaid2svg - please maintain this test using the GUI', () => {
   });
 
   it('Test that real calculation is done only once', (done) => {
-    const first: Promise<SvgResult> = service.mermaid2svgStatistics(input);
-    const second: Promise<string> = service.mermaid2svg(input);
+    const first: Promise<SvgResult> = service.flow2svgStatistics(input);
+    const second: Promise<string> = service.flow2svg(input);
     Promise.all([first, second]).then(() => {
       expect(service.numSvgCalculations).toEqual(1);
       expect(service.getHashes()).toHaveSize(1);

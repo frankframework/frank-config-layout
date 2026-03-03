@@ -16,7 +16,7 @@
 
 import { ChangeDetectionStrategy, Component, Input, NgZone } from '@angular/core';
 import { OnInit } from '@angular/core';
-import { Dimensions, SvgResult, initMermaid2Svg, mermaid2svgStatistics } from 'frank-config-layout';
+import { Dimensions, SvgResult, initflow2Svg, flow2svgStatistics } from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -35,7 +35,7 @@ export class StaticSvgStatisticsComponent implements OnInit {
     this.reset();
   }
 
-  private _mermaid: string | null = null;
+  private _flow: string | null = null;
   private _dimensions: Dimensions | null = null;
 
   private reset(): void {
@@ -45,8 +45,8 @@ export class StaticSvgStatisticsComponent implements OnInit {
   }
 
   @Input()
-  set mermaid(mermaid: string) {
-    this._mermaid = mermaid;
+  set flow(flow: string) {
+    this._flow = flow;
     this.update();
   }
 
@@ -61,11 +61,11 @@ export class StaticSvgStatisticsComponent implements OnInit {
   }
 
   private update(): void {
-    if (this._mermaid === null || this._mermaid.length === 0 || this._dimensions === null) {
+    if (this._flow === null || this._flow.length === 0 || this._dimensions === null) {
       return;
     }
-    initMermaid2Svg(this._dimensions);
-    mermaid2svgStatistics(this._mermaid!)
+    initflow2Svg(this._dimensions);
+    flow2svgStatistics(this._flow!)
       .then((statistics) => {
         this.updateStatistics(statistics);
       })
