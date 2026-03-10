@@ -15,7 +15,7 @@
 */
 
 import { Component, ElementRef, Input } from '@angular/core';
-import { Dimensions, initMermaid2Svg, mermaid2svg } from 'frank-config-layout';
+import { Dimensions, initflow2Svg, flow2svg } from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -37,11 +37,11 @@ export class CalculatedStaticSvgComponent {
     this.update();
   }
 
-  private _mermaid: string | null = null;
+  private _flow: string | null = null;
   private _dimensions: Dimensions | null = null;
 
-  @Input() set mermaid(mermaid: string) {
-    this._mermaid = mermaid;
+  @Input() set flow(flow: string) {
+    this._flow = flow;
     this.update();
   }
 
@@ -51,19 +51,19 @@ export class CalculatedStaticSvgComponent {
   }
 
   private update(): void {
-    if (this._show !== null && this._mermaid != null && this._dimensions !== null) {
+    if (this._show !== null && this._flow != null && this._dimensions !== null) {
       // This block is not in a separate function, because then we would
-      // have to put ! signs for this._show and this._mermaid
+      // have to put ! signs for this._show and this._flow
       if (![CalculatedStaticSvgComponent.SHOW_TEXT, CalculatedStaticSvgComponent.SHOW_IMAGE].includes(this._show)) {
         this.showError(`Invalid input show: ${this._show}`);
         return;
       }
-      if (this._mermaid.length === 0) {
+      if (this._flow.length === 0) {
         this.showNoSvg();
         return;
       }
-      initMermaid2Svg(this._dimensions);
-      mermaid2svg(this._mermaid)
+      initflow2Svg(this._dimensions);
+      flow2svg(this._flow)
         .then((svg) => {
           this.showSvg(svg);
         })

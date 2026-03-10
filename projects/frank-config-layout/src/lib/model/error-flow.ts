@@ -16,7 +16,7 @@
 
 import { EdgeText, NodeText } from './text';
 import { Graph } from './graph';
-import { MermaidGraph, MermaidNode } from '../parsing/mermaid-parser';
+import { FlowGraph, FlowNode } from '../parsing/flowcode-parser';
 
 const NODE_ERROR_CLASS = 'errorOutline';
 
@@ -57,7 +57,7 @@ export function createOriginalGraph(): OriginalGraph {
   return new Graph<OriginalNode, OriginalEdge>();
 }
 
-export function findErrorFlow(b: MermaidGraph): OriginalGraph {
+export function findErrorFlow(b: FlowGraph): OriginalGraph {
   const result = createOriginalGraph();
   for (const n of b.nodes) {
     result.addNode(transformNode(n));
@@ -70,12 +70,10 @@ export function findErrorFlow(b: MermaidGraph): OriginalGraph {
   return result;
 }
 
-function transformNode(n: MermaidNode): OriginalNode {
-  if (n.style === NODE_ERROR_CLASS) {
-    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_ERROR };
-  } else {
-    return { id: n.id, text: n.text, errorStatus: ERROR_STATUS_SUCCESS };
-  }
+function transformNode(n: FlowNode): OriginalNode {
+  return n.style === NODE_ERROR_CLASS
+    ? { id: n.id, text: n.text, errorStatus: ERROR_STATUS_ERROR }
+    : { id: n.id, text: n.text, errorStatus: ERROR_STATUS_SUCCESS };
 }
 
 function transformEdge(from: OriginalNode, to: OriginalNode, text: EdgeText): OriginalEdge {
@@ -86,10 +84,10 @@ function transformEdge(from: OriginalNode, to: OriginalNode, text: EdgeText): Or
     return { from, to, text, errorStatus: ERROR_STATUS_SUCCESS };
   } else {
     const isError: boolean = text.lines
-      .map((line) => ERROR_FORWARD_NAMES.has(line))
+      .map((line) => ERROR_FORWARD_NAMES.has(line.text))
       .every((lineIsError) => lineIsError === true);
     const isSuccess: boolean = text.lines
-      .map((line) => !ERROR_FORWARD_NAMES.has(line))
+      .map((line) => !ERROR_FORWARD_NAMES.has(line.text))
       .every((lineIsSuccess) => lineIsSuccess === true);
     if (isError) {
       return { from, to, text, errorStatus: ERROR_STATUS_ERROR };

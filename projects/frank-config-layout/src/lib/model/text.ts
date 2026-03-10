@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 WeAreFrank!
+   Copyright 2025-2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,22 +19,25 @@ export interface NodeTextDimensions {
   nodeTextBorder: number;
 }
 
+export interface TextPart {
+  readonly svg: string;
+  readonly text: string;
+}
+
 export interface EdgeText {
-  readonly html: string;
-  readonly lines: string[];
+  readonly svg: string;
+  readonly lines: TextPart[];
   readonly numLines: number;
   readonly maxLineLength: number;
 }
 
-export interface NodeTextPart {
-  readonly name: string;
-  readonly text: string;
+export interface NodeTextPart extends TextPart {
   readonly innerWidth: number;
   readonly outerWidth: number;
 }
 
 export interface NodeText {
-  readonly html: string;
+  readonly svg: string;
   readonly parts: NodeTextPart[];
   readonly innerWidth: number;
   readonly outerWidth: number;
@@ -42,32 +45,36 @@ export interface NodeText {
 
 export function createEmptyEdgeText(): EdgeText {
   return {
-    html: '',
+    svg: '',
     lines: [],
     numLines: 0,
     maxLineLength: 0,
   };
 }
 
-export function createEdgeText(originalHtml: string): EdgeText {
-  let lines: string[] = [];
-  if (originalHtml.length > 0) {
-    lines = originalHtml.split('<br/>').map((s) => s.trim());
+export function createEdgeText(originalSvg: string): EdgeText {
+  if (originalSvg.length === 0) {
+    return createEmptyEdgeText();
   }
-  let maxLineLength = 0;
-  if (lines.length > 0) {
-    maxLineLength = Math.max(...lines.map((s) => s.length));
-  }
+  const parts = originalSvg.split('</text>');
+  parts.pop(); // remove the last element, which is always empty
+  const lines = parts.map((line) => {
+    const text = line.slice(line.indexOf('>') + 1);
+    const svg = `${line.trim()}</text>`;
+    return { text, svg };
+  });
+
+  const maxLineLength = Math.max(...lines.map((line) => line.text.length));
   return {
-    html: lines.join('<br/>'),
+    svg: originalSvg,
     lines,
     maxLineLength,
     numLines: lines.length,
   };
 }
 
-export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
-  const nodeDOM = new DOMParser().parseFromString(html, 'text/html');
+export function createNodeText(svg: string, d: NodeTextDimensions): NodeText {
+  const nodeDOM = new DOMParser().parseFromString(svg, 'text/html');
   const nodes = nodeDOM.body.childNodes;
   const textParts: NodeTextPart[] = [];
 
@@ -76,27 +83,33 @@ export function createNodeText(html: string, d: NodeTextDimensions): NodeText {
   for (let index = 0; index < nodes.length; index++) {
     const node = nodes[index];
     const name = node.nodeName.toLowerCase();
-    if (name === 'br') continue;
-    const isBold: boolean = name === 'b';
-    const text = node.textContent ?? '';
-    textParts.push(createNodeTextPart(name, text, isBold, d));
+    if (name !== 'text') continue;
+    const textNode = node as SVGTextElement;
+    const textContent = textNode.textContent ?? '';
+    const isBold: boolean = textNode.dataset['htmlNode'] === 'b';
+    textParts.push(createNodeTextPart(textNode.outerHTML, textContent, isBold, d));
   }
-  const innerWidth = Math.max(...textParts.map((p) => p.innerWidth));
+  const innerWidth = Math.max(0, ...textParts.map((p) => p.innerWidth));
   return {
-    html,
+    svg: svg,
     parts: textParts,
     innerWidth,
     outerWidth: innerWidth + 2 * d.nodeTextBorder,
   };
 }
 
-function createNodeTextPart(nodeName: string, text: string, isBold: boolean, d: NodeTextDimensions): NodeTextPart {
+function createNodeTextPart(
+  textElement: string,
+  textContent: string,
+  isBold: boolean,
+  d: NodeTextDimensions,
+): NodeTextPart {
   const fontWidth: number = calculateAverageFontCharacterWidth(d.nodeTextFontSize, isBold);
-  const innerWidth: number = Math.round(text.length * fontWidth);
+  const innerWidth: number = Math.round(textContent.length * fontWidth);
   const outerWidth: number = innerWidth + 2 * d.nodeTextBorder;
   return {
-    name: nodeName,
-    text,
+    svg: textElement,
+    text: textContent,
     innerWidth,
     outerWidth,
   };
@@ -104,7 +117,7 @@ function createNodeTextPart(nodeName: string, text: string, isBold: boolean, d: 
 
 export function createIntermediateNodeText(): NodeText {
   return {
-    html: '',
+    svg: '',
     parts: [],
     innerWidth: 0,
     outerWidth: 1,

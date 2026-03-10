@@ -1,5 +1,5 @@
 /*
-   Copyright 2024-2025 WeAreFrank!
+   Copyright 2024-2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,11 +32,7 @@ export function generateSvg(layout: Layout, d: SvgGenerationDimensions): string 
   return (
     openSvg(layout.width, layout.height) +
     renderDefs() +
-    renderNodes(
-      layout.nodes.map((n) => n as PlacedNode),
-      d.nodeTextBorder,
-      d.nodeTextFontSize,
-    ) +
+    renderNodes(layout.nodes, d.nodeTextBorder, d.nodeTextFontSize) +
     renderEdges(layout.layoutLineSegments) +
     renderLabels(layout.edgeLabels, d.edgeLabelFontSize, d.estEdgeLabelCharacterWidth) +
     closeSvg()
@@ -50,7 +46,7 @@ function openSvg(width: number, height: number): string {
 }
 
 function renderDefs(): string {
-  return `  <defs>
+  return `<defs>
     <style>
       .rectangle {
         fill: transparent;
@@ -108,14 +104,14 @@ function renderNodes(nodes: readonly PlacedNode[], border: number, nodeTextFontS
 
 function renderOriginalNode(node: PlacedNode, border: number, nodeTextFontSize: number): string {
   const svgText = getSvgTextElements(node, border, nodeTextFontSize);
-  return `  <g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
+  return `<g class="${getNodeGroupClass(node.id)}" transform="translate(${node.horizontalBox.minValue}, ${node.verticalBox.minValue})">
     <rect class="${getRectangleClass(node)}"
       width="${node.horizontalBox.size}"
       height="${node.verticalBox.size}"
       rx="5">
     </rect>
   </g>
-  <g class="rect-text" text-anchor="middle" dominant-baseline="middle">${svgText}</g>
+<g class="rect-text" text-anchor="middle" dominant-baseline="middle">${svgText}</g>
 `;
 }
 
@@ -136,7 +132,7 @@ function renderEdges(edges: LayoutLineSegment[]): string {
 }
 
 function renderEdge(edge: LayoutLineSegment): string {
-  return `  <g class="${getEdgeGroupClass(edge.key)}">
+  return `<g class="${getEdgeGroupClass(edge.key)}">
     <polyline ${classOfLine(edge)} points="${edge.line.startPoint.x},${edge.line.startPoint.y} ${edge.line.endPoint.x},${edge.line.endPoint.y}" ${getMarkerEnd(edge)}/>
   </g>
 `;
@@ -165,26 +161,28 @@ function classOfLine(edge: LayoutLineSegment): string {
 }
 
 function renderLabels(labels: EdgeLabel[], edgeLabelFontSize: number, estEdgeLabelCharacterWidth: number): string {
-  return `  <g text-anchor="middle" dominant-baseline="middle">${labels.map((label) => renderLabel(label, edgeLabelFontSize, estEdgeLabelCharacterWidth)).join('')}</g>`;
+  return `<g text-anchor="middle" dominant-baseline="middle">${labels.map((label) => renderLabel(label, edgeLabelFontSize, estEdgeLabelCharacterWidth)).join('')}</g>`;
 }
 
 function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCharacterWidth: number): string {
   const coordinates: Point[] = arrangeInBox({
     container: new Box(label.horizontalBox, label.verticalBox),
     border: 0,
-    itemWidths: label.text.lines.map((l) => l.length * estEdgeLabelCharacterWidth),
+    itemWidths: label.text.lines.map((line) => line.text.length * estEdgeLabelCharacterWidth),
     commonItemHeight: edgeLabelFontSize,
   });
   let result: string = '';
   for (let i = 0; i < label.text.lines.length; ++i) {
     const p: Point = coordinates[i];
-    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i]);
+    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].svg);
   }
   return result;
 }
 
-function renderSingleLayerText(x: number, y: number, edgeLabelFontSize: number, text: string): string {
-  return `<text class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}">${text}</text>`;
+function renderSingleLayerText(x: number, y: number, edgeLabelFontSize: number, textElement: string): string {
+  const elementStart = textElement.slice(0, 5);
+  const elementEnd = textElement.slice(5);
+  return `${elementStart} class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}"${elementEnd}`;
 }
 
 function closeSvg(): string {
@@ -208,5 +206,7 @@ function getSvgTextElements(node: PlacedNode, border: number, fontSize: number):
 }
 
 function getSvgTextElement(textPart: NodeTextPart, x: number, y: number): string {
-  return `<text data-html-node=${textPart.name} x="${x}" y="${y}">${textPart.text}</text>`;
+  const elementStart = textPart.svg.slice(0, 5);
+  const elementEnd = textPart.svg.slice(5);
+  return `${elementStart} x="${x}" y="${y}"${elementEnd}`;
 }

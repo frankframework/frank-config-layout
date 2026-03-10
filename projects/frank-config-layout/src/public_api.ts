@@ -16,7 +16,7 @@
    limitations under the License.
 */
 
-import { Mermaid2svgService } from './lib/mermaid2svg';
+import { Flow2svgService } from './lib/flow2svg';
 
 export interface Dimensions {
   nodeTextFontSize: number; // 16
@@ -46,13 +46,13 @@ export interface SvgResult {
   numNodeVisitsDuringLayerCalculation: number;
 }
 
-let service: Mermaid2svgService | null = null;
+let service: Flow2svgService | null = null;
 
-export function initMermaid2Svg(d: Dimensions): void {
+export function initFlow2Svg(d: Dimensions): void {
   // In production, do not initialize more than once.
   // The playground has to call this function any time
   // there are new dimensions.
-  service = new Mermaid2svgService(d);
+  service = new Flow2svgService(d);
 }
 
 export function getFactoryDimensions(): Dimensions {
@@ -74,23 +74,23 @@ export function getFactoryDimensions(): Dimensions {
   };
 }
 
-export function isMermaid2SvgInitialized(): boolean {
+export function isFlow2SvgInitialized(): boolean {
   return service !== null;
 }
 
-export async function mermaid2svg(mermaid: string): Promise<string> {
+export async function flow2svg(flow: string): Promise<string> {
   if (service === null) {
-    throw new Error('Mermaid2Svg was not initialized');
+    throw new Error('Flow2Svg was not initialized');
   }
-  const statistics = await service.mermaid2svgStatistics(mermaid);
+  const statistics = await service.flow2svgStatistics(flow);
   return statistics.svg;
 }
 
-export async function mermaid2svgStatistics(mermaid: string): Promise<SvgResult> {
+export async function flow2svgStatistics(flow: string): Promise<SvgResult> {
   if (service === null) {
-    throw new Error('Mermaid2Svg was not initialized');
+    throw new Error('Flow2Svg was not initialized');
   }
-  return await service.mermaid2svgStatistics(mermaid);
+  return await service.flow2svgStatistics(flow);
 }
 
 /*
@@ -105,7 +105,7 @@ export {
   createEmptyEdgeText as createText,
   createIntermediateNodeText as createDummyNodeText,
 } from './lib/model/text';
-export { getGraphFromMermaid } from './lib/parsing/mermaid-parser';
+export { getGraphFromFlow } from './lib/parsing/flowcode-parser';
 export {
   findErrorFlow,
   OriginalGraph,

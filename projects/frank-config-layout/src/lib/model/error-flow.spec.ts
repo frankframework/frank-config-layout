@@ -1,5 +1,5 @@
 import { getKey } from './graph';
-import { getGraphFromMermaid } from '../parsing/mermaid-parser';
+import { getGraphFromFlow } from '../parsing/flowcode-parser';
 import {
   findErrorFlow,
   OriginalGraph,
@@ -13,11 +13,11 @@ import { EdgeLabelDimensions } from '../graphics/edge-label-layouter';
 describe('Distinguish error flow', () => {
   it('No error flow', () => {
     const input = `
-N1(""):::normal
-N2(""):::normal
-N1 --> |success| N2
+N1(''):::normal
+N2(''):::normal
+N1 --> |<text>success</text>| N2
 `;
-    const b = getGraphFromMermaid(input, dimensions());
+    const b = getGraphFromFlow(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -29,11 +29,11 @@ N1 --> |success| N2
 
   it('No error flow if edge has no text', () => {
     const input = `
-N1(""):::normal
-N2(""):::normal
+N1(''):::normal
+N2(''):::normal
 N1 --> N2
 `;
-    const b = getGraphFromMermaid(input, dimensions());
+    const b = getGraphFromFlow(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -45,11 +45,11 @@ N1 --> N2
 
   it('Node is error and edge is error because it originates from error node', () => {
     const input = `
-N1(""):::errorOutline
-N2(""):::normal
-N1 --> |success| N2
+N1(''):::errorOutline
+N2(''):::normal
+N1 --> |<text>success</text>| N2
 `;
-    const b = getGraphFromMermaid(input, dimensions());
+    const b = getGraphFromFlow(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -61,11 +61,11 @@ N1 --> |success| N2
 
   it('Edge is error because of forward name', () => {
     const input = `
-N1(""):::normal
-N2(""):::normal
-N1 --> |exception| N2
+N1(''):::normal
+N2(''):::normal
+N1 --> |<text>exception</text>| N2
 `;
-    const b = getGraphFromMermaid(input, dimensions());
+    const b = getGraphFromFlow(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -78,11 +78,11 @@ N1 --> |exception| N2
 
   it('When an edge has both success and error labels then it has error status mixed', () => {
     const input = `
-N1(""):::normal
-N2(""):::normal
-N1 --> |exception<br/>success| N2
+N1(''):::normal
+N2(''):::normal
+N1 --> |<text>exception</text><text>success</text>| N2
 `;
-    const b = getGraphFromMermaid(input, dimensions());
+    const b = getGraphFromFlow(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
@@ -95,14 +95,15 @@ N1 --> |exception<br/>success| N2
 
   it('When edge text has multiple lines, then the number of lines is calculated correctly', () => {
     const input = `
-N1(""):::normal
-N2(""):::normal
-N1 --> |success<br/>  exception  | N2`;
-    const b = getGraphFromMermaid(input, dimensions());
+N1(''):::normal
+N2(''):::normal
+N1 --> |  <text>success</text><text>exception</text>  | N2
+`;
+    const b = getGraphFromFlow(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
     const instance = c.getEdgeByKey('N1-N2');
     expect(instance.text.numLines).toEqual(2);
-    expect(instance.text.lines).toEqual(['success', 'exception']);
+    expect(instance.text.lines.map((line) => line.svg)).toEqual(['<text>success</text>', '<text>exception</text>']);
     // The second line is trimmed, length of word 'exception'
     expect(instance.text.maxLineLength).toEqual(9);
   });

@@ -22,7 +22,7 @@ import { NodeSequenceEditor } from '../../node-sequence-editor';
 import { NodeOrEdgeSelection } from '../../node-or-edge-selection';
 import { getCaption, NodeCaptionChoice } from '../../misc';
 import {
-  getGraphFromMermaid,
+  getGraphFromFlow,
   findErrorFlow,
   OriginalGraph,
   LAYERS_FIRST_OCCURING_PATH,
@@ -71,8 +71,8 @@ export class FlowChartEditorComponent implements OnInit {
     { key: LAYERS_LONGEST_PATH, value: 'longest path' },
   ];
 
-  mermaidText: string = '';
-  committedMermaidText = '';
+  flowText: string = '';
+  committedflowText = '';
   originalGraph: OriginalGraphReferencingIntermediates | null = null;
   layoutModel: NodeSequenceEditor | null = null;
   selectionInModel: NodeOrEdgeSelection = new NodeOrEdgeSelection();
@@ -80,9 +80,9 @@ export class FlowChartEditorComponent implements OnInit {
   choiceShowNodeTextInDrawing: NodeCaptionChoice = this.updateShowNodeTextInDrawing();
 
   ngOnInit(): void {
-    this.mermaidText = globalThis.sessionStorage.getItem('mermaidText') ?? '';
-    if (this.mermaidText !== '') {
-      this.loadMermaid(this.layerNumberAlgorithms[0].key);
+    this.flowText = globalThis.sessionStorage.getItem('flowText') ?? '';
+    if (this.flowText !== '') {
+      this.loadflow(this.layerNumberAlgorithms[0].key);
     }
   }
 
@@ -115,14 +115,14 @@ export class FlowChartEditorComponent implements OnInit {
     this.itemClickedSubject?.next(itemClicked);
   }
 
-  loadMermaid(algorithm: number): void {
-    const graphOrError: OriginalGraphOrError = this.mermaid2graph(this.mermaidText);
+  loadflow(algorithm: number): void {
+    const graphOrError: OriginalGraphOrError = this.flow2graph(this.flowText);
     if (graphOrError.error !== null) {
       alert(graphOrError.error);
       return;
     }
     this.loadGraph(graphOrError.graph!, algorithm);
-    globalThis.sessionStorage.setItem('mermaidText', this.mermaidText);
+    globalThis.sessionStorage.setItem('flowText', this.flowText);
   }
 
   loadGraph(graph: OriginalGraph, algorithm: number): void {
@@ -132,17 +132,17 @@ export class FlowChartEditorComponent implements OnInit {
       return;
     }
     this.layoutModel = modelOrError.model;
-    this.committedMermaidText = this.mermaidText;
+    this.committedflowText = this.flowText;
     this.updateDrawing();
   }
 
-  mermaid2graph(text: string): OriginalGraphOrError {
+  flow2graph(text: string): OriginalGraphOrError {
     let graph: OriginalGraph;
     try {
-      const b = getGraphFromMermaid(text, this.dimensions);
+      const b = getGraphFromFlow(text, this.dimensions);
       graph = findErrorFlow(b);
     } catch (error) {
-      return { graph: null, error: `Invalid mermaid text: ${(error as Error).message}` };
+      return { graph: null, error: `Invalid flow text: ${(error as Error).message}` };
     }
     return { graph, error: null };
   }
@@ -214,9 +214,9 @@ export class FlowChartEditorComponent implements OnInit {
     };
   }
 
-  resetMermaid(): void {
-    this.mermaidText = '';
-    this.loadMermaid(this.layerNumberAlgorithms[0].key);
+  resetflow(): void {
+    this.flowText = '';
+    this.loadflow(this.layerNumberAlgorithms[0].key);
   }
 
   static model2layout(

@@ -1,5 +1,5 @@
 /*
-   Copyright 2024-2025 WeAreFrank!
+   Copyright 2024-2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,27 +24,25 @@ import {
 } from '../model/text';
 import { Graph } from '../model/graph';
 
-export interface MermaidNode {
+export interface FlowNode {
   id: string;
   text: NodeText;
   style: string;
 }
 
-export interface MermaidEdge {
-  from: MermaidNode;
-  to: MermaidNode;
+export interface FlowEdge {
+  from: FlowNode;
+  to: FlowNode;
   text: EdgeText;
 }
 
-export type MermaidGraph = Graph<MermaidNode, MermaidEdge>;
+export type FlowGraph = Graph<FlowNode, FlowEdge>;
 
-export function getGraphFromMermaid(str: string, d: NodeTextDimensions): MermaidGraph {
-  const result = new Graph<MermaidNode, MermaidEdge>();
-  const lines: string[] = str.split(/\r?\n/).map((line) => line.trim());
+export function getGraphFromFlow(flowCode: string, d: NodeTextDimensions): FlowGraph {
+  const result = new Graph<FlowNode, FlowEdge>();
+  const lines: string[] = flowCode.split(/\r?\n/).map((line) => line.trim());
   const nodeLines: string[] = lines.filter((line) => line.search(/^[\dA-Za-z-]+\(/) === 0);
-  const forwardLines: string[] = lines.filter(
-    (line) => !(line.startsWith('classDef') || line.startsWith('linkStyle')) && line.search(/^[\dA-Za-z-]+ /) !== -1,
-  );
+  const forwardLines: string[] = lines.filter((line) => line.search(/^[\dA-Za-z-]+ /) !== -1);
   for (const nodeLine of nodeLines) {
     const id = nodeLine.slice(0, nodeLine.indexOf('('));
     const text = nodeLine.slice(nodeLine.indexOf('(') + 2, nodeLine.lastIndexOf(')') - 1);
