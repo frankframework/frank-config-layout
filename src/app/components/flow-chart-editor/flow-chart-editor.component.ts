@@ -72,7 +72,7 @@ export class FlowChartEditorComponent implements OnInit {
   ];
 
   flowText: string = '';
-  committedflowText = '';
+  committedFlowText = '';
   originalGraph: OriginalGraphReferencingIntermediates | null = null;
   layoutModel: NodeSequenceEditor | null = null;
   selectionInModel: NodeOrEdgeSelection = new NodeOrEdgeSelection();
@@ -82,7 +82,7 @@ export class FlowChartEditorComponent implements OnInit {
   ngOnInit(): void {
     this.flowText = globalThis.sessionStorage.getItem('flowText') ?? '';
     if (this.flowText !== '') {
-      this.loadflow(this.layerNumberAlgorithms[0].key);
+      this.loadFlow(this.layerNumberAlgorithms[0].key);
     }
   }
 
@@ -115,7 +115,7 @@ export class FlowChartEditorComponent implements OnInit {
     this.itemClickedSubject?.next(itemClicked);
   }
 
-  loadflow(algorithm: number): void {
+  loadFlow(algorithm: number): void {
     const graphOrError: OriginalGraphOrError = this.flow2graph(this.flowText);
     if (graphOrError.error !== null) {
       alert(graphOrError.error);
@@ -132,7 +132,7 @@ export class FlowChartEditorComponent implements OnInit {
       return;
     }
     this.layoutModel = modelOrError.model;
-    this.committedflowText = this.flowText;
+    this.committedFlowText = this.flowText;
     this.updateDrawing();
   }
 
@@ -214,9 +214,9 @@ export class FlowChartEditorComponent implements OnInit {
     };
   }
 
-  resetflow(): void {
+  resetFlow(): void {
     this.flowText = '';
-    this.loadflow(this.layerNumberAlgorithms[0].key);
+    this.loadFlow(this.layerNumberAlgorithms[0].key);
   }
 
   static model2layout(

@@ -1,5 +1,5 @@
 /*
-   Copyright 2024, 2025 WeAreFrank!
+   Copyright 2024, 2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
    limitations under the License.
 */
 
-import { Component, ElementRef, Input } from '@angular/core';
-import { Dimensions, initflow2Svg, flow2svg } from 'frank-config-layout';
+import { Component, ElementRef, Input, inject } from '@angular/core';
+import { Dimensions, initFlow2Svg, flow2svg } from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -25,11 +25,10 @@ import { Dimensions, initflow2Svg, flow2svg } from 'frank-config-layout';
   styleUrl: './calculated-static-svg.component.scss',
 })
 export class CalculatedStaticSvgComponent {
-  static readonly SHOW_IMAGE = 'IMAGE';
-  static readonly SHOW_TEXT = 'TEXT';
+  public static readonly SHOW_IMAGE = 'IMAGE';
+  public static readonly SHOW_TEXT = 'TEXT';
 
-  constructor(private rootElement: ElementRef) {}
-
+  private readonly rootElement: ElementRef = inject(ElementRef);
   private _show: string | null = null;
 
   @Input() set show(show: string) {
@@ -62,7 +61,7 @@ export class CalculatedStaticSvgComponent {
         this.showNoSvg();
         return;
       }
-      initflow2Svg(this._dimensions);
+      initFlow2Svg(this._dimensions);
       flow2svg(this._flow)
         .then((svg) => {
           this.showSvg(svg);
@@ -82,11 +81,8 @@ export class CalculatedStaticSvgComponent {
   }
 
   showSvg(svg: string): void {
-    if (this._show === CalculatedStaticSvgComponent.SHOW_TEXT) {
-      this.rootElement.nativeElement.innerHTML = `<pre><code>${htmlEscape(svg)}</code></pre>`;
-    } else {
-      this.rootElement.nativeElement.innerHTML = svg;
-    }
+    this.rootElement.nativeElement.innerHTML =
+      this._show === CalculatedStaticSvgComponent.SHOW_TEXT ? `<pre><code>${htmlEscape(svg)}</code></pre>` : svg;
   }
 }
 
