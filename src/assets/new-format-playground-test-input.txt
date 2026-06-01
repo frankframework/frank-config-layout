@@ -1,0 +1,5 @@
+Start('<text data-html-node="b">Start</text>')
+N1('<text data-html-node="b">N1</text>')
+N2('<text data-html-node="b">N2</text>')
+Start --> |<text>success</text>| N1
+Start --> |<text>success</text>| N2
