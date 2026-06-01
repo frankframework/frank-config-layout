@@ -2,17 +2,13 @@
   <tr>
     <td>
       <h2>Mermaid input</h2>
-      <textarea [(ngModel)]="mermaidText"></textarea>
+      <textarea [(ngModel)]="flowText"></textarea>
     </td>
     <td>
       @for (alg of layerNumberAlgorithms; track alg) {
-        <button class="loadButton" (click)="loadMermaid(alg.key)">
-          Load with {{ alg.value }} algorithm
-        </button>
+        <button class="loadButton" (click)="loadFlow(alg.key)">Load with {{ alg.value }} algorithm</button>
       }
-      <button class="loadButton" (click)="resetMermaid()">
-        Reset
-      </button>
+      <button class="loadButton" (click)="resetFlow()">Reset</button>
     </td>
     <td>
       <table id="values">
@@ -64,13 +60,13 @@
   <tr>
     <td>
       <h2>Static SVG</h2>
-      <app-calculated-static-svg [show]="SHOW_IMAGE" [mermaid]="committedMermaidText" [dimensions]="dimensions" />
+      <app-calculated-static-svg [show]="SHOW_IMAGE" [flow]="committedFlowText" [dimensions]="dimensions" />
     </td>
     <td id="staticSvgText">
       <h2>Statistics</h2>
-      <app-static-svg-statistics [mermaid]="committedMermaidText" [dimensions]="dimensions" />
+      <app-static-svg-statistics [flow]="committedFlowText" [dimensions]="dimensions" />
       <h2>Static SVG text</h2>
-      <app-calculated-static-svg [show]="SHOW_TEXT" [mermaid]="committedMermaidText" [dimensions]="dimensions" />
+      <app-calculated-static-svg [show]="SHOW_TEXT" [flow]="committedFlowText" [dimensions]="dimensions" />
     </td>
   </tr>
 </table>

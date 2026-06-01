@@ -14,9 +14,8 @@
    limitations under the License.
 */
 
-import { ChangeDetectionStrategy, Component, Input, NgZone } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { Dimensions, SvgResult, initflow2Svg, flow2svgStatistics } from 'frank-config-layout';
+import { ChangeDetectionStrategy, Component, Input, NgZone, OnInit, inject } from '@angular/core';
+import { Dimensions, SvgResult, initFlow2Svg, flow2svgStatistics } from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -27,11 +26,13 @@ import { Dimensions, SvgResult, initflow2Svg, flow2svgStatistics } from 'frank-c
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class StaticSvgStatisticsComponent implements OnInit {
-  numNodes: string | null = null;
-  numEdges: string | null = null;
-  numVisitsDuringLayerCalculation: string | null = null;
+  public numNodes: string | null = null;
+  public numEdges: string | null = null;
+  public numVisitsDuringLayerCalculation: string | null = null;
 
-  constructor(private ngZone: NgZone) {
+  private readonly ngZone: NgZone = inject(NgZone);
+
+  constructor() {
     this.reset();
   }
 
@@ -64,7 +65,7 @@ export class StaticSvgStatisticsComponent implements OnInit {
     if (this._flow === null || this._flow.length === 0 || this._dimensions === null) {
       return;
     }
-    initflow2Svg(this._dimensions);
+    initFlow2Svg(this._dimensions);
     flow2svgStatistics(this._flow!)
       .then((statistics) => {
         this.updateStatistics(statistics);
