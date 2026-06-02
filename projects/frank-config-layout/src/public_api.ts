@@ -99,7 +99,7 @@ export async function flow2svgStatistics(flow: string): Promise<SvgResult> {
  */
 
 export { getRange, rotateToSwapItems, permutationFrom } from './lib/util/util';
-export { getKey } from './lib/model/graph';
+export { getKey, keyFor } from './lib/model/graph';
 export {
   EdgeText as Text,
   createEmptyEdgeText as createText,
