@@ -119,12 +119,8 @@ function getNodeGroupClass(id: string): string {
   return `frank-flowchart-node-${id}`;
 }
 
-function getRectangleClass(n: PlacedNode): string {
-  if (n.errorStatus === ERROR_STATUS_ERROR) {
-    return 'rectangle errorOutline';
-  } else {
-    return 'rectangle';
-  }
+function getRectangleClass(node: PlacedNode): string {
+  return node.errorStatus === ERROR_STATUS_ERROR ? 'rectangle errorOutline' : 'rectangle';
 }
 
 function renderEdges(edges: LayoutLineSegment[]): string {
@@ -143,11 +139,7 @@ function getEdgeGroupClass(key: string): string {
 }
 
 function getMarkerEnd(lineSegment: LayoutLineSegment): string {
-  if (lineSegment.isLastLineSegment) {
-    return 'marker-end="url(#arrow)"';
-  } else {
-    return '';
-  }
+  return lineSegment.isLastLineSegment ? 'marker-end="url(#arrow)"' : '';
 }
 
 function classOfLine(edge: LayoutLineSegment): string {
@@ -172,9 +164,9 @@ function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCh
     commonItemHeight: edgeLabelFontSize,
   });
   let result: string = '';
-  for (let i = 0; i < label.text.lines.length; ++i) {
-    const p: Point = coordinates[i];
-    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].svg);
+  for (let index = 0; index < label.text.lines.length; ++index) {
+    const point: Point = coordinates[index];
+    result += renderSingleLayerText(point.x, point.y, edgeLabelFontSize, label.text.lines[index].svg);
   }
   return result;
 }
@@ -182,7 +174,7 @@ function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCh
 function renderSingleLayerText(x: number, y: number, edgeLabelFontSize: number, textElement: string): string {
   const elementStart = textElement.slice(0, 5);
   const elementEnd = textElement.slice(5);
-  return `${elementStart} class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}"${elementEnd}`;
+  return `${elementStart} class="label-text" x="${x}" y="${y}" font-size="${edgeLabelFontSize}"${elementEnd}\n`;
 }
 
 function closeSvg(): string {
@@ -198,9 +190,9 @@ function getSvgTextElements(node: PlacedNode, border: number, fontSize: number):
     itemWidths: nodeText.parts.map((p) => p.innerWidth),
   });
   let totalSvgText = '';
-  for (let i = 0; i < nodeText.parts.length; ++i) {
-    const p: Point = textCoordinates[i];
-    totalSvgText += getSvgTextElement(nodeText.parts[i], p.x, p.y);
+  for (let index = 0; index < nodeText.parts.length; ++index) {
+    const point: Point = textCoordinates[index];
+    totalSvgText += getSvgTextElement(nodeText.parts[index], point.x, point.y);
   }
   return totalSvgText;
 }
