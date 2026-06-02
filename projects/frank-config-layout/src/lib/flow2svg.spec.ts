@@ -113,34 +113,34 @@ const expectedSvg = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     </rect>
   </g>
 <g class="rect-text" text-anchor="middle" dominant-baseline="middle"><text x="137" y="390">End node</text></g>
-<g class="frank-flowchart-edge-Start-N1">
+<g class="frank-flowchart-edge-Start%-!#N1">
     <polyline class="line" points="125,56 125,123" marker-end="url(#arrow)"/>
   </g>
-<g class="frank-flowchart-edge-Start-intermediate1">
+<g class="frank-flowchart-edge-Start%-!#intermediate1">
     <polyline class="line" points="101,56 42,150" />
   </g>
-<g class="frank-flowchart-edge-intermediate1-N2">
+<g class="frank-flowchart-edge-intermediate1%-!#N2">
     <polyline class="line" points="42,150 34,243" marker-end="url(#arrow)"/>
   </g>
-<g class="frank-flowchart-edge-Start-N3">
+<g class="frank-flowchart-edge-Start%-!#N3">
     <polyline class="line" points="148,56 232,123" marker-end="url(#arrow)"/>
   </g>
-<g class="frank-flowchart-edge-N1-intermediate2">
+<g class="frank-flowchart-edge-N1%-!#intermediate2">
     <polyline class="line error" points="144,176 140,270" />
   </g>
-<g class="frank-flowchart-edge-intermediate2-End">
+<g class="frank-flowchart-edge-intermediate2%-!#End">
     <polyline class="line error" points="140,270 137,363" marker-end="url(#arrow)"/>
   </g>
-<g class="frank-flowchart-edge-N2-End">
+<g class="frank-flowchart-edge-N2%-!#End">
     <polyline class="line" points="53,296 113,363" marker-end="url(#arrow)"/>
   </g>
-<g class="frank-flowchart-edge-N1-N2">
+<g class="frank-flowchart-edge-N1%-!#N2">
     <polyline class="line" points="106,176 72,243" marker-end="url(#arrow)"/>
   </g>
-<g class="frank-flowchart-edge-N3-intermediate3">
+<g class="frank-flowchart-edge-N3%-!#intermediate3">
     <polyline class="line error" points="232,176 196,270" />
   </g>
-<g class="frank-flowchart-edge-intermediate3-End">
+<g class="frank-flowchart-edge-intermediate3%-!#End">
     <polyline class="line error" points="196,270 160,363" marker-end="url(#arrow)"/>
   </g>
 <g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="82" y="86" font-size="10">success</text><text class="label-text" x="125" y="86" font-size="10">success</text><text class="label-text" x="186" y="86" font-size="10">success</text><text class="label-text" x="91" y="206" font-size="10">success</text><text class="label-text" x="143" y="206" font-size="10">failure</text><text class="label-text" x="221" y="206" font-size="10">success</text><text class="label-text" x="80" y="326" font-size="10">success</text></g></svg>`;
@@ -249,34 +249,34 @@ const expectedMultiline = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
     </rect>
   </g>
   <g class="rect-text" text-anchor="middle" dominant-baseline="middle"><text x="155" y="383">End node</text><text x="155" y="399">subtitle</text></g>
-  <g class="frank-flowchart-edge-Start-N1">
+  <g class="frank-flowchart-edge-Start%-!#N1">
     <polyline class="line" points="138,56 138,123" marker-end="url(#arrow)"/>
   </g>
-  <g class="frank-flowchart-edge-Start-intermediate1">
+  <g class="frank-flowchart-edge-Start%-!#intermediate1">
     <polyline class="line" points="114,56 46,150" />
   </g>
-  <g class="frank-flowchart-edge-intermediate1-N2">
+  <g class="frank-flowchart-edge-intermediate1%-!#N2">
     <polyline class="line" points="46,150 38,243" marker-end="url(#arrow)"/>
   </g>
-  <g class="frank-flowchart-edge-Start-N3">
+  <g class="frank-flowchart-edge-Start%-!#N3">
     <polyline class="line" points="161,56 263,123" marker-end="url(#arrow)"/>
   </g>
-  <g class="frank-flowchart-edge-N1-intermediate2">
+  <g class="frank-flowchart-edge-N1%-!#intermediate2">
     <polyline class="line error" points="161,176 158,270" />
   </g>
-  <g class="frank-flowchart-edge-intermediate2-End">
+  <g class="frank-flowchart-edge-intermediate2%-!#End">
     <polyline class="line error" points="158,270 155,363" marker-end="url(#arrow)"/>
   </g>
-  <g class="frank-flowchart-edge-N2-End">
+  <g class="frank-flowchart-edge-N2%-!#End">
     <polyline class="line" points="62,296 131,363" marker-end="url(#arrow)"/>
   </g>
-  <g class="frank-flowchart-edge-N1-N2">
+  <g class="frank-flowchart-edge-N1%-!#N2">
     <polyline class="line" points="114,176 85,243" marker-end="url(#arrow)"/>
   </g>
-  <g class="frank-flowchart-edge-N3-intermediate3">
+  <g class="frank-flowchart-edge-N3%-!#intermediate3">
     <polyline class="line error" points="263,176 220,270" />
   </g>
-  <g class="frank-flowchart-edge-intermediate3-End">
+  <g class="frank-flowchart-edge-intermediate3%-!#End">
     <polyline class="line error" points="220,270 178,363" marker-end="url(#arrow)"/>
   </g>
   <g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="92" y="78" font-size="10">success</text><text class="label-text" x="92" y="94" font-size="10">other</text><text class="label-text" x="138" y="78" font-size="10">success</text><text class="label-text" x="138" y="94" font-size="10">other</text><text class="label-text" x="207" y="86" font-size="10">success</text><text class="label-text" x="101" y="206" font-size="10">success</text><text class="label-text" x="160" y="206" font-size="10">failure</text><text class="label-text" x="249" y="206" font-size="10">success</text><text class="label-text" x="93" y="326" font-size="10">success</text></g></svg>`;

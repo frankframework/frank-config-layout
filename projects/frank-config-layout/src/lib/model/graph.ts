@@ -14,6 +14,8 @@
    limitations under the License.
 */
 
+const EDGE_KEY_SEP = '%-!#';
+
 export interface WithId {
   id: string;
 }
@@ -33,11 +35,11 @@ export function getKey<T extends WithId>(c: Connection<T>): string {
 }
 
 export function keyFor(idFrom: string, idTo: string): string {
-  return `${idFrom}-${idTo}`;
+  return `${idFrom}${EDGE_KEY_SEP}${idTo}`;
 }
 
 export function getConnectedIdsOfKey(key: string): string[] {
-  return key.split('-');
+  return key.split(EDGE_KEY_SEP);
 }
 
 /*
@@ -124,7 +126,7 @@ export class Graph<T extends WithId, U extends Connection<T>> {
   }
 
   parseNodeOrEdgeId(id: string): NodeOrEdge<T, U> {
-    if (id.includes('-')) {
+    if (id.includes(EDGE_KEY_SEP)) {
       if (this._edgesByKey.has(id)) {
         const optionalEdge = this.getEdgeByKey(id);
         return {

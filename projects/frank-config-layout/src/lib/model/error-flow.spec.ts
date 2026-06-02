@@ -1,4 +1,4 @@
-import { getKey } from './graph';
+import { getKey, keyFor } from './graph';
 import { getGraphFromFlow } from '../parsing/flowcode-parser';
 import {
   findErrorFlow,
@@ -21,10 +21,10 @@ N1 --> |<text>success</text>| N2
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
-    expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
+    expect(c.edges.map((e) => getKey(e))).toEqual([keyFor('N1', 'N2')]);
     checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
     checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
-    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_SUCCESS);
+    checkErrorEdge(c, keyFor('N1', 'N2'), ERROR_STATUS_SUCCESS);
   });
 
   it('No error flow if edge has no text', () => {
@@ -37,10 +37,10 @@ N1 --> N2
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
-    expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
+    expect(c.edges.map((e) => getKey(e))).toEqual([keyFor('N1', 'N2')]);
     checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
     checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
-    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_SUCCESS);
+    checkErrorEdge(c, keyFor('N1', 'N2'), ERROR_STATUS_SUCCESS);
   });
 
   it('Node is error and edge is error because it originates from error node', () => {
@@ -53,10 +53,10 @@ N1 --> |<text>success</text>| N2
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
-    expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
+    expect(c.edges.map((e) => getKey(e))).toEqual([keyFor('N1', 'N2')]);
     checkErrorNode(c, 'N1', ERROR_STATUS_ERROR);
     checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
-    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_ERROR);
+    checkErrorEdge(c, keyFor('N1', 'N2'), ERROR_STATUS_ERROR);
   });
 
   it('Edge is error because of forward name', () => {
@@ -69,11 +69,11 @@ N1 --> |<text>exception</text>| N2
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
-    expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
+    expect(c.edges.map((e) => getKey(e))).toEqual([keyFor('N1', 'N2')]);
     checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
     checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
-    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_ERROR);
-    expect(c.getEdgeByKey('N1-N2').text.numLines).toEqual(1);
+    checkErrorEdge(c, keyFor('N1', 'N2'), ERROR_STATUS_ERROR);
+    expect(c.getEdgeByKey(keyFor('N1', 'N2')).text.numLines).toEqual(1);
   });
 
   it('When an edge has both success and error labels then it has error status mixed', () => {
@@ -86,11 +86,11 @@ N1 --> |<text>exception</text><text>success</text>| N2
     const c: OriginalGraph = findErrorFlow(b);
     expect(c.nodes.length).toEqual(2);
     expect(c.nodes.map((n) => n.id)).toEqual(['N1', 'N2']);
-    expect(c.edges.map((e) => getKey(e))).toEqual(['N1-N2']);
+    expect(c.edges.map((e) => getKey(e))).toEqual([keyFor('N1', 'N2')]);
     checkErrorNode(c, 'N1', ERROR_STATUS_SUCCESS);
     checkErrorNode(c, 'N2', ERROR_STATUS_SUCCESS);
-    checkErrorEdge(c, 'N1-N2', ERROR_STATUS_MIXED);
-    expect(c.getEdgeByKey('N1-N2').text.numLines).toEqual(2);
+    checkErrorEdge(c, keyFor('N1', 'N2'), ERROR_STATUS_MIXED);
+    expect(c.getEdgeByKey(keyFor('N1', 'N2')).text.numLines).toEqual(2);
   });
 
   it('When edge text has multiple lines, then the number of lines is calculated correctly', () => {
@@ -101,7 +101,7 @@ N1 --> |  <text>success</text><text>exception</text>  | N2
 `;
     const b = getGraphFromFlow(input, dimensions());
     const c: OriginalGraph = findErrorFlow(b);
-    const instance = c.getEdgeByKey('N1-N2');
+    const instance = c.getEdgeByKey(keyFor('N1', 'N2'));
     expect(instance.text.numLines).toEqual(2);
     expect(instance.text.lines.map((line) => line.svg)).toEqual(['<text>success</text>', '<text>exception</text>']);
     // The second line is trimmed, length of word 'exception'

@@ -1,6 +1,7 @@
 import { PASS_DIRECTION_DOWN, PASS_DIRECTION_UP } from '../model/horizontal-grouping';
 import { Line, Point } from './graphics';
 import { straighten, StraightenedLine, StraightenedLineSegmentsBuilder } from './straightened-line';
+import { keyFor } from '../model/graph'
 
 describe('StraightenedLine', () => {
   it('Join', () => {
@@ -36,10 +37,10 @@ describe('StraightenedLine', () => {
 
 describe('StraightenedLineSegmentsBuilder', () => {
   const linesWithoutIntermediates = new Map<string, Line>([
-    ['Start-i1', new Line(new Point(0, 0), new Point(1, 10))],
-    ['i1-i2', new Line(new Point(1, 10), new Point(1, 20))],
-    ['i2-i3', new Line(new Point(1, 20), new Point(1, 30))],
-    ['i3-End', new Line(new Point(1, 30), new Point(0, 40))],
+    [keyFor('Start', 'i1'), new Line(new Point(0, 0), new Point(1, 10))],
+    [keyFor('i1', 'i2'), new Line(new Point(1, 10), new Point(1, 20))],
+    [keyFor('i2', 'i3'), new Line(new Point(1, 20), new Point(1, 30))],
+    [keyFor('i3', 'End'), new Line(new Point(1, 30), new Point(0, 40))],
   ]);
 
   it('When edges are connected then one group of line segments is created', () => {
@@ -49,7 +50,12 @@ describe('StraightenedLineSegmentsBuilder', () => {
       layerPassageFactory: undefined,
       directionCalculator: (): number => PASS_DIRECTION_DOWN,
     });
-    const result: StraightenedLine[][] = instance.run(['Start-i1', 'i1-i2', 'i2-i3', 'i3-End']);
+    const result: StraightenedLine[][] = instance.run([
+      keyFor('Start', 'i1'),
+      keyFor('i1', 'i2'),
+      keyFor('i2', 'i3'),
+      keyFor('i3', 'End'),
+    ]);
     expect(result.length).toEqual(1);
     const theGroup = result[0];
     expect(theGroup.length).toEqual(4);
@@ -77,7 +83,7 @@ describe('StraightenedLineSegmentsBuilder', () => {
       layerPassageFactory: undefined,
       directionCalculator: (): number => PASS_DIRECTION_DOWN,
     });
-    const result: StraightenedLine[][] = instance.run(['Start-i1', 'i2-i3', 'i3-End']);
+    const result: StraightenedLine[][] = instance.run([keyFor('Start', 'i1'), keyFor('i2', 'i3'), keyFor('i3', 'End')]);
     expect(result.length).toEqual(2);
     const firstGroup = result[0];
     expect(firstGroup.length).toEqual(1);
@@ -109,10 +115,10 @@ describe('StraightenedLineSegmentsBuilder', () => {
   });
 
   const linesWithIntermediates = new Map<string, Line>([
-    ['Start-i1', new Line(new Point(0, 0), new Point(1, 9))],
-    ['i1-i2', new Line(new Point(1, 11), new Point(1, 19))],
-    ['i2-i3', new Line(new Point(1, 21), new Point(1, 29))],
-    ['i3-End', new Line(new Point(1, 31), new Point(0, 40))],
+    [keyFor('Start', 'i1'), new Line(new Point(0, 0), new Point(1, 9))],
+    [keyFor('i1', 'i2'), new Line(new Point(1, 11), new Point(1, 19))],
+    [keyFor('i2', 'i3'), new Line(new Point(1, 21), new Point(1, 29))],
+    [keyFor('i3', 'End'), new Line(new Point(1, 31), new Point(0, 40))],
   ]);
 
   const layerPasses = new Map<string, Line>([
@@ -131,7 +137,12 @@ describe('StraightenedLineSegmentsBuilder', () => {
       },
       directionCalculator: (): number => PASS_DIRECTION_DOWN,
     });
-    const result: StraightenedLine[][] = instance.run(['Start-i1', 'i1-i2', 'i2-i3', 'i3-End']);
+    const result: StraightenedLine[][] = instance.run([
+      keyFor('Start', 'i1'),
+      keyFor('i1', 'i2'),
+      keyFor('i2', 'i3'),
+      keyFor('i3', 'End'),
+    ]);
     expect(result.length).toEqual(1);
     const theGroup = result[0];
     expect(theGroup.length).toEqual(7);
@@ -156,10 +167,10 @@ describe('StraightenedLineSegmentsBuilder', () => {
   });
 
   const linesWithIntermediatesUp = new Map<string, Line>([
-    ['Start-i1', new Line(new Point(0, 0), new Point(1, -9))],
-    ['i1-i2', new Line(new Point(1, -11), new Point(1, -19))],
-    ['i2-i3', new Line(new Point(1, -21), new Point(1, -29))],
-    ['i3-End', new Line(new Point(1, -31), new Point(0, -40))],
+    [keyFor('Start', 'i1'), new Line(new Point(0, 0), new Point(1, -9))],
+    [keyFor('i1', 'i2'), new Line(new Point(1, -11), new Point(1, -19))],
+    [keyFor('i2', 'i3'), new Line(new Point(1, -21), new Point(1, -29))],
+    [keyFor('i3', 'End'), new Line(new Point(1, -31), new Point(0, -40))],
   ]);
 
   const layerPassesUp = new Map<string, Line>([
@@ -178,7 +189,12 @@ describe('StraightenedLineSegmentsBuilder', () => {
       },
       directionCalculator: (): number => PASS_DIRECTION_UP,
     });
-    const result: StraightenedLine[][] = instance.run(['Start-i1', 'i1-i2', 'i2-i3', 'i3-End']);
+    const result: StraightenedLine[][] = instance.run([
+      keyFor('Start', 'i1'),
+      keyFor('i1', 'i2'),
+      keyFor('i2', 'i3'),
+      keyFor('i3', 'End'),
+    ]);
     expect(result.length).toEqual(1);
     const theGroup = result[0];
     expect(theGroup.length).toEqual(7);

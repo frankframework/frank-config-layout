@@ -8,6 +8,7 @@ import {
   GraphForLayers,
   ERROR_STATUS_SUCCESS,
   createDummyNodeText,
+  keyFor,
 } from 'frank-config-layout';
 
 describe('NodeOrEdgeSelection', () => {
@@ -57,13 +58,13 @@ describe('NodeOrEdgeSelection', () => {
     expect(m.getSequence().map((n) => n!.id)).toEqual(['Start', 'N1', 'N2', 'End']);
     const instance = new NodeOrEdgeSelection();
     checkNothingSelected(instance, m);
-    instance.selectEdgeKey('Start-N1', m);
+    instance.selectEdgeKey(keyFor('Start', 'N1'), m);
     checkEdgeStartN1SelectedCorrectly(instance, m);
     instance.selectNodeId('N1', m);
     checkNodeN1SelectedCorrectly(instance, m);
-    instance.selectEdgeKey('Start-N1', m);
+    instance.selectEdgeKey(keyFor('Start', 'N1'), m);
     checkEdgeStartN1SelectedCorrectly(instance, m);
-    instance.selectEdgeKey('Start-N1', m);
+    instance.selectEdgeKey(keyFor('Start', 'N1'), m);
     checkNothingSelected(instance, m);
   });
 
@@ -108,7 +109,7 @@ function checkNothingSelected(instance: NodeOrEdgeSelection, m: NodeSequenceEdit
   for (const nodeId of ['Start', 'N1', 'N2', 'End']) {
     expect(instance.isNodeHighlightedInDrawing(nodeId, m)).toBe(false);
   }
-  for (const edgeKey of ['Start-N1', 'Start-N2', 'N1-End', 'N2-End']) {
+  for (const edgeKey of [keyFor('Start', 'N1'), keyFor('Start', 'N2'), keyFor('N1', 'End'), keyFor('N2', 'End')]) {
     expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(false);
   }
   for (const index of getRange(0, 4)) {
@@ -127,10 +128,10 @@ function checkNodeN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: NodeSequ
     expect(instance.isNodeHighlightedInDrawing(nodeId, m)).toBe(false);
   }
   expect(instance.isNodeHighlightedInDrawing('N1', m)).toBe(true);
-  for (const edgeKey of ['Start-N1', 'N1-End']) {
+  for (const edgeKey of [keyFor('Start', 'N1'), keyFor('N1', 'End')]) {
     expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(true);
   }
-  for (const edgeKey of ['Start-N2', 'N2-End']) {
+  for (const edgeKey of [keyFor('Start', 'N2'), keyFor('N2', 'End')]) {
     expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(false);
   }
   for (const [indexTo, expectedToHighlighted] of [false, true, false, false].entries()) {
@@ -159,8 +160,8 @@ function checkEdgeStartN1SelectedCorrectly(instance: NodeOrEdgeSelection, m: Nod
   for (const nodeId of ['N2', 'End']) {
     expect(instance.isNodeHighlightedInDrawing(nodeId, m)).toBe(false);
   }
-  expect(instance.isEdgeHighlightedInDrawing('Start-N1', m)).toBe(true);
-  for (const edgeKey of ['Start-N2', 'N1-End', 'N2-End']) {
+  expect(instance.isEdgeHighlightedInDrawing(keyFor('Start', 'N1'), m)).toBe(true);
+  for (const edgeKey of [keyFor('Start', 'N2'), keyFor('N1', 'End'), keyFor('N2', 'End')]) {
     expect(instance.isEdgeHighlightedInDrawing(edgeKey, m)).toBe(false);
   }
   for (const [indexTo, expectedToHighlighted] of [false, true, false, false].entries()) {

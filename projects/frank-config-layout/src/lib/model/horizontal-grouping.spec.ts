@@ -11,6 +11,7 @@ import {
   LAYERS_LONGEST_PATH,
   IntermediatesCreationResult,
 } from './horizontal-grouping';
+import { keyFor } from './graph';
 
 function newNode(id: string): OriginalNode {
   return { id, text: createIntermediateNodeText(), errorStatus: ERROR_STATUS_SUCCESS };
@@ -306,11 +307,11 @@ describe('Assigning layers and introducing intermediate nodes and edges', () => 
 
   it('Can augment original edges with intermediate edge keys', () => {
     const extendedOriginal = getInstanceDownwardLinks().original;
-    expect(extendedOriginal.getEdgeByKey('N0-N1')!.intermediateEdgeKeys).toEqual(['N0-N1']);
-    expect(extendedOriginal.getEdgeByKey('N0-N3')!.intermediateEdgeKeys).toEqual([
-      'N0-intermediate2',
-      'intermediate2-intermediate3',
-      'intermediate3-N3',
+    expect(extendedOriginal.getEdgeByKey(keyFor('N0', 'N1'))!.intermediateEdgeKeys).toEqual([keyFor('N0', 'N1')]);
+    expect(extendedOriginal.getEdgeByKey(keyFor('N0', 'N3'))!.intermediateEdgeKeys).toEqual([
+      keyFor('N0', 'intermediate2'),
+      keyFor('intermediate2', 'intermediate3'),
+      keyFor('intermediate3', 'N3'),
     ]);
   });
 });
