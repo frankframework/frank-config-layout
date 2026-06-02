@@ -1,4 +1,4 @@
-import { Connection, Graph } from './graph';
+import { Connection, Graph, keyFor } from './graph';
 import { WithLayerNumber } from './horizontal-grouping';
 import { LayoutBase } from './layout-base';
 import {
@@ -61,8 +61,8 @@ describe('LayoutModel', () => {
 
   it('When two nodes are connected in two directions, the downard edge is left and the edges don-t cross', () => {
     const instance: LayoutModel = getInstance();
-    const edgeKeyDown = 'S1-E1';
-    const edgeKeyUp = 'E1-S1';
+    const edgeKeyDown = keyFor('S1', 'E1');
+    const edgeKeyUp = keyFor('E1', 'S1');
     const connectionDown = instance.getConnection(edgeKeyDown);
     const connectionUp = instance.getConnection(edgeKeyUp);
     expect(connectionDown.from.referencePosition.id).toEqual('S1');
@@ -97,7 +97,7 @@ describe('LayoutModel', () => {
   it('Can lookup positions and connectors by their key, allowing calling code to reference them with Map keys', () => {
     const instance: LayoutModel = getInstance();
     const nodeId = 'S1';
-    const edgeKey = 'S1-E1';
+    const edgeKey = keyFor('S1', 'E1');
     const position: LayoutPosition = instance.getPositionOfId(nodeId)!;
     const positionLookup = instance.getPosition(position.key);
     expect(positionLookup).toBe(position);

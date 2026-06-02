@@ -15,7 +15,7 @@
 */
 
 import { getRange } from '../util/util';
-import { Graph, Connection } from './graph';
+import { Graph, Connection, keyFor } from './graph';
 import { WithLayerNumber } from './horizontal-grouping';
 import { LayoutBase } from './layout-base';
 
@@ -191,10 +191,10 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
         // This will add the edge two times, one time for each connector.
         // But on both occasions the same will happen.
         if (connector.direction === DIRECTION_IN) {
-          edgeKey = `${connector.relatedId}-${connector.referencePosition.id}`;
+          edgeKey = keyFor(connector.relatedId, connector.referencePosition.id);
           this.connectionsByEdgeKey.set(edgeKey, { from: reversedConnector, to: connector });
         } else {
-          edgeKey = `${connector.referencePosition.id}-${connector.relatedId}`;
+          edgeKey = keyFor(connector.referencePosition.id, connector.relatedId);
           this.connectionsByEdgeKey.set(edgeKey, { from: connector, to: reversedConnector });
         }
       }

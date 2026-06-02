@@ -41,8 +41,8 @@ export type FlowGraph = Graph<FlowNode, FlowEdge>;
 export function getGraphFromFlow(flowCode: string, d: NodeTextDimensions): FlowGraph {
   const result = new Graph<FlowNode, FlowEdge>();
   const lines: string[] = flowCode.split(/\r?\n/).map((line) => line.trim());
-  const nodeLines: string[] = lines.filter((line) => line.search(/^[\dA-Za-z-]+\(/) === 0);
-  const forwardLines: string[] = lines.filter((line) => line.search(/^[\dA-Za-z-]+ /) !== -1);
+  const nodeLines: string[] = lines.filter((line) => line.search(/^[\dA-Za-z\-]+\(/) === 0);
+  const forwardLines: string[] = lines.filter((line) => line.search('-->') !== -1);
   for (const nodeLine of nodeLines) {
     const id = nodeLine.slice(0, nodeLine.indexOf('('));
     const text = nodeLine.slice(nodeLine.indexOf('(') + 2, nodeLine.lastIndexOf(')') - 1);

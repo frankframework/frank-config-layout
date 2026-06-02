@@ -1,5 +1,6 @@
 import { NodeText, NodeTextDimensions } from '../model/text';
 import { getGraphFromFlow } from './flowcode-parser';
+import { keyFor } from '../model/graph';
 
 describe('Parse Flow', () => {
   it('Simple node definition', () => {
@@ -35,8 +36,8 @@ describe('Parse Flow', () => {
     expect(result.edges[0].from.id).toEqual('d2e2');
     expect(result.edges[0].to.id).toEqual('d2e12');
     expect(result.edges[0].text.svg).toEqual('<text>success</text>');
-    expect(result.getEdgeByKey('d2e2-d2e12')!.from.id).toEqual('d2e2');
-    expect(result.getEdgeByKey('d2e2-d2e12')!.to.id).toEqual('d2e12');
+    expect(result.getEdgeByKey(keyFor('d2e2', 'd2e12'))!.from.id).toEqual('d2e2');
+    expect(result.getEdgeByKey(keyFor('d2e2', 'd2e12'))!.to.id).toEqual('d2e12');
   });
 });
 

@@ -1,4 +1,4 @@
-import { WithId, Connection, Graph, getKey } from './graph';
+import { WithId, Connection, Graph, getKey, keyFor } from './graph';
 
 describe('Generic graph', () => {
   it('When a graph is created, the nodes and the edges are related correctly', () => {
@@ -21,12 +21,12 @@ describe('Generic graph', () => {
     const g: Graph<WithId, TestEdge> = getTestGraph();
     expect(g.parseNodeOrEdgeId('Start').optionalEdge).toEqual(undefined);
     expect(g.parseNodeOrEdgeId('Start').optionalNode?.id).toEqual('Start');
-    expect(g.parseNodeOrEdgeId('Start-N1').optionalNode).toEqual(undefined);
-    expect(g.parseNodeOrEdgeId('Start-N1').optionalEdge?.from.id).toEqual('Start');
-    expect(g.parseNodeOrEdgeId('Start-N1').optionalEdge?.to.id).toEqual('N1');
-    expect(getKey(g.parseNodeOrEdgeId('Start-N1').optionalEdge!)).toEqual('Start-N1');
-    expect(g.parseNodeOrEdgeId('Start-End').optionalNode).toEqual(undefined);
-    expect(g.parseNodeOrEdgeId('Start-End').optionalEdge).toEqual(undefined);
+    expect(g.parseNodeOrEdgeId(keyFor('Start', 'N1')).optionalNode).toEqual(undefined);
+    expect(g.parseNodeOrEdgeId(keyFor('Start', 'N1')).optionalEdge?.from.id).toEqual('Start');
+    expect(g.parseNodeOrEdgeId(keyFor('Start', 'N1')).optionalEdge?.to.id).toEqual('N1');
+    expect(getKey(g.parseNodeOrEdgeId(keyFor('Start', 'N1')).optionalEdge!)).toEqual('Start%-!#N1');
+    expect(g.parseNodeOrEdgeId(keyFor('Start', 'End')).optionalNode).toEqual(undefined);
+    expect(g.parseNodeOrEdgeId(keyFor('Start', 'End')).optionalEdge).toEqual(undefined);
     expect(g.parseNodeOrEdgeId('xyz').optionalNode).toEqual(undefined);
     expect(g.parseNodeOrEdgeId('xyz').optionalEdge).toEqual(undefined);
   });
