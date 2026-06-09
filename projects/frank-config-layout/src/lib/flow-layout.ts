@@ -26,12 +26,18 @@ import {
   calculateLayerNumbersLongestPath,
   IntermediatesCreationResult,
 } from './model/horizontal-grouping';
-import { SvgResult, Dimensions } from '../public_api';
 import { LayoutModel, LayoutModelBuilder } from './model/layout-model';
-import { DerivedDimensions, getDerivedDimensions } from './dimensions';
+import { DerivedDimensions, Dimensions, getDerivedDimensions } from './dimensions';
 
-export class Flow2svgService {
-  private cache = new AsynchronousCache<SvgResult>();
+export interface LayoutStatisticsResult {
+  layout: Layout;
+  numNodes: number;
+  numEdges: number;
+  numNodeVisitsDuringLayerCalculation: number;
+}
+
+export class FlowLayoutService {
+  private cache = new AsynchronousCache<LayoutStatisticsResult>();
 
   private _numSvgCalculations = 0;
   get numSvgCalculations(): number {
@@ -39,49 +45,49 @@ export class Flow2svgService {
   }
 
   getHashes(): string[] {
-    return [...this.cache.getSortedKeys()];
+    return this.cache.getSortedKeys();
   }
 
-  private dimensions: DerivedDimensions;
+  private readonly dimensions: DerivedDimensions;
 
   constructor(dimensions: Dimensions) {
     this.dimensions = getDerivedDimensions(dimensions);
   }
 
   async flow2svg(flow: string): Promise<string> {
-    const statistics = await this.flow2svgStatistics(flow);
-    return statistics.svg;
+    const statistics = await this.flow2LayoutStatistics(flow);
+    return generateSvg(statistics.layout, this.dimensions);
   }
 
-  async flow2svgStatistics(flow: string): Promise<SvgResult> {
-    let hash: string;
+  async flow2Layout(flow: string): Promise<Layout> {
+    const statistics = await this.flow2LayoutStatistics(flow);
+    return statistics.layout;
+  }
+
+  async flow2LayoutStatistics(flow: string): Promise<LayoutStatisticsResult> {
     try {
-      hash = await sha256(flow);
+      const hash = await sha256(flow);
+      return this.cache.get(hash, () => this.flow2LayoutStatisticsImpl(flow));
     } catch (error) {
-      console.log(error);
-      throw new Error('Could not calculate hash');
+      throw new Error('Could not calculate hash', error as Error);
     }
-    return await this.cache.get(hash, () => this.flow2svgStatisticsImpl(flow));
   }
 
-  private async flow2svgStatisticsImpl(flow: string): Promise<SvgResult> {
+  private async flow2LayoutStatisticsImpl(flow: string): Promise<LayoutStatisticsResult> {
     ++this._numSvgCalculations;
-    const b: FlowGraph = getGraphFromFlow(flow, this.dimensions);
-    const g: OriginalGraph = findErrorFlow(b);
+    const flowGraph: FlowGraph = getGraphFromFlow(flow, this.dimensions);
+    const graph: OriginalGraph = findErrorFlow(flowGraph);
     let numNodeVisits = 0;
-    const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(g, () => ++numNodeVisits);
-    const intermediates: IntermediatesCreationResult = introduceIntermediateNodesAndEdges(g, nodeIdToLayer);
-    let lb: LayoutBase;
-    try {
-      lb = LayoutBase.create(
-        intermediates.intermediate.nodes.map((n) => n.id),
-        intermediates.intermediate,
-      );
-    } catch (error) {
-      throw error;
-    }
-    lb = minimizeNumCrossings(lb);
-    const layoutModel: LayoutModel = new LayoutModelBuilder(lb, intermediates.intermediate).run();
+    const nodeIdToLayer: Map<string, number> = calculateLayerNumbersLongestPath(graph, () => ++numNodeVisits);
+    const intermediates: IntermediatesCreationResult = introduceIntermediateNodesAndEdges(graph, nodeIdToLayer);
+    const layoutBase = LayoutBase.create(
+      intermediates.intermediate.nodes.map((n) => n.id),
+      intermediates.intermediate,
+    );
+    const layoutModel: LayoutModel = new LayoutModelBuilder(
+      minimizeNumCrossings(layoutBase),
+      intermediates.intermediate,
+    ).run();
     const layout: Layout = new LayoutBuilder(
       layoutModel,
       intermediates.original,
@@ -89,9 +95,9 @@ export class Flow2svgService {
       this.dimensions,
     ).run();
     return {
-      svg: generateSvg(layout, this.dimensions),
-      numNodes: g.nodes.length,
-      numEdges: g.edges.length,
+      layout,
+      numNodes: graph.nodes.length,
+      numEdges: graph.edges.length,
       numNodeVisitsDuringLayerCalculation: numNodeVisits,
     };
   }

@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/filename-case */
 
 /*
-   Copyright 2025 WeAreFrank!
+   Copyright 2025, 2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,43 +16,21 @@
    limitations under the License.
 */
 
-import { Flow2svgService } from './lib/flow2svg';
-
-export interface Dimensions {
-  nodeTextFontSize: number; // 16
-  nodeTextBorder: number;
-  horizontalNodeBorder: number;
-  intermediateWidth: number;
-  layerHeight: number;
-  layerDistance: number;
-  nodeBoxHeight: number;
-  boxConnectorAreaPerc: number;
-  intermediateLayerPassedByVerticalLine: boolean;
-  boxCrossProtectionMargin: number;
-  lineTransgressionPerc: number;
-  edgeLabelFontSize: number;
-  preferredVertDistanceFromOrigin: number;
-  strictlyKeepLabelOutOfBox: boolean;
-}
+import { FlowLayoutService } from './lib/flow-layout';
+import { Dimensions } from './lib/dimensions';
 
 /*
  * These are the real outputs of this library
  */
 
-export interface SvgResult {
-  svg: string;
-  numNodes: number;
-  numEdges: number;
-  numNodeVisitsDuringLayerCalculation: number;
-}
+let service: FlowLayoutService | null = null;
 
-let service: Flow2svgService | null = null;
-
-export function initFlow2Svg(d: Dimensions): void {
+export function initFlow2Svg(dimensions: Dimensions): FlowLayoutService {
   // In production, do not initialize more than once.
   // The playground has to call this function any time
   // there are new dimensions.
-  service = new Flow2svgService(d);
+  if (!service) service = new FlowLayoutService(dimensions);
+  return service;
 }
 
 export function getFactoryDimensions(): Dimensions {
@@ -72,25 +50,6 @@ export function getFactoryDimensions(): Dimensions {
     preferredVertDistanceFromOrigin: 30,
     strictlyKeepLabelOutOfBox: true,
   };
-}
-
-export function isFlow2SvgInitialized(): boolean {
-  return service !== null;
-}
-
-export async function flow2svg(flow: string): Promise<string> {
-  if (service === null) {
-    throw new Error('Flow2Svg was not initialized');
-  }
-  const statistics = await service.flow2svgStatistics(flow);
-  return statistics.svg;
-}
-
-export async function flow2svgStatistics(flow: string): Promise<SvgResult> {
-  if (service === null) {
-    throw new Error('Flow2Svg was not initialized');
-  }
-  return await service.flow2svgStatistics(flow);
 }
 
 /*
@@ -136,6 +95,7 @@ export {
   calculateNumCrossingsChangesFromAligning,
   minimizeNumCrossings,
 } from './lib/model/layout-base';
-export { getDerivedDimensions, DerivedDimensions } from './lib/dimensions';
+export { getDerivedDimensions, DerivedDimensions, Dimensions } from './lib/dimensions';
 export { LayoutModel, LayoutModelBuilder } from './lib/model/layout-model';
 export { LayoutBuilder, Layout, PlacedNode, EdgeLabel, getNumCrossingLines } from './lib/graphics/layout';
+export type { FlowLayoutService, LayoutStatisticsResult } from './lib/flow-layout';

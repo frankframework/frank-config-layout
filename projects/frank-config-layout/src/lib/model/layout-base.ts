@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 WeAreFrank!
+   Copyright 2025, 2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -219,14 +219,18 @@ export class NumCrossingsJudgement {
   }
 }
 
-export function minimizeNumCrossings(lb: LayoutBase): LayoutBase {
-  const current = lb.clone();
+export function minimizeNumCrossings(layoutBase: LayoutBase): LayoutBase {
+  const current = layoutBase.clone();
   while (true) {
     const crossingsChanges = calculateNumCrossingsChangesFromAligning(current);
     const judgements: NumCrossingsJudgement[] = [];
-    for (let layerNumber = 0; layerNumber < lb.numLayers; ++layerNumber) {
+    for (let layerNumber = 0; layerNumber < layoutBase.numLayers; ++layerNumber) {
       judgements.push(
-        new NumCrossingsJudgement(layerNumber, lb.getIdsOfLayer(layerNumber).length, -crossingsChanges[layerNumber]),
+        new NumCrossingsJudgement(
+          layerNumber,
+          layoutBase.getIdsOfLayer(layerNumber).length,
+          -crossingsChanges[layerNumber],
+        ),
       );
     }
     judgements.sort((a, b) => a.compareTo(b));
