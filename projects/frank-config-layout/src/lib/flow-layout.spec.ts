@@ -1,5 +1,5 @@
-import { Flow2svgService } from './flow2svg';
-import { getFactoryDimensions, SvgResult } from '../public_api';
+import { FlowLayoutService, LayoutStatisticsResult } from './flow-layout';
+import { getFactoryDimensions } from '../public_api';
 
 const input = `Start('<text>My start</text>'):::normal
 N1('<text>Node 1</text>'):::normal
@@ -282,11 +282,11 @@ const expectedMultiline = `<svg class="svg" xmlns="http://www.w3.org/2000/svg"
   <g text-anchor="middle" dominant-baseline="middle"><text class="label-text" x="92" y="78" font-size="10">success</text><text class="label-text" x="92" y="94" font-size="10">other</text><text class="label-text" x="138" y="78" font-size="10">success</text><text class="label-text" x="138" y="94" font-size="10">other</text><text class="label-text" x="207" y="86" font-size="10">success</text><text class="label-text" x="101" y="206" font-size="10">success</text><text class="label-text" x="160" y="206" font-size="10">failure</text><text class="label-text" x="249" y="206" font-size="10">success</text><text class="label-text" x="93" y="326" font-size="10">success</text></g></svg>`;
 
 describe('Flow2svg - please maintain this test using the GUI', () => {
-  let service: Flow2svgService;
+  let service: FlowLayoutService;
 
   beforeEach(() => {
     // No need to test injection - if injection does not work then the app does not show
-    service = new Flow2svgService(getFactoryDimensions());
+    service = new FlowLayoutService(getFactoryDimensions());
   });
 
   it('Test the plain SVG', (done) => {
@@ -305,18 +305,18 @@ describe('Flow2svg - please maintain this test using the GUI', () => {
     });
   });
 
-  it('Test with statistics', (done) => {
-    service.flow2svgStatistics(input).then((statistics) => {
-      expect(statistics.svg).toEqual(expectedSvg);
-      expect(statistics.numNodes).toEqual(5);
-      expect(statistics.numEdges).toEqual(7);
-      expect(statistics.numNodeVisitsDuringLayerCalculation).toEqual(8);
-      done();
-    });
+  it('Test with statistics', async () => {
+    const flowSvg = await service.flow2svg(input);
+    expect(flowSvg).toEqual(expectedSvg);
+
+    const statistics = await service.flow2LayoutStatistics(input);
+    expect(statistics.numNodes).toEqual(5);
+    expect(statistics.numEdges).toEqual(7);
+    expect(statistics.numNodeVisitsDuringLayerCalculation).toEqual(8);
   });
 
   it('Test that real calculation is done only once', (done) => {
-    const first: Promise<SvgResult> = service.flow2svgStatistics(input);
+    const first: Promise<LayoutStatisticsResult> = service.flow2LayoutStatistics(input);
     const second: Promise<string> = service.flow2svg(input);
     Promise.all([first, second]).then(() => {
       expect(service.numSvgCalculations).toEqual(1);

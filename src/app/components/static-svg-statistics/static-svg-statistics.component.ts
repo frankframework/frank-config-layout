@@ -1,5 +1,5 @@
 /*
-   Copyright 2024, 2025 WeAreFrank!
+   Copyright 2024, 2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 */
 
 import { ChangeDetectionStrategy, Component, Input, NgZone, OnInit, inject } from '@angular/core';
-import { Dimensions, SvgResult, initFlow2Svg, flow2svgStatistics } from 'frank-config-layout';
+import { Dimensions, initFlow2Svg, LayoutStatisticsResult } from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -65,17 +65,14 @@ export class StaticSvgStatisticsComponent implements OnInit {
     if (this._flow === null || this._flow.length === 0 || this._dimensions === null) {
       return;
     }
-    initFlow2Svg(this._dimensions);
-    flow2svgStatistics(this._flow!)
-      .then((statistics) => {
-        this.updateStatistics(statistics);
-      })
-      .catch(() => {
-        this.reset();
-      });
+    const flowLayoutService = initFlow2Svg(this._dimensions);
+    flowLayoutService
+      .flow2LayoutStatistics(this._flow!)
+      .then((statistics) => this.updateStatistics(statistics))
+      .catch(() => this.reset());
   }
 
-  private updateStatistics(statistics: SvgResult): void {
+  private updateStatistics(statistics: LayoutStatisticsResult): void {
     this.ngZone.run(() => {
       this.numNodes = `${statistics.numNodes}`;
       this.numEdges = `${statistics.numEdges}`;

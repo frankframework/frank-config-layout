@@ -120,11 +120,7 @@ function getNodeGroupClass(id: string): string {
 }
 
 function getRectangleClass(n: PlacedNode): string {
-  if (n.errorStatus === ERROR_STATUS_ERROR) {
-    return 'rectangle errorOutline';
-  } else {
-    return 'rectangle';
-  }
+  return n.errorStatus === ERROR_STATUS_ERROR ? 'rectangle errorOutline' : 'rectangle';
 }
 
 function renderEdges(edges: LayoutLineSegment[]): string {
@@ -143,11 +139,7 @@ function getEdgeGroupClass(key: string): string {
 }
 
 function getMarkerEnd(lineSegment: LayoutLineSegment): string {
-  if (lineSegment.isLastLineSegment) {
-    return 'marker-end="url(#arrow)"';
-  } else {
-    return '';
-  }
+  return lineSegment.isLastLineSegment ? 'marker-end="url(#arrow)"' : '';
 }
 
 function classOfLine(edge: LayoutLineSegment): string {
@@ -172,9 +164,9 @@ function renderLabel(label: EdgeLabel, edgeLabelFontSize: number, estEdgeLabelCh
     commonItemHeight: edgeLabelFontSize,
   });
   let result: string = '';
-  for (let i = 0; i < label.text.lines.length; ++i) {
-    const p: Point = coordinates[i];
-    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[i].svg);
+  for (let index = 0; index < label.text.lines.length; ++index) {
+    const p: Point = coordinates[index];
+    result += renderSingleLayerText(p.x, p.y, edgeLabelFontSize, label.text.lines[index].svg);
   }
   return result;
 }
@@ -198,9 +190,9 @@ function getSvgTextElements(node: PlacedNode, border: number, fontSize: number):
     itemWidths: nodeText.parts.map((p) => p.innerWidth),
   });
   let totalSvgText = '';
-  for (let i = 0; i < nodeText.parts.length; ++i) {
-    const p: Point = textCoordinates[i];
-    totalSvgText += getSvgTextElement(nodeText.parts[i], p.x, p.y);
+  for (let index = 0; index < nodeText.parts.length; ++index) {
+    const p: Point = textCoordinates[index];
+    totalSvgText += getSvgTextElement(nodeText.parts[index], p.x, p.y);
   }
   return totalSvgText;
 }

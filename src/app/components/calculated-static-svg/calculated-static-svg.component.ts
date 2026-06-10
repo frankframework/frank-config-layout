@@ -15,7 +15,7 @@
 */
 
 import { Component, ElementRef, Input, inject } from '@angular/core';
-import { Dimensions, initFlow2Svg, flow2svg } from 'frank-config-layout';
+import { Dimensions, initFlow2Svg } from 'frank-config-layout';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -61,8 +61,9 @@ export class CalculatedStaticSvgComponent {
         this.showNoSvg();
         return;
       }
-      initFlow2Svg(this._dimensions);
-      flow2svg(this._flow)
+      const flowLayoutService = initFlow2Svg(this._dimensions);
+      flowLayoutService
+        .flow2svg(this._flow)
         .then((svg) => {
           this.showSvg(svg);
         })
@@ -72,8 +73,8 @@ export class CalculatedStaticSvgComponent {
     }
   }
 
-  showError(msg: string): void {
-    this.rootElement.nativeElement.innerHTML = `ERROR: ${msg}`;
+  showError(message: string): void {
+    this.rootElement.nativeElement.innerHTML = `ERROR: ${message}`;
   }
 
   showNoSvg(): void {

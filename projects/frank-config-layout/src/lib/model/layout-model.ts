@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 WeAreFrank!
+   Copyright 2025, 2026 WeAreFrank!
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -67,10 +67,10 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
   private connectionsByEdgeKey = new Map<string, LayoutConnection>();
 
   constructor(
-    readonly lb: LayoutBase,
-    readonly g: Graph<T, C>,
+    readonly layoutBase: LayoutBase,
+    readonly graph: Graph<T, C>,
   ) {
-    for (let layer = 0; layer < lb.numLayers; ++layer) {
+    for (let layer = 0; layer < layoutBase.numLayers; ++layer) {
       this.positionsOfLayer.push([]);
     }
   }
@@ -81,7 +81,7 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
     this.buildConnectors();
     this.buildConnectionsFromEdges();
     return new LayoutModel(
-      this.lb.numLayers,
+      this.layoutBase.numLayers,
       this.positionsByKey,
       this.connectorsByKey,
       this.positionsOfLayer,
@@ -93,8 +93,8 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
   }
 
   private establishPositions(): void {
-    for (let layerNumber = 0; layerNumber < this.lb.numLayers; ++layerNumber) {
-      for (const [position, id] of this.lb.getIdsOfLayer(layerNumber).entries()) {
+    for (let layerNumber = 0; layerNumber < this.layoutBase.numLayers; ++layerNumber) {
+      for (const [position, id] of this.layoutBase.getIdsOfLayer(layerNumber).entries()) {
         const positionObject: LayoutPosition = new LayoutPosition(layerNumber, position, id);
         this.positionsByKey.set(positionObject.key, positionObject);
         this.positionsOfLayer[layerNumber].push(positionObject);
@@ -105,7 +105,7 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
 
   private relatePositions(): void {
     this.forEachPositionAndAdjacentLayerCombi((referencePositionObject, otherLayerNumber) => {
-      const positionsInOther: number[] = this.lb.getConnections(referencePositionObject.id, otherLayerNumber);
+      const positionsInOther: number[] = this.layoutBase.getConnections(referencePositionObject.id, otherLayerNumber);
       for (const positionInOther of positionsInOther) {
         const relatedPositionObjectKey = `${otherLayerNumber}-${positionInOther}`;
         const relatedPositionObject: LayoutPosition | undefined = this.positionsByKey.get(relatedPositionObjectKey);
@@ -131,9 +131,9 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
   private forEachPositionAndAdjacentLayerCombi(
     action: (referencePositionObject: LayoutPosition, otherLayerNumber: number) => void,
   ): void {
-    for (let layerNumber = 0; layerNumber < this.lb.numLayers; ++layerNumber) {
+    for (let layerNumber = 0; layerNumber < this.layoutBase.numLayers; ++layerNumber) {
       const otherLayerNumbers: number[] = [layerNumber - 1, layerNumber + 1].filter(
-        (otherLayerNumber) => otherLayerNumber >= 0 && otherLayerNumber < this.lb.numLayers,
+        (otherLayerNumber) => otherLayerNumber >= 0 && otherLayerNumber < this.layoutBase.numLayers,
       );
       for (const positionObject of this.positionsOfLayer[layerNumber]) {
         for (const otherLayerNumber of otherLayerNumbers) {
@@ -149,7 +149,7 @@ export class LayoutModelBuilder<T extends WithLayerNumber, C extends Connection<
       for (const relatedPositionObject of this.getRelatedPositionObjects(referencePositionObject, otherLayerNumber)) {
         const idRef = referencePositionObject.id;
         const idRel = relatedPositionObject.id;
-        const edgesInOut: C[] = [this.g.searchEdge(idRel, idRef), this.g.searchEdge(idRef, idRel)].filter(
+        const edgesInOut: C[] = [this.graph.searchEdge(idRel, idRef), this.graph.searchEdge(idRef, idRel)].filter(
           (edge) => edge !== undefined,
         );
         let edges: C[];
