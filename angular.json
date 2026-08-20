@@ -106,14 +106,29 @@
           "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/frank-config-layout/ng-package.json",
-            "tsConfig": "projects/frank-config-layout/tsconfig.lib.json"
+            "tsConfig": "tsconfig.lib.json"
+          }
+        },
+        "tester": {
+          "builder": "@angular/build:application",
+          "options": {
+            "tsConfig": "tsconfig.lib-spec.json"
+          },
+          "configurations": {
+            "testing": {
+              "aot": false,
+              "optimization": false,
+              "extractLicenses": false,
+              "polyfills": ["zone.js", "zone.js/testing"]
+            }
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "projects/frank-config-layout/tsconfig.spec.json"
+            "tsConfig": "tsconfig.lib-spec.json",
+            "buildTarget": ":tester:testing",
+            "runner": "vitest"
           }
         },
         "lint": {

@@ -4,7 +4,6 @@ describe('Hashing', () => {
   it('Same string produces same hash', (done) => {
     hashAll(['aap', 'aap']).then((hashes) => {
       expect(hashes).toHaveSize(1);
-      done();
     });
   });
 
@@ -17,7 +16,6 @@ describe('Hashing', () => {
     expect(numInputs).toEqual(13);
     hashAll(inputs).then((hashes) => {
       expect(hashes).toHaveSize(numInputs);
-      done();
     });
   });
 });

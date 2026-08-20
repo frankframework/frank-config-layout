@@ -50,7 +50,7 @@ importers:
     devDependencies:
       '@angular/build':
         specifier: ^22.1.5
-        version: 22.1.5(76021c0b8d6174f035156adeddd4e153)
+        version: 22.1.5(503e4029ba8393cc71a34771bee94e8b)
       '@angular/cli':
         specifier: ^22.1.4
         version: 22.1.5(@types/node@26.0.1)(chokidar@5.0.0)(supports-color@7.2.0)
@@ -75,6 +75,9 @@ importers:
       eslint-plugin-unicorn:
         specifier: ^73.0.0
         version: 73.0.0(eslint@10.8.1(supports-color@7.2.0))
+      happy-dom:
+        specifier: ^20.11.2
+        version: 20.11.2
       ng-packagr:
         specifier: ^22.1.1
         version: 22.1.1(@angular/compiler-cli@22.1.2(@angular/compiler@22.1.2)(typescript@6.0.3))(tslib@2.8.1)(typescript@6.0.3)
@@ -89,7 +92,7 @@ importers:
         version: 8.67.0(eslint@10.8.1(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vitest:
         specifier: ^4.0.8
-        version: 4.1.11(@types/node@26.0.1)(vite@8.1.5(@types/node@26.0.1)(esbuild@0.28.2)(less@4.6.7)(sass@1.101.0)(yaml@2.9.0))
+        version: 4.1.11(@types/node@26.0.1)(happy-dom@20.11.2)(vite@8.1.5(@types/node@26.0.1)(esbuild@0.28.2)(less@4.6.7)(sass@1.101.0)(yaml@2.9.0))
 
 packages:
 
@@ -1841,6 +1844,9 @@ packages:
   '@types/node@26.0.1':
     resolution: {integrity: sha512-fc3KiUoBt6kie0N9bIW3E47vZsuaMf0PM2AaUpLCLT0s/LvX1nxAim6Fc049cNxODPpGm6qRAuUOB86SkRuPQw==}
 
+  '@types/whatwg-mimetype@3.0.2':
+    resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
+
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
@@ -2086,6 +2092,10 @@ packages:
 
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
+
+  buffer-image-size@0.6.4:
+    resolution: {integrity: sha512-nEh+kZOPY1w+gcCMobZ6ETUp9WfibndnosbpwB1iJk/8Gt5ZF2bhS6+B6bPYz424KtwsR6Rflc3tCz1/ghX2dQ==}
+    engines: {node: '>=4.0'}
 
   builtin-modules@5.3.0:
     resolution: {integrity: sha512-hMQUl2bUFG339QygPM97E+mc8OY1IAchORZxm4a/frcYwKzozMzRVDBwHW0NjOqGElLm2O37AVQE8ikxlZHrMQ==}
@@ -2645,6 +2655,10 @@ packages:
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  happy-dom@20.11.2:
+    resolution: {integrity: sha512-7MB+bJLkxu3SowAfBJbjW+c55kNz5tkR45gu2qzrxznezhLeN5YIlJbwUgSzlGc+qWoZ8Ykg71H5ezz69xixrw==}
+    engines: {node: '>=20.0.0'}
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -3801,6 +3815,10 @@ packages:
   web-worker@1.5.0:
     resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
 
+  whatwg-mimetype@3.0.0:
+    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
+    engines: {node: '>=12'}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
@@ -3994,7 +4012,7 @@ snapshots:
       '@angular/core': 22.1.2(@angular/compiler@22.1.2)(rxjs@7.8.2)(zone.js@0.16.2)
       tslib: 2.8.1
 
-  '@angular/build@22.1.5(76021c0b8d6174f035156adeddd4e153)':
+  '@angular/build@22.1.5(503e4029ba8393cc71a34771bee94e8b)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.2201.5(chokidar@5.0.0)
@@ -4036,7 +4054,7 @@ snapshots:
       ng-packagr: 22.1.1(@angular/compiler-cli@22.1.2(@angular/compiler@22.1.2)(typescript@6.0.3))(tslib@2.8.1)(typescript@6.0.3)
       postcss: 8.5.26
       rollup: 4.62.2
-      vitest: 4.1.11(@types/node@26.0.1)(vite@8.1.5(@types/node@26.0.1)(esbuild@0.28.2)(less@4.6.7)(sass@1.101.0)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@26.0.1)(happy-dom@20.11.2)(vite@8.1.5(@types/node@26.0.1)(esbuild@0.28.2)(less@4.6.7)(sass@1.101.0)(yaml@2.9.0))
     transitivePeerDependencies:
       - '@types/node'
       - '@vitejs/devtools'
@@ -5304,12 +5322,12 @@ snapshots:
   '@types/node@26.0.1':
     dependencies:
       undici-types: 8.3.0
-    optional: true
+
+  '@types/whatwg-mimetype@3.0.2': {}
 
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 26.0.1
-    optional: true
 
   '@typescript-eslint/eslint-plugin@8.67.0(@typescript-eslint/parser@8.67.0(eslint@10.8.1(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.8.1(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)':
     dependencies:
@@ -5622,6 +5640,10 @@ snapshots:
       update-browserslist-db: 1.2.3(browserslist@4.28.4)
 
   buffer-from@1.1.2: {}
+
+  buffer-image-size@0.6.4:
+    dependencies:
+      '@types/node': 26.0.1
 
   builtin-modules@5.3.0: {}
 
@@ -6273,6 +6295,19 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
+
+  happy-dom@20.11.2:
+    dependencies:
+      '@types/node': 26.0.1
+      '@types/whatwg-mimetype': 3.0.2
+      '@types/ws': 8.18.1
+      buffer-image-size: 0.6.4
+      entities: 7.0.1
+      whatwg-mimetype: 3.0.0
+      ws: 8.21.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   has-flag@4.0.0:
     optional: true
@@ -7442,8 +7477,7 @@ snapshots:
   ua-parser-js@0.7.41:
     optional: true
 
-  undici-types@8.3.0:
-    optional: true
+  undici-types@8.3.0: {}
 
   universalify@0.1.2:
     optional: true
@@ -7482,7 +7516,7 @@ snapshots:
       sass: 1.101.0
       yaml: 2.9.0
 
-  vitest@4.1.11(@types/node@26.0.1)(vite@8.1.5(@types/node@26.0.1)(esbuild@0.28.2)(less@4.6.7)(sass@1.101.0)(yaml@2.9.0)):
+  vitest@4.1.11(@types/node@26.0.1)(happy-dom@20.11.2)(vite@8.1.5(@types/node@26.0.1)(esbuild@0.28.2)(less@4.6.7)(sass@1.101.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(vite@8.1.5(@types/node@26.0.1)(esbuild@0.28.2)(less@4.6.7)(sass@1.101.0)(yaml@2.9.0))
@@ -7506,6 +7540,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.0.1
+      happy-dom: 20.11.2
     transitivePeerDependencies:
       - msw
 
@@ -7520,6 +7555,8 @@ snapshots:
     optional: true
 
   web-worker@1.5.0: {}
+
+  whatwg-mimetype@3.0.0: {}
 
   which@2.0.2:
     dependencies:
@@ -7552,8 +7589,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.21.0:
-    optional: true
+  ws@8.21.0: {}
 
   y18n@5.0.8: {}
 

@@ -53,7 +53,6 @@ describe('AsynchronousCache', () => {
         expect(caught1).toEqual(true);
         expect(caught2).toEqual(true);
         expect(numCalculations).toEqual(1);
-        done();
       });
   });
 });
