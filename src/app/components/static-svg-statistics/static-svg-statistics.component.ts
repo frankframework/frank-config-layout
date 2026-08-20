@@ -23,7 +23,7 @@ import { Dimensions, initFlow2Svg, LayoutStatisticsResult } from 'frank-config-l
   selector: 'app-static-svg-statistics',
   templateUrl: './static-svg-statistics.component.html',
   styleUrl: './static-svg-statistics.component.scss',
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class StaticSvgStatisticsComponent implements OnInit {
   public numNodes: string | null = null;

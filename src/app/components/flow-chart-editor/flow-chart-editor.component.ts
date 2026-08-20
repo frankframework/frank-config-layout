@@ -60,7 +60,7 @@ export interface OriginalGraphOrError {
   selector: 'app-flow-chart-editor',
   templateUrl: './flow-chart-editor.component.html',
   styleUrl: './flow-chart-editor.component.scss',
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class FlowChartEditorComponent implements OnInit {
   readonly SHOW_IMAGE = CalculatedStaticSvgComponent.SHOW_IMAGE;
