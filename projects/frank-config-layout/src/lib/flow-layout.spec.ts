@@ -289,20 +289,16 @@ describe('Flow2svg - please maintain this test using the GUI', () => {
     service = new FlowLayoutService(getFactoryDimensions());
   });
 
-  it('Test the plain SVG', (done) => {
-    service.flow2svg(input).then((svg) => {
-      expect(svg.split('\n').map((line) => line.trim())).toEqual(expectedSvg!.split('\n').map((line) => line.trim()));
-      done();
-    });
+  it('Test the plain SVG', async () => {
+    const svg = await service.flow2svg(input);
+    expect(svg.split('\n').map((line) => line.trim())).toEqual(expectedSvg!.split('\n').map((line) => line.trim()));
   });
 
-  it('Test SVG with multiline nodes and edges', (done) => {
-    service.flow2svg(inputMultiline).then((svg) => {
-      expect(svg.split('\n').map((line) => line.trim())).toEqual(
-        expectedMultiline!.split('\n').map((line) => line.trim()),
-      );
-      done();
-    });
+  it('Test SVG with multiline nodes and edges', async () => {
+    const svg = await service.flow2svg(inputMultiline);
+    expect(svg.split('\n').map((line) => line.trim())).toEqual(
+      expectedMultiline!.split('\n').map((line) => line.trim()),
+    );
   });
 
   it('Test with statistics', async () => {
@@ -315,15 +311,13 @@ describe('Flow2svg - please maintain this test using the GUI', () => {
     expect(statistics.numNodeVisitsDuringLayerCalculation).toEqual(8);
   });
 
-  it('Test that real calculation is done only once', (done) => {
+  it('Test that real calculation is done only once', async () => {
     const first: Promise<LayoutStatisticsResult> = service.flow2LayoutStatistics(input);
     const second: Promise<string> = service.flow2svg(input);
-    Promise.all([first, second]).then(() => {
-      expect(service.numSvgCalculations).toEqual(1);
-      expect(service.getHashes()).toHaveSize(1);
-      expect(service.getHashes()[0]).toHaveSize(64);
-      expect(service.getHashes()[0].length).toEqual(64);
-      done();
-    });
+    await Promise.all([first, second]);
+    expect(service.numSvgCalculations).toEqual(1);
+    expect(service.getHashes()).lengthOf(1);
+    expect(service.getHashes()[0]).lengthOf(64);
+    expect(service.getHashes()[0].length).toEqual(64);
   });
 });

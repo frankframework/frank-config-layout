@@ -22,7 +22,10 @@
       "frank-config-layout": [
         "./dist/frank-config-layout"
       ]
-    }
+    },
+    "types": [
+      "vitest/globals"
+    ]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
