@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Component, ElementRef, Input, inject } from '@angular/core';
+import { Component, ElementRef, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Dimensions, initFlow2Svg } from 'frank-config-layout';
 
 @Component({
@@ -22,6 +22,7 @@ import { Dimensions, initFlow2Svg } from 'frank-config-layout';
   standalone: false,
   selector: 'app-calculated-static-svg',
   templateUrl: './calculated-static-svg.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './calculated-static-svg.component.scss',
 })
 export class CalculatedStaticSvgComponent {
